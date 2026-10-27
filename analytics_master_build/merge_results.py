@@ -84,6 +84,9 @@ def load_records(path):
             "shares": num(r.get("shares")),
             "saves": num(r.get("saves")),
             "caption": r.get("title"),
+            # thumbnail links from the scrapers (they expire, so export_dashboard.py keeps a local copy)
+            "thumb_url": raw.get("displayUrl") or raw.get("thumbnail") or raw.get("preview_image") or raw.get("post_image")
+                         or ((raw.get("attachments") or [{}])[0].get("thumbnail") if isinstance(raw.get("attachments"), list) and raw.get("attachments") else None),
             "page_url": raw.get("page_url") or raw.get("user_url") or raw.get("user_profile_url") or raw.get("channel_url"),
             "account": r.get("account") or raw.get("page_name") or raw.get("user_username_raw") or raw.get("youtuber") or raw.get("user_posted"),
             "source": source,
@@ -117,7 +120,7 @@ def main(result_files):
                 "snapshot_type": snapshot_type(age),
                 "captured_at": fetched.isoformat(),
                 "age_days": age,
-                **{k: rec[k] for k in ("views", "likes", "comments", "shares", "saves", "published_at", "account", "page_url", "caption", "source", "error")},
+                **{k: rec[k] for k in ("views", "likes", "comments", "shares", "saves", "published_at", "account", "page_url", "caption", "thumb_url", "source", "error")},
                 "post_url": rec["resolved_url"],
                 "fetch_status": "OK" if rec["ok"] else "Failed",
             })
@@ -148,6 +151,8 @@ def main(result_files):
         m["account"] = (last or {}).get("account") or ""
         m["caption"] = next((s_.get("caption") for s_ in reversed(good) if s_.get("caption")), m.get("caption") or "")
         m["published_at"] = (last or {}).get("published_at") or m.get("published_at") or ""
+        m["post_url"] = next((s_.get("post_url") for s_ in reversed(good) if s_.get("post_url")), m.get("post_url") or "")
+        m["thumb_url"] = next((s_.get("thumb_url") for s_ in reversed(good) if s_.get("thumb_url")), "")
         for k in ("views", "likes", "comments", "shares"):
             m[f"latest_{k}"] = last.get(k) if last else None
         v = m["latest_views"]

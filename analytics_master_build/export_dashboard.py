@@ -25,9 +25,34 @@ def rows():
                     "shares": m.get("latest_shares"), "status": m.get("fetch_status"), "fetched_by": m.get("data_source") or None,
                     "title": (m.get("caption") or "").strip().split("\n")[0][:90] or None,
                     "published_at": m.get("published_at") or None,
+                    "post_url": m.get("post_url") or None,
+                    "thumb": save_thumb(m),
                     **{f"{l}_{k}": m.get(f"{l}_{k}") for l in ("d2", "d7", "d30")
                        for k in ("views", "likes", "comments", "shares", "status", "due", "age")}})
     return out, d["generated_at"]
+
+
+def save_thumb(m):
+    """Keep a small copy of each video's thumbnail in docs/thumbs/ (platform thumbnail links expire after a few days).
+    Returns its path relative to docs/, or None. Needs Pillow; without it thumbnails are skipped."""
+    vid, src = m["master_id"], m.get("thumb_url")
+    out = DOCS / "thumbs" / f"{vid}.jpg"
+    if out.exists():
+        return f"thumbs/{vid}.jpg"
+    if not src:
+        return None
+    try:
+        import io, urllib.request
+        from PIL import Image
+        req = urllib.request.Request(src, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=20) as r:
+            img = Image.open(io.BytesIO(r.read())).convert("RGB")
+        img.thumbnail((320, 320))
+        out.parent.mkdir(parents=True, exist_ok=True)
+        img.save(out, "JPEG", quality=72, optimize=True)
+        return f"thumbs/{vid}.jpg"
+    except Exception:
+        return None
 
 
 SHELL = """<!doctype html>
@@ -43,6 +68,7 @@ body{margin:0;background:#F5F6F8;color:#101828;font-family:Inter,system-ui,sans-
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <script>
+window.PV_EMBED = true; // this standalone page may embed players and remote thumbnails; the Claude dashboard cannot
 window.dash = (function () {
   const sets = { videos: { status: 'loading', data: [] } }, calcs = {}, subs = [];
   const api = {
