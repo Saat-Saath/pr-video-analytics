@@ -68,15 +68,22 @@ def load_records(path):
         raw = r.get("raw") or {}
         input_url = (raw.get("input") or {}).get("url") or r.get("url")
         err = r.get("error") or raw.get("error")
+        resolved = r.get("url")
+        if resolved and "/share/" in resolved:  # short share links: Bright Data's shortcode is the reel id behind them
+            att = (raw.get("attachments") or [{}])[0] if isinstance(raw.get("attachments"), list) else {}
+            rid = raw.get("shortcode") or att.get("id")
+            if rid:
+                resolved = f"https://www.facebook.com/reel/{rid}"
         out.append({
             "input_url": input_url,
-            "resolved_url": r.get("url"),
+            "resolved_url": resolved,
             "published_at": r.get("published_at"),
             "views": num(r.get("views")),
             "likes": num(r.get("likes")),
             "comments": num(r.get("comments")),
             "shares": num(r.get("shares")),
             "saves": num(r.get("saves")),
+            "page_url": raw.get("page_url") or raw.get("user_url") or raw.get("user_profile_url") or raw.get("channel_url"),
             "account": r.get("account") or raw.get("page_name") or raw.get("user_username_raw") or raw.get("youtuber") or raw.get("user_posted"),
             "source": source,
             "fetched_at": r.get("fetched_at"),
@@ -109,7 +116,8 @@ def main(result_files):
                 "snapshot_type": snapshot_type(age),
                 "captured_at": fetched.isoformat(),
                 "age_days": age,
-                **{k: rec[k] for k in ("views", "likes", "comments", "shares", "saves", "published_at", "account", "source", "error")},
+                **{k: rec[k] for k in ("views", "likes", "comments", "shares", "saves", "published_at", "account", "page_url", "source", "error")},
+                "post_url": rec["resolved_url"],
                 "fetch_status": "OK" if rec["ok"] else "Failed",
             })
 

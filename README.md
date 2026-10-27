@@ -25,7 +25,7 @@ Each video is fetched once per window. A capture past the grace days is kept and
 | Instagram | Apify Instagram Scraper (plays, likes, comments, date) | `apify_instagram.mjs` |
 | Facebook, YouTube | Bright Data Scraper API | `brightdata_api_pipeline.mjs` |
 
-Facebook doesn't show a public view count on some reels; those are listed as "No view count" in the dashboard's To fix section.
+Facebook hides the view count on many smaller reels. As a backup, `analytics_master_build/fb_views_backup.py` scans each page's Reels tab with Apify (only reels newer than the oldest missing one) and fills in just the view count; Bright Data's likes, comments and shares are kept. It runs inside `refresh.py finish` and is capped per day by `APIFY_FB_BACKUP_MAX_ITEMS` (Apify bills about $0.005 per reel scanned). Set `APIFY_FB_BACKUP=off` to disable it.
 
 ## Daily refresh
 

@@ -1,7 +1,8 @@
 """Daily refresh: sync the sheets, fetch every video that is due for a Day 2 / 7 / 30 capture, rebuild outputs.
 
   python refresh.py start    # sync sheets, work out what is due today, start the scraper runs
-  python refresh.py finish   # collect finished runs, merge, rebuild workbook and dashboard data
+  python refresh.py finish   # collect finished runs, merge, run the Apify backup for missing Facebook views,
+                             # rebuild workbook and dashboard data
   python refresh.py status   # show what is due without starting anything
 
 `finish` exits with code 2 while runs are still collecting; run it again a few minutes later.
@@ -84,6 +85,17 @@ def start():
 def finish():
     env()
     pend = RUNS / "pending.json"
+    stage = json.loads(pend.read_text() or "{}").get("stage") if pend.exists() else None
+    if stage == "backup":  # step 2: Apify backup for Facebook view counts Bright Data could not get
+        r = subprocess.run([sys.executable, str(BUILD / "fb_views_backup.py"), "collect"], capture_output=True, text=True)
+        print(r.stdout.strip())
+        if r.returncode == 2:
+            sys.exit(2)
+        pend.write_text("{}")
+        print(py("merge_results.py").strip().splitlines()[-1])
+        py("build_workbook.py")
+        print(py("export_dashboard.py").strip())
+        return
     if not pend.exists() or not json.loads(pend.read_text() or "{}"):
         print("no pending runs; rebuilding outputs only")
         files = []
@@ -115,6 +127,12 @@ def finish():
         files = [r["result"] for r in state["runs"]]
         pend.write_text("{}")  # cleared (this folder does not allow deleting files)
     print(py("merge_results.py", *files).strip())
+    if files and os.environ.get("APIFY_FB_BACKUP", "on").lower() != "off":
+        out = subprocess.run([sys.executable, str(BUILD / "fb_views_backup.py"), "start"], capture_output=True, text=True)
+        print(out.stdout.strip() or out.stderr.strip()[-300:])
+        if out.returncode == 0 and "queued: 0 pages" not in out.stdout and "backup queued" in out.stdout:
+            pend.write_text(json.dumps({"stage": "backup"}))
+            print("Facebook view backup running; run finish again"); sys.exit(2)
     py("build_workbook.py")
     print(py("export_dashboard.py").strip())
 
