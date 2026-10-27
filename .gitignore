@@ -1,0 +1,14 @@
+# Secrets
+.env
+
+# Private working data (contains internal Google Sheet links and raw scraper output)
+analytics_master_build/source_data.json
+analytics_master_build/analytics_data.json
+analytics_master_build/snapshot_history.json
+outputs/
+.codex-tmp/
+.tmp_preview/
+
+node_modules/
+__pycache__/
+*.xlsx

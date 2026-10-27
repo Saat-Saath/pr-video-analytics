@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PR video analytics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,400&display=swap" rel="stylesheet">
+<style>
+:root{--font-anthropic-sans:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;--font-anthropic-serif:"Source Serif 4",Georgia,serif;
+--color-bg:#f7f7f5;--color-panel:#ffffff;--color-fg:#1f1f1d;--color-fg-muted:#6b6a65;--color-border-line:#e4e2dc;
+--color-ok:#2f7d32;--color-warn:#9a6200;--color-bad:#b3261e;--cds-chart-grid:#ecebe6;--cds-surface-popover:#ffffff;--cds-border:#dddbd4;
+--cds-shadow-popover:0 8px 24px rgba(0,0,0,.12),0 2px 6px rgba(0,0,0,.08);--cds-text-secondary:#6b6a65;
+--cds-font-size-caption:.8125rem;--cds-font-size-body:.9375rem;--cds-font-size-heading:1rem;--cds-font-size-title:1.75rem;--cds-font-weight-medium:500;
+--cds-gap-xs:.25rem;--cds-gap-sm:.5rem;--cds-gap-md:.75rem;--cds-gap-lg:1.5rem;--cds-pad-xs:.25rem;--cds-pad-sm:.5rem;--cds-pad-md:.75rem;--cds-pad-lg:1rem;
+--cds-radius:10px;--cds-dur-slow:.3s;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--color-bg:#171716;--color-panel:#1f1f1e;--color-fg:#ecebe6;--color-fg-muted:#a3a19a;--color-border-line:#33322f;
+--color-ok:#7cc47f;--color-warn:#e0a84a;--color-bad:#f08a80;--cds-chart-grid:#2c2b29;--cds-surface-popover:#262624;--cds-border:#3a3936;--cds-text-secondary:#a3a19a;color-scheme:dark}}
+body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:var(--font-anthropic-sans)}
+#dash-root{max-width:1200px;margin:0 auto;padding-block:2rem 3rem;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.dash-skeleton{color:transparent!important;background:var(--color-border-line);border-radius:6px;animation:pvsk 1.2s ease-in-out infinite alternate}
+@keyframes pvsk{from{opacity:.5}to{opacity:1}}
+.pv-foot{margin-top:2rem;font-size:.8125rem;color:var(--color-fg-muted)}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+window.dash = (function () {
+  const sets = { videos: { status: 'loading', data: [] } }, calcs = {}, subs = [];
+  const api = {
+    colors: ['#3266ad', '#c2185b', '#2e7d6b', '#b26a00', '#6a4c93', '#5f6b7a', '#9c3d2b', '#3d7a3d'],
+    calc(id, o) { calcs[id] = o; },
+    data(id) {
+      if (calcs[id]) {
+        const ins = calcs[id].inputs.map(api.data);
+        const bad = ins.find(x => x.status !== 'ok'); if (bad) return { status: bad.status, data: [] };
+        if (!calcs[id].cache) calcs[id].cache = calcs[id].fn(...ins.map(x => x.data));
+        return { status: 'ok', data: calcs[id].cache };
+      }
+      return sets[id] || { status: 'missing', data: [] };
+    },
+    onData(fn) { subs.push(fn); fn(); },
+    setLink(n) { try { history.replaceState(null, '', '#' + n); } catch (e) {} },
+    refresh() {}
+  };
+  const run = () => subs.forEach(f => f());
+  fetch('data.json', { cache: 'no-cache' }).then(r => r.json())
+    .then(rows => { sets.videos = { status: 'ok', data: rows }; run(); })
+    .catch(() => { sets.videos = { status: 'error', data: [] }; run(); });
+  let t; window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(run, 150); });
+  return api;
+})();
+</script>
+</head><body><div id="dash-root">
+<style>
+.pv{display:flex;flex-direction:column;gap:var(--cds-gap-lg);font-family:var(--font-anthropic-sans);color:var(--color-fg)}
+.pv-head h1{font-family:var(--font-anthropic-serif);font-weight:400;font-size:var(--cds-font-size-title);margin:0 0 var(--cds-gap-xs)}
+.pv-take{margin:0;font-size:var(--cds-font-size-body);max-width:62ch;text-wrap:pretty}
+.pv-sub{margin:var(--cds-gap-xs) 0 0;font-size:var(--cds-font-size-caption);color:var(--color-fg-muted)}
+.pv-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,10rem),1fr));gap:var(--cds-gap-md)}
+.pv-tile{background:var(--color-panel);border:1px solid var(--color-border-line);border-radius:var(--cds-radius);padding:var(--cds-pad-md) var(--cds-pad-lg);display:flex;flex-direction:column;gap:var(--cds-gap-xs)}
+.pv-tile .lbl{font-size:var(--cds-font-size-caption);color:var(--color-fg-muted)}
+.pv-tile .val{font-family:var(--font-anthropic-serif);font-weight:400;font-size:var(--cds-font-size-title);font-variant-numeric:tabular-nums;line-height:1.15}
+.pv-tile .note{font-size:var(--cds-font-size-caption);color:var(--color-fg-muted)}
+.pv-tile.warn .val{color:var(--color-warn)}
+.pv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,20rem),1fr));gap:var(--cds-gap-md)}
+.pv-card{background:var(--color-panel);border:1px solid var(--color-border-line);border-radius:var(--cds-radius);padding:var(--cds-pad-lg);display:flex;flex-direction:column;gap:var(--cds-gap-sm);min-width:0;position:relative}
+.pv-card h2{font-size:var(--cds-font-size-heading);font-weight:var(--cds-font-weight-medium);margin:0}
+.pv-card .hint{font-size:var(--cds-font-size-caption);color:var(--color-fg-muted);margin:0}
+.pv-chart{min-height:150px;position:relative}
+.pv-chart svg text{font-size:var(--cds-font-size-caption);fill:var(--color-fg-muted)}
+.pv-chart svg text.lab{fill:var(--color-fg)}
+.pv-tip{position:absolute;pointer-events:none;background:var(--cds-surface-popover);border:1px solid var(--cds-border);border-radius:var(--cds-radius);box-shadow:var(--cds-shadow-popover);padding:var(--cds-pad-xs) var(--cds-pad-sm);font-size:var(--cds-font-size-caption);white-space:nowrap;z-index:2}
+.pv-tip .k{color:var(--cds-text-secondary)}
+.pv-tbl-wrap{overflow:auto;max-height:28rem}
+.pv-tbl{width:100%;border-collapse:collapse;font-size:var(--cds-font-size-caption);font-variant-numeric:tabular-nums}
+.pv-tbl th{position:sticky;top:0;background:var(--color-panel);text-align:left;font-weight:var(--cds-font-weight-medium);color:var(--color-fg-muted);padding:var(--cds-pad-xs) var(--cds-pad-sm);border-bottom:1px solid var(--color-border-line);white-space:nowrap}
+.pv-tbl td{padding:var(--cds-pad-xs) var(--cds-pad-sm);border-bottom:1px solid var(--color-border-line);white-space:nowrap}
+.pv-tbl .num{text-align:right}
+.pv-tbl th button{all:unset;cursor:pointer}
+.pv-tbl th button:focus-visible{outline:2px solid var(--color-fg)}
+.pv-tbl a.pv-link{color:inherit;text-decoration:underline;text-decoration-color:var(--color-border-line);text-underline-offset:2px}
+.pv-tbl a.pv-link:hover{text-decoration-color:currentColor}
+.pv-tbl tbody tr:hover td{background:var(--color-bg)}
+.pv-pill{display:inline-block;padding:0 var(--cds-pad-sm);border-radius:999px;border:1px solid var(--color-border-line)}
+.pv-pill.ok{color:var(--color-ok)}.pv-pill.warn{color:var(--color-warn)}.pv-pill.bad{color:var(--color-bad)}
+.pv-tools{display:flex;flex-wrap:wrap;gap:var(--cds-gap-sm)}
+.pv-tools input,.pv-tools select{font:inherit;font-size:var(--cds-font-size-caption);padding:var(--cds-pad-xs) var(--cds-pad-sm);border:1px solid var(--color-border-line);border-radius:var(--cds-radius);background:var(--color-bg);color:var(--color-fg)}
+.pv-tools input{flex:1 1 12rem;min-width:0}
+.pv-fail{display:flex;align-items:center;justify-content:center;gap:var(--cds-gap-xs);min-height:inherit;color:var(--color-fg-muted);font-size:var(--cds-font-size-caption)}
+.pv-fail::before{content:"";width:.375rem;height:.375rem;border-radius:50%;background:var(--color-bad)}
+[data-dash-source-state=empty]{color:transparent}
+[data-dash-source-state=refreshing]{opacity:.5;transition:opacity var(--cds-dur-slow)}
+.pv-hide-narrow{}
+@media (max-width:640px){.pv-hide-narrow{display:none}}
+</style>
+
+<div class="pv">
+  <header class="pv-head" id="overview">
+    <h1>PR video analytics</h1>
+    <p class="pv-take">The Kalpana channels drew <b data-source="by_source" data-where="source=Kalpana channels" data-field="share" class="dash-skeleton">—</b> of all tracked views from <span data-source="by_source" data-where="source=Kalpana channels" data-field="videos" class="dash-skeleton">—</span> videos. Sanjay Agency's <span data-source="by_source" data-where="source=Sanjay Agency" data-field="videos" class="dash-skeleton">—</span> videos drew <span data-source="by_source" data-where="source=Sanjay Agency" data-field="share" class="dash-skeleton">—</span>.</p>
+    <p class="pv-sub">Latest public counts per video, fetched 27 Oct 2026. Instagram via Apify, Facebook and YouTube via Bright Data. Facebook rounds its counts (54K shows as 54,000).</p>
+  </header>
+
+  <section class="pv-tiles" aria-label="Headline figures">
+    <div class="pv-tile"><span class="lbl">Total views</span><span class="val dash-skeleton" data-source="kpis" data-row="0" data-field="views">—</span><span class="note">Videos with a view count</span></div>
+    <div class="pv-tile"><span class="lbl">Videos tracked</span><span class="val dash-skeleton" data-source="kpis" data-row="0" data-field="videos">—</span><span class="note">Unique posts across 3 sheets</span></div>
+    <div class="pv-tile"><span class="lbl">Likes and comments</span><span class="val dash-skeleton" data-source="kpis" data-row="0" data-field="likes_comments">—</span><span class="note">All fetched videos</span></div>
+    <div class="pv-tile"><span class="lbl">Engagement rate</span><span class="val dash-skeleton" data-source="kpis" data-row="0" data-field="eng_rate">—</span><span class="note">Likes, comments, shares ÷ views</span></div>
+    <div class="pv-tile warn"><span class="lbl">No view count yet</span><span class="val dash-skeleton" data-source="kpis" data-row="0" data-field="missing">—</span><span class="note">See "To fix" below</span></div>
+  </section>
+
+  <section class="pv-grid">
+    <div class="pv-card" id="by-platform">
+      <h2>Views by platform</h2>
+      <p class="hint">Bar shows views; label shows how many videos had a view count.</p>
+      <div class="pv-chart dash-skeleton" id="chart-platform" data-source="by_platform"></div>
+    </div>
+    <div class="pv-card" id="by-source">
+      <h2>Views by source</h2>
+      <p class="hint">Which sheet's videos reach the most people.</p>
+      <div class="pv-chart dash-skeleton" id="chart-source" data-source="by_source"></div>
+    </div>
+  </section>
+
+  <section class="pv-card" id="source-table">
+    <h2>Source summary</h2>
+    <p class="hint">Engagement rate counts only videos that have a view count.</p>
+    <div class="pv-tbl-wrap">
+      <table class="pv-tbl" data-source="by_source" data-row-key="source">
+        <thead><tr><th data-field="source">Source</th><th class="num" data-field="videos">Videos</th><th class="num" data-field="with_views">With views</th><th class="num" data-field="views">Views</th><th class="num" data-field="likes">Likes</th><th class="num pv-hide-narrow" data-field="comments">Comments</th><th class="num pv-hide-narrow" data-field="shares">Shares</th><th class="num" data-field="eng_rate">Eng. rate</th></tr></thead>
+        <tbody id="tb-source"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="pv-grid">
+    <div class="pv-card" id="top-videos">
+      <h2>Top 10 videos by views</h2>
+      <p class="hint">Click a video, account or number to open the post.</p>
+      <div class="pv-tbl-wrap">
+        <table class="pv-tbl" data-source="top10" data-row-key="video">
+          <thead><tr><th data-field="video">Video</th><th data-field="account">Account</th><th data-field="platform" class="pv-hide-narrow">Platform</th><th class="num" data-field="views">Views</th><th class="num" data-field="likes">Likes</th></tr></thead>
+          <tbody id="tb-top"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="pv-card" id="by-day">
+      <h2>Views by publish date</h2>
+      <p class="hint">Day 7 vs day 30 growth appears here once the scheduled re-checks run.</p>
+      <div class="pv-chart dash-skeleton" id="chart-day" data-source="by_day" style="min-height:200px"></div>
+    </div>
+  </section>
+
+  <section class="pv-card" id="to-fix">
+    <h2>To fix</h2>
+    <p class="hint">Videos that have no view count yet, and what to do about them.</p>
+    <table class="pv-tbl" data-source="status" data-row-key="status">
+      <thead><tr><th data-field="status">Issue</th><th class="num" data-field="videos">Videos</th><th data-field="next_step">Next step</th></tr></thead>
+      <tbody id="tb-status"></tbody>
+    </table>
+  </section>
+
+  <section class="pv-card" id="all-videos">
+    <h2>All videos</h2>
+    <p class="hint"><span id="count-shown">—</span> shown. Click any video, account or number to open the post. Search by account, ID or link; click a header to sort.</p>
+    <div class="pv-tools">
+      <input id="f-search" type="search" placeholder="Disease Care, VID-0022, reel/1984…" aria-label="Search videos">
+      <select id="f-source" aria-label="Source"><option value="">All sources</option></select>
+      <select id="f-platform" aria-label="Platform"><option value="">All platforms</option></select>
+      <select id="f-status" aria-label="Status"><option value="">Any status</option></select>
+    </div>
+    <div class="pv-tbl-wrap">
+      <table class="pv-tbl" data-source="videos" data-row-key="video">
+        <thead><tr>
+          <th data-field="video"><button data-k="video">Video</button></th>
+          <th data-field="account"><button data-k="account">Account</button></th>
+          <th data-field="source" class="pv-hide-narrow"><button data-k="source">Source</button></th>
+          <th data-field="platform"><button data-k="platform">Platform</button></th>
+          <th data-field="published" class="pv-hide-narrow"><button data-k="published">Published</button></th>
+          <th class="num" data-field="views"><button data-k="views">Views</button></th>
+          <th class="num" data-field="likes"><button data-k="likes">Likes</button></th>
+          <th class="num pv-hide-narrow" data-field="comments"><button data-k="comments">Comments</button></th>
+          <th class="num pv-hide-narrow" data-field="shares"><button data-k="shares">Shares</button></th>
+          <th data-field="status"><button data-k="status">Status</button></th>
+        </tr></thead>
+        <tbody id="tb-all"></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<script>
+dash.calc('kpis', {
+  inputs: ['videos'], title: 'Headline figures',
+  description: 'Totals across all videos; engagement rate is (likes + comments + shares) / views over videos that have a view count.',
+  fn: (videos) => {
+    const w = videos.filter(v => v.views != null);
+    const s = (rows, k) => rows.reduce((a, v) => a + (Number(v[k]) || 0), 0);
+    const views = s(w, 'views');
+    return [{
+      videos: videos.length,
+      views,
+      likes_comments: s(videos, 'likes') + s(videos, 'comments'),
+      eng_rate: views ? (s(w, 'likes') + s(w, 'comments') + s(w, 'shares')) / views : null,
+      missing: videos.length - w.length
+    }];
+  }
+});
+
+dash.calc('by_platform', { inputs: ['videos'], title: 'Totals by platform',
+  description: 'Videos, views, likes, comments and shares summed per platform; share is that platform\'s part of all views.',
+  fn: (videos) => {
+    const s = (rows, k) => rows.reduce((a, v) => a + (Number(v[k]) || 0), 0);
+    const total = s(videos, 'views');
+    return [...new Set(videos.map(v => v.platform))].map(g => {
+      const rows = videos.filter(v => v.platform === g), w = rows.filter(v => v.views != null), views = s(w, 'views');
+      return { platform: g, videos: rows.length, with_views: w.length, views, likes: s(rows, 'likes'), comments: s(rows, 'comments'),
+        shares: s(rows, 'shares'), eng_rate: views ? (s(w, 'likes') + s(w, 'comments') + s(w, 'shares')) / views : null,
+        share: total ? views / total : 0 };
+    }).sort((a, b) => b.views - a.views || b.videos - a.videos);
+  } });
+dash.calc('by_source', { inputs: ['videos'], title: 'Totals by source sheet',
+  description: 'Videos, views, likes, comments and shares summed per source sheet; share is that source\'s part of all views.',
+  fn: (videos) => {
+    const s = (rows, k) => rows.reduce((a, v) => a + (Number(v[k]) || 0), 0);
+    const total = s(videos, 'views');
+    return [...new Set(videos.map(v => v.source))].map(g => {
+      const rows = videos.filter(v => v.source === g), w = rows.filter(v => v.views != null), views = s(w, 'views');
+      return { source: g, videos: rows.length, with_views: w.length, views, likes: s(rows, 'likes'), comments: s(rows, 'comments'),
+        shares: s(rows, 'shares'), eng_rate: views ? (s(w, 'likes') + s(w, 'comments') + s(w, 'shares')) / views : null,
+        share: total ? views / total : 0 };
+    }).sort((a, b) => b.views - a.views || b.videos - a.videos);
+  } });
+
+dash.calc('top10', { inputs: ['videos'], title: 'Top 10 videos by views',
+  description: 'The ten videos with the most views at the latest fetch.',
+  fn: (videos) => videos.filter(v => v.views != null).sort((a, b) => b.views - a.views).slice(0, 10)
+    .map(v => ({ video: v.video, account: v.account, platform: v.platform, views: v.views, likes: v.likes, url: v.url })) });
+
+dash.calc('by_day', { inputs: ['videos'], title: 'Views by publish date',
+  description: 'Views and number of videos per publish date, for videos with a known date.',
+  fn: (videos) => {
+    const days = [...new Set(videos.filter(v => v.published).map(v => v.published))].sort();
+    return days.map(d => { const rows = videos.filter(v => v.published === d);
+      return { published: d, videos: rows.length, views: rows.reduce((a, v) => a + (Number(v.views) || 0), 0) }; });
+  } });
+
+dash.calc('status', { inputs: ['videos'], title: 'Videos to fix',
+  description: 'Count of videos per fetch problem, with the next step for each.',
+  fn: (videos) => {
+    const steps = {
+      'No view count': 'Facebook hides the count on some reels. Re-check at day 7, or try another scraper.',
+      'Fetch failed': 'Link deleted, private or unreachable. Open it and replace the link in the sheet.',
+      'No public link': 'Internal PR sheet has a Drive file only. Ask the team for the live post link.'
+    };
+    return Object.keys(steps).map(s => ({ status: s, videos: videos.filter(v => v.status === s).length, next_step: steps[s] }))
+      .filter(r => r.videos > 0);
+  } });
+
+(function () {
+  const fmt = d3.format(',');
+  const big = new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 });
+  const pct = d3.format('.1%');
+  const n = (v) => v == null || v === '' ? '' : fmt(v);
+  const dayFmt = d3.utcFormat('%b %-d');
+  const $ = (id) => document.getElementById(id);
+  const failed = (el) => { el.textContent = ''; const f = document.createElement('div'); f.className = 'pv-fail'; f.textContent = 'Failed to load'; el.appendChild(f); };
+  const ready = (el, d) => { if (d.status === 'ok' || d.status === 'error' || d.status === 'declined') el.classList.remove('dash-skeleton'); };
+
+  function tipFor(card) {
+    let t = card.querySelector('.pv-tip');
+    if (!t) { t = document.createElement('div'); t.className = 'pv-tip'; t.hidden = true; card.appendChild(t); }
+    return t;
+  }
+  function showTip(card, ev, lines) {
+    const t = tipFor(card); t.textContent = '';
+    lines.forEach(([k, v], i) => { const row = document.createElement('div'); if (i === 0) { row.className = 'k'; row.textContent = k; } else { row.textContent = k + ': ' + v; } t.appendChild(row); });
+    t.hidden = false;
+    const r = card.getBoundingClientRect(), tw = t.offsetWidth;
+    let x = ev.clientX - r.left + 12; if (x + tw > r.width - 8) x = ev.clientX - r.left - tw - 12;
+    t.style.left = Math.max(8, x) + 'px'; t.style.top = (ev.clientY - r.top + 12) + 'px';
+  }
+  const hideTip = (card) => { const t = card.querySelector('.pv-tip'); if (t) t.hidden = true; };
+
+  function hbars(el, rows, key, color) {
+    el.textContent = '';
+    const W = Math.max(260, el.clientWidth), rowH = 34, H = rows.length * rowH + 4;
+    const svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`);
+    const labels = svg.append('g');
+    const lw = d3.max(rows, r => { const t = labels.append('text').attr('class', 'lab').text(r[key]); const w = t.node().getComputedTextLength(); t.remove(); return w; }) || 60;
+    const vw = d3.max(rows, r => { const t = labels.append('text').text(big.format(r.views) + ' · ' + r.with_views + '/' + r.videos); const w = t.node().getComputedTextLength(); t.remove(); return w; }) || 60;
+    const x = d3.scaleLinear([0, d3.max(rows, r => r.views) || 1], [0, Math.max(20, W - lw - vw - 28)]);
+    const card = el.closest('.pv-card');
+    const g = svg.selectAll('g.r').data(rows).join('g').attr('class', 'r').attr('transform', (r, i) => `translate(0,${i * rowH})`);
+    g.append('text').attr('class', 'lab').attr('x', 0).attr('y', rowH / 2).attr('dominant-baseline', 'central').text(r => r[key]);
+    g.append('rect').attr('x', lw + 10).attr('y', 7).attr('height', rowH - 14).attr('rx', 4)
+      .attr('width', r => Math.max(r.views ? 2 : 0, x(r.views))).attr('fill', color)
+      .on('mousemove', (ev, r) => showTip(card, ev, [[r[key]], ['Views', fmt(r.views)], ['Videos with views', r.with_views + ' of ' + r.videos], ['Likes', fmt(r.likes)]]))
+      .on('mouseleave', () => hideTip(card));
+    g.append('text').attr('x', r => lw + 16 + x(r.views)).attr('y', rowH / 2).attr('dominant-baseline', 'central')
+      .text(r => big.format(r.views) + ' · ' + r.with_views + '/' + r.videos);
+  }
+
+  function dayBars(el, rows) {
+    el.textContent = '';
+    if (!rows.length) return;
+    const W = Math.max(280, el.clientWidth), H = 200, m = { t: 8, r: 8, b: 24, l: 8 };
+    const svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`);
+    const ymax = d3.max(rows, r => r.views) || 1;
+    const probe = svg.append('text').text(big.format(ymax)); m.l = probe.node().getComputedTextLength() + 10; probe.remove();
+    const x = d3.scaleBand(rows.map(r => r.published), [m.l, W - m.r]).padding(0.25);
+    const y = d3.scaleLinear([0, ymax], [H - m.b, m.t]).nice();
+    y.ticks(4).forEach(t => {
+      svg.append('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y(t)).attr('y2', y(t)).attr('stroke', 'var(--cds-chart-grid)');
+      svg.append('text').attr('x', m.l - 6).attr('y', y(t)).attr('text-anchor', 'end').attr('dominant-baseline', 'central').text(big.format(t));
+    });
+    const card = el.closest('.pv-card');
+    svg.selectAll('rect.b').data(rows).join('rect').attr('class', 'b').attr('x', r => x(r.published)).attr('width', x.bandwidth())
+      .attr('y', r => y(r.views)).attr('height', r => Math.max(0, y(0) - y(r.views))).attr('rx', 3).attr('fill', dash.colors[0])
+      .on('mousemove', (ev, r) => showTip(card, ev, [[dayFmt(new Date(r.published))], ['Views', fmt(r.views)], ['Videos published', r.videos]]))
+      .on('mouseleave', () => hideTip(card));
+    const every = Math.ceil(rows.length / Math.max(2, Math.floor((W - m.l) / 56)));
+    rows.forEach((r, i) => { if (i % every === 0) svg.append('text').attr('x', x(r.published) + x.bandwidth() / 2).attr('y', H - 6).attr('text-anchor', 'middle').text(dayFmt(new Date(r.published))); });
+  }
+
+  function fillRows(tbody, rows, cols) {
+    tbody.textContent = '';
+    rows.forEach(r => {
+      const tr = document.createElement('tr');
+      cols.forEach(([k, f, cls]) => {
+        const td = document.createElement('td'); if (cls) td.className = cls;
+        const v = f ? f(r[k], r, td) : r[k];
+        if (v instanceof Node) td.appendChild(v); else td.textContent = v == null ? '' : v;
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+  }
+  const icon = { Instagram: 'Instagram', Facebook: 'Facebook', YouTube: 'YouTube' };
+  const link = (v, r) => { if (!r.url || v == null || v === '') return v == null ? '' : v; const a = document.createElement('a'); a.href = r.url; a.target = '_blank'; a.rel = 'noopener'; a.className = 'pv-link'; a.title = 'Open on ' + (icon[r.platform] || 'Google Drive'); a.textContent = v; return a; };
+  const nlink = (v, r) => link(n(v), r);
+  const pill = (v) => { const s = document.createElement('span'); s.className = 'pv-pill ' + (v === 'OK' ? 'ok' : v === 'Fetch failed' ? 'bad' : 'warn'); s.textContent = v; return s; };
+
+  // All-videos table state
+  let sortKey = 'views', sortDir = -1, filled = false;
+  const numKeys = new Set(['views', 'likes', 'comments', 'shares']);
+  function drawAll() {
+    const d = dash.data('videos'); const tb = $('tb-all');
+    if (d.status !== 'ok') { tb.textContent = ''; $('count-shown').textContent = '—'; return; }
+    const rows = d.data;
+    if (!filled) {
+      [['f-source', 'source'], ['f-platform', 'platform'], ['f-status', 'status']].forEach(([id, k]) => {
+        const sel = $(id); [...new Set(rows.map(r => r[k]))].sort().forEach(v => { const o = document.createElement('option'); o.value = v; o.textContent = v; sel.appendChild(o); });
+      });
+      filled = true;
+    }
+    const q = $('f-search').value.trim().toLowerCase(), fs = $('f-source').value, fp = $('f-platform').value, fst = $('f-status').value;
+    const shown = rows.filter(r => (!fs || r.source === fs) && (!fp || r.platform === fp) && (!fst || r.status === fst) &&
+      (!q || [r.video, r.account, r.url].join(' ').toLowerCase().includes(q)))
+      .sort((a, b) => {
+        const A = a[sortKey], B = b[sortKey];
+        if (A == null && B == null) return 0; if (A == null) return 1; if (B == null) return -1;
+        return (numKeys.has(sortKey) ? A - B : String(A).localeCompare(String(B))) * sortDir;
+      });
+    $('count-shown').textContent = fmt(shown.length) + ' of ' + fmt(rows.length);
+    fillRows(tb, shown, [['video', link], ['account', link], ['source', null, 'pv-hide-narrow'], ['platform', link],
+      ['published', v => v ? dayFmt(new Date(v)) : '', 'pv-hide-narrow'], ['views', nlink, 'num'], ['likes', nlink, 'num'],
+      ['comments', nlink, 'num pv-hide-narrow'], ['shares', nlink, 'num pv-hide-narrow'], ['status', pill]]);
+    document.querySelectorAll('#all-videos th').forEach(th => {
+      const b = th.querySelector('button'); th.setAttribute('aria-sort', b && b.dataset.k === sortKey ? (sortDir > 0 ? 'ascending' : 'descending') : 'none');
+    });
+  }
+  ['f-search', 'f-source', 'f-platform', 'f-status'].forEach(id => $(id).addEventListener('input', drawAll));
+  document.querySelectorAll('#all-videos th button').forEach(b => b.addEventListener('click', () => {
+    const k = b.dataset.k; if (k === sortKey) sortDir = -sortDir; else { sortKey = k; sortDir = numKeys.has(k) ? -1 : 1; } drawAll();
+  }));
+
+  dash.onData(() => {
+    // Headline tiles and takeaway
+    const k = dash.data('kpis');
+    document.querySelectorAll('[data-source="kpis"]').forEach(el => {
+      ready(el, k);
+      if (k.status !== 'ok' || !k.data.length) { el.textContent = '—'; return; }
+      const v = k.data[0][el.dataset.field];
+      el.textContent = el.dataset.field === 'eng_rate' ? (v == null ? '—' : pct(v)) : el.dataset.field === 'views' || el.dataset.field === 'likes_comments' ? big.format(v) : fmt(v);
+    });
+    const s = dash.data('by_source');
+    document.querySelectorAll('.pv-take [data-source="by_source"]').forEach(el => {
+      ready(el, s);
+      const row = s.status === 'ok' ? s.data.find(r => 'source=' + r.source === el.dataset.where) : null;
+      el.textContent = !row ? '—' : el.dataset.field === 'share' ? pct(row.share) : fmt(row.videos);
+    });
+
+    // Charts
+    const p = dash.data('by_platform'), cp = $('chart-platform'); ready(cp, p);
+    if (p.status === 'ok') hbars(cp, p.data, 'platform', dash.colors[0]); else if (p.status === 'error') failed(cp); else cp.textContent = '';
+    const cs = $('chart-source'); ready(cs, s);
+    if (s.status === 'ok') hbars(cs, s.data, 'source', dash.colors[1]); else if (s.status === 'error') failed(cs); else cs.textContent = '';
+    const dd = dash.data('by_day'), cd = $('chart-day'); ready(cd, dd);
+    if (dd.status === 'ok') dayBars(cd, dd.data); else if (dd.status === 'error') failed(cd); else cd.textContent = '';
+
+    // Tables
+    if (s.status === 'ok') fillRows($('tb-source'), s.data, [['source'], ['videos', n, 'num'], ['with_views', n, 'num'], ['views', n, 'num'], ['likes', n, 'num'],
+      ['comments', n, 'num pv-hide-narrow'], ['shares', n, 'num pv-hide-narrow'], ['eng_rate', v => v == null ? '' : pct(v), 'num']]);
+    else $('tb-source').textContent = '';
+    const t = dash.data('top10');
+    if (t.status === 'ok') fillRows($('tb-top'), t.data, [['video', link], ['account', link], ['platform', null, 'pv-hide-narrow'], ['views', nlink, 'num'], ['likes', nlink, 'num']]);
+    else $('tb-top').textContent = '';
+    const st = dash.data('status');
+    if (st.status === 'ok') fillRows($('tb-status'), st.data, [['status', pill], ['videos', n, 'num'], ['next_step']]);
+    else $('tb-status').textContent = '';
+    drawAll();
+  });
+
+  const named = document.getElementById(location.hash.slice(1));
+  if (named) setTimeout(() => { named.scrollIntoView(); dash.setLink(named.id); }, 300);
+})();
+</script>
+
+<p class="pv-foot">Data updated 27 Oct 2026. Public counts as shown on each platform; Instagram via Apify, Facebook and YouTube via Bright Data.</p>
+</div></body></html>
