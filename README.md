@@ -2,7 +2,7 @@
 
 Tracks views, likes, comments and shares for every PR video posted from three source sheets (Kalpana disease channels, Sanjay Agency, Internal PR) across Instagram, Facebook and YouTube.
 
-**Live dashboard:** see the GitHub Pages link in this repo's About section (served from `docs/`).
+**Live dashboard:** https://sagarchauhan7792-bot.github.io/pr-video-analytics/ (served from `docs/`)
 
 Every video, account and number in the dashboard links to the post on its platform.
 
