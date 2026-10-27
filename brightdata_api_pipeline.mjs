@@ -134,7 +134,7 @@ function normalizeRecord(record, platform, snapshotId) {
   return {
     platform,
     url: firstValue(record, ["url", "post_url", "video_url", "shortcode_url", "link"]),
-    title: firstValue(record, ["title", "caption", "description", "text"]),
+    title: firstValue(record, ["title", "caption", "description", "text", "content", "post_content"]),
     published_at: firstValue(record, ["date_posted", "published_at", "upload_date", "timestamp", "created_at"]),
     views: firstValue(record, ["views", "view_count", "views_count", "video_view_count", "play_count", "plays", "video_play_count"]),
     likes: firstValue(record, ["likes", "like_count", "likes_count"]),

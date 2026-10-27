@@ -83,6 +83,7 @@ def load_records(path):
             "comments": num(r.get("comments")),
             "shares": num(r.get("shares")),
             "saves": num(r.get("saves")),
+            "caption": r.get("title"),
             "page_url": raw.get("page_url") or raw.get("user_url") or raw.get("user_profile_url") or raw.get("channel_url"),
             "account": r.get("account") or raw.get("page_name") or raw.get("user_username_raw") or raw.get("youtuber") or raw.get("user_posted"),
             "source": source,
@@ -116,7 +117,7 @@ def main(result_files):
                 "snapshot_type": snapshot_type(age),
                 "captured_at": fetched.isoformat(),
                 "age_days": age,
-                **{k: rec[k] for k in ("views", "likes", "comments", "shares", "saves", "published_at", "account", "page_url", "source", "error")},
+                **{k: rec[k] for k in ("views", "likes", "comments", "shares", "saves", "published_at", "account", "page_url", "caption", "source", "error")},
                 "post_url": rec["resolved_url"],
                 "fetch_status": "OK" if rec["ok"] else "Failed",
             })
@@ -145,6 +146,8 @@ def main(result_files):
             m["day_7_due"] = date.fromordinal(d0.toordinal() + 7).isoformat()
             m["day_30_due"] = date.fromordinal(d0.toordinal() + 30).isoformat()
         m["account"] = (last or {}).get("account") or ""
+        m["caption"] = next((s_.get("caption") for s_ in reversed(good) if s_.get("caption")), m.get("caption") or "")
+        m["published_at"] = (last or {}).get("published_at") or m.get("published_at") or ""
         for k in ("views", "likes", "comments", "shares"):
             m[f"latest_{k}"] = last.get(k) if last else None
         v = m["latest_views"]
