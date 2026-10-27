@@ -9,6 +9,9 @@ outputs/
 .codex-tmp/
 .tmp_preview/
 
-node_modules/
+node_modules
 __pycache__/
 *.xlsx
+analytics_master_build/source_data.prev.json
+analytics_master_build/sync_report.json
+inspect_workbook.mjs

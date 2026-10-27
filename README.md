@@ -1,10 +1,22 @@
 # PR video analytics
 
-Tracks views, likes, comments and shares for every PR video posted from three source sheets (Kalpana disease channels, Sanjay Agency, Internal PR) across Instagram, Facebook and YouTube.
+Tracks views, likes, comments and shares for every PR video posted from three source sheets (Kalpana disease channels, Sanjay Agency, Internal PR) across Instagram, Facebook and YouTube, at **Day 2, Day 7 and Day 30 after upload**.
 
 **Live dashboard:** https://sagarchauhan7792-bot.github.io/pr-video-analytics/ (served from `docs/`)
 
 Every video, account and number in the dashboard links to the post on its platform.
+
+## Milestones
+
+Ages are counted in calendar days, India time. A video posted on the 1st is captured on the 3rd (Day 2), the 8th (Day 7) and the 31st (Day 30).
+
+| Milestone | Window | Late after |
+|---|---|---|
+| Day 2 | ages 2–6 | day 3 |
+| Day 7 | ages 7–29 | day 9 |
+| Day 30 | age 30+ | day 35 |
+
+Each video is fetched once per window. A capture past the grace days is kept and flagged late with the day it was taken. Rules live in `analytics_master_build/milestones.py`.
 
 ## How the numbers are collected
 
@@ -15,17 +27,15 @@ Every video, account and number in the dashboard links to the post on its platfo
 
 Facebook doesn't show a public view count on some reels; those are listed as "No view count" in the dashboard's To fix section.
 
-## Refresh
+## Daily refresh
 
 ```bash
-cp .env.example .env            # add your own keys
-node apify_instagram.mjs --urls-file ig-urls.json --output outputs/ig-result.json
-node brightdata_api_pipeline.mjs scrape --platform facebook --urls-file fb-urls.json --output outputs/fb-result.json
-node brightdata_api_pipeline.mjs scrape --platform youtube --urls-file yt-urls.json --output outputs/yt-result.json
-python analytics_master_build/merge_results.py outputs/ig-result.json outputs/fb-result.json outputs/yt-result.json
-python analytics_master_build/build_workbook.py      # Excel master (kept locally)
-python analytics_master_build/export_dashboard.py    # updates docs/ for the live dashboard
-git add docs && git commit -m "Refresh data" && git push
+cp .env.example .env          # add API keys and the three Google Sheet IDs
+python refresh.py start       # sync sheets, find videos due for Day 2/7/30, start scraper runs
+python refresh.py finish      # repeat until it exits 0: merge, rebuild workbook, write docs/
+git add docs && git commit -m "Daily refresh" && git push
 ```
 
-`merge_results.py` reads the private master list (`analytics_master_build/source_data.json`), which stays out of this repo because it holds internal Google Sheet links. The public repo only contains public post links and public counts (`docs/data.json`).
+`sync_sheets.py` reads each sheet's CSV export, keeps existing `VID-####` ids, adds new rows, and keeps a video's id when its link is replaced in the same row (e.g. a Drive file swapped for the live post link). Internal PR tabs prefer the live post link over the Drive file.
+
+The private master list (`analytics_master_build/source_data.json`), the sheet IDs and the API keys stay out of this repo. It only contains public post links and public counts (`docs/data.json`).

@@ -5,8 +5,10 @@ Reads  source_data.json (master list) and snapshot_history.json (all past fetche
 Writes snapshot_history.json (appended) and analytics_data.json (master + latest metrics).
 """
 import json, re, sys
-from datetime import datetime, timezone, date
+from datetime import datetime, timezone, date, timedelta
 from pathlib import Path
+
+from milestones import MILESTONES, milestone_status, window_for
 
 ROOT = Path(__file__).resolve().parent
 SOURCE = ROOT / "source_data.json"
@@ -26,7 +28,9 @@ def platform_of(url):
 def norm(url):
     u = (url or "").strip().lower()
     u = re.sub(r"^https?://", "", u).replace("www.", "").replace("m.facebook.com", "facebook.com")
-    u = u.split("?")[0].split("#")[0].rstrip("/")
+    path, _, query = u.split("#")[0].partition("?")
+    ids = [kv for kv in query.split("&") if kv.split("=")[0] in ("story_fbid", "fbid", "v", "id")]
+    u = path.rstrip("/") + ("?" + "&".join(ids) if ids and re.search(r"(story|permalink|video|photo)\.php$|/watch$", path.rstrip("/")) else "")
     u = u.replace("youtube.com/shorts/", "yt/").replace("youtu.be/", "yt/").replace("youtube.com/watch?v=", "yt/")
     u = re.sub(r"instagram\.com/(?:[^/]+/)?(?:p|reel|reels|tv)/", "instagram.com/p/", u)
     return u
@@ -44,11 +48,16 @@ def parse_dt(v):
     except ValueError: return None
 
 
+IST = timezone(timedelta(hours=5, minutes=30))
+
+
+def ist_day(dt):
+    """Calendar day in India time; ages are counted in calendar days (posted on the 1st -> Day 2 on the 3rd)."""
+    return dt.astimezone(IST).date() if dt.tzinfo else dt.date()
+
+
 def snapshot_type(age):
-    if age is None: return "UNDATED"
-    if age < 7: return "BASELINE"
-    if age < 30: return "7_DAY"
-    return "30_DAY"
+    return {"d2": "DAY_2", "d7": "DAY_7", "d30": "DAY_30", "early": "EARLY", None: "UNDATED"}[window_for(age)]
 
 
 def load_records(path):
@@ -93,7 +102,7 @@ def main(result_files):
                 unmatched.append(rec["input_url"]); continue
             pub = parse_dt(rec["published_at"])
             fetched = parse_dt(rec["fetched_at"]) or datetime.now(timezone.utc)
-            age = (fetched - pub).days if pub else None
+            age = (ist_day(fetched) - ist_day(pub)).days if pub else None
             history.append({
                 "snapshot_id": f"SNAP-{len(history) + 1:05d}",
                 "master_id": m["master_id"],
@@ -106,6 +115,11 @@ def main(result_files):
 
     HISTORY.write_text(json.dumps(history, indent=1, ensure_ascii=False), encoding="utf8")
 
+    for s in history:  # recount ages in calendar days and label with the current milestone rules
+        pub, cap = parse_dt(s.get("published_at")), parse_dt(s.get("captured_at"))
+        if pub and cap:
+            s["age_days"] = (ist_day(cap) - ist_day(pub)).days
+        s["snapshot_type"] = snapshot_type(s.get("age_days"))
     snaps = {}
     for s in history:
         snaps.setdefault(s["master_id"], []).append(s)
@@ -117,7 +131,7 @@ def main(result_files):
         last = good[-1] if good else None
         pub = parse_dt(last["published_at"]) if last and last.get("published_at") else None
         if pub:
-            m["published_date"] = pub.date().isoformat()
+            m["published_date"] = ist_day(pub).isoformat()
         if m.get("published_date"):
             d0 = date.fromisoformat(m["published_date"][:10])
             m["day_7_due"] = date.fromordinal(d0.toordinal() + 7).isoformat()
@@ -130,14 +144,26 @@ def main(result_files):
         m["latest_engagement_rate"] = round(inter / v, 4) if v else None
         m["last_analytics_at"] = last["captured_at"] if last else ""
         m["data_source"] = last["source"] if last else ""
-        for label, lo, hi in (("7d", 7, 30), ("30d", 30, 10_000)):
-            hit = next((s for s in good if s["age_days"] is not None and lo <= s["age_days"] < hi), None)
-            m[f"views_{label}"] = hit["views"] if hit else None
-            m[f"likes_{label}"] = hit["likes"] if hit else None
-            m[f"comments_{label}"] = hit["comments"] if hit else None
+        for s_ in good:  # re-age snapshots when the publish date became known later
+            if m.get("published_date") and s_.get("age_days") is None:
+                s_["age_days"] = (ist_day(parse_dt(s_["captured_at"])) - date.fromisoformat(m["published_date"][:10])).days
+                s_["snapshot_type"] = snapshot_type(s_["age_days"])
+        ms = milestone_status(m.get("published_date"), good, today.astimezone(IST).date())
+        for label, _, _, _ in MILESTONES:
+            hit = ms[label]["snap"]
+            m[f"{label}_status"] = "No public link" if m["content_type"] == "Drive asset" else ms[label]["status"]
+            m[f"{label}_due"] = ms[label]["due"]
+            m[f"{label}_age"] = hit["age_days"] if hit else None
+            for k in ("views", "likes", "comments", "shares"):
+                m[f"{label}_{k}"] = hit.get(k) if hit else None
             ints = sum(x or 0 for x in ((hit or {}).get("likes"), (hit or {}).get("comments"), (hit or {}).get("shares")))
-            m[f"engagement_rate_{label}"] = round(ints / hit["views"], 4) if hit and hit["views"] else None
-        if m["content_type"] == "Drive asset":
+            m[f"{label}_engagement_rate"] = round(ints / hit["views"], 4) if hit and hit.get("views") else None
+        for old_key in ("day_7_due", "day_30_due", "views_7d", "likes_7d", "comments_7d", "engagement_rate_7d",
+                        "views_30d", "likes_30d", "comments_30d", "engagement_rate_30d"):
+            m.pop(old_key, None)
+        if m.get("sheet_status") == "Removed from sheet":
+            m["fetch_status"] = "Removed from sheet"
+        elif m["content_type"] == "Drive asset":
             m["fetch_status"] = "No public link"
         elif not ss:
             m["fetch_status"] = "Not fetched"

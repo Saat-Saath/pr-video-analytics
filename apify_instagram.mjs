@@ -50,10 +50,13 @@ async function main() {
       })).data;
   if (process.argv.includes("--start-only")) { process.stdout.write(JSON.stringify({ run_id: run.id, status: run.status }) + "\n"); return; }
   let status = run.status;
-  for (let i = 0; i < 120 && !["SUCCEEDED", "FAILED", "ABORTED", "TIMED-OUT"].includes(status); i += 1) {
+  // With --run-id (collecting a run started earlier) check once and report RUNNING instead of waiting.
+  const polls = arg("run-id") ? 0 : 120;
+  for (let i = 0; i < polls && !["SUCCEEDED", "FAILED", "ABORTED", "TIMED-OUT"].includes(status); i += 1) {
     await new Promise((r) => setTimeout(r, 5000));
     status = (await api(token, `https://api.apify.com/v2/actor-runs/${run.id}`)).data.status;
   }
+  if (["READY", "RUNNING"].includes(status)) throw new Error(`RUNNING: Apify run ${run.id} is still ${status}`);
   if (status !== "SUCCEEDED") throw new Error(`Apify run ${run.id} ended with ${status}`);
   const items = await api(token, `https://api.apify.com/v2/datasets/${run.defaultDatasetId}/items?clean=true&format=json`);
 

@@ -63,37 +63,40 @@ for ws in wb.worksheets:
 # ---------- Master Content ----------
 master = DATA["master"]
 mcols = [("Master ID", 11), ("Platform", 12), ("Content type", 13), ("Source group", 24), ("Channel / influencer", 24),
-         ("Account", 24), ("Post URL", 46), ("Published", 12), ("Day 7 due", 12), ("Day 30 due", 12),
+         ("Account", 24), ("Post URL", 46), ("Published", 12),
+         ("Day 2 views", 12), ("Day 2 likes", 11), ("Day 2 status", 20),
+         ("Day 7 views", 12), ("Day 7 likes", 11), ("Day 7 status", 20),
+         ("Day 30 views", 12), ("Day 30 likes", 11), ("Day 30 status", 20),
          ("Latest views", 13), ("Latest likes", 12), ("Latest comments", 12), ("Latest shares", 12), ("Engagement rate", 12),
-         ("Views 7d", 11), ("Views 30d", 11), ("Eng. rate 7d", 11), ("Eng. rate 30d", 11),
-         ("Last fetched", 18), ("Data source", 12), ("Fetch status", 15), ("Source rows", 22), ("Occurrences", 11)]
+         ("Last fetched", 18), ("Data source", 12), ("Fetch status", 15), ("Sheet status", 14), ("Source rows", 22), ("Occurrences", 11)]
 for i, (h, _) in enumerate(mcols, 1):
     master_ws.cell(row=1, column=i, value=h)
 style_header(master_ws, 1, 1, len(mcols))
 widths(master_ws, [w for _, w in mcols])
 for r, m in enumerate(master, start=2):
     row = [m["master_id"], m["platform"], m["content_type"], m["source_group"], m.get("channel") or m.get("influencer") or "",
-           m.get("account") or "", m["canonical_url"], d(m.get("published_date")), d(m.get("day_7_due")), d(m.get("day_30_due")),
+           m.get("account") or "", m["canonical_url"], d(m.get("published_date")),
+           m.get("d2_views"), m.get("d2_likes"), m.get("d2_status"),
+           m.get("d7_views"), m.get("d7_likes"), m.get("d7_status"),
+           m.get("d30_views"), m.get("d30_likes"), m.get("d30_status"),
            m.get("latest_views"), m.get("latest_likes"), m.get("latest_comments"), m.get("latest_shares"), m.get("latest_engagement_rate"),
-           m.get("views_7d"), m.get("views_30d"), m.get("engagement_rate_7d"), m.get("engagement_rate_30d"),
-           dt(m.get("last_analytics_at")), m.get("data_source") or "", m.get("fetch_status"), m.get("source_rows"), m.get("occurrence_count")]
+           dt(m.get("last_analytics_at")), m.get("data_source") or "", m.get("fetch_status"), m.get("sheet_status") or "In sheet",
+           m.get("source_rows"), m.get("occurrence_count")]
     for c, v in enumerate(row, start=1):
         cell = master_ws.cell(row=r, column=c, value=v)
         cell.font = Font(name=F, size=10, color=DARK)
     master_ws.cell(row=r, column=7).hyperlink = m["canonical_url"]
     master_ws.cell(row=r, column=7).font = Font(name=F, size=10, color="1155CC", underline="single")
 mend = len(master) + 1
-for col in "HIJ": 
-    for c in master_ws[f"{col}2:{col}{mend}"]: c[0].number_format = "dd-mmm-yyyy"
-for col in "KLMNPQ":
+for c in master_ws[f"H2:H{mend}"]: c[0].number_format = "dd-mmm-yyyy"
+for col in "IJLMOPRSTU":
     for c in master_ws[f"{col}2:{col}{mend}"]: c[0].number_format = "#,##0"
-for col in "ORS":
-    for c in master_ws[f"{col}2:{col}{mend}"]: c[0].number_format = "0.0%"
-for c in master_ws[f"T2:T{mend}"]: c[0].number_format = "dd-mmm-yyyy hh:mm"
+for c in master_ws[f"V2:V{mend}"]: c[0].number_format = "0.0%"
+for c in master_ws[f"W2:W{mend}"]: c[0].number_format = "dd-mmm-yyyy hh:mm"
 add_table(master_ws, "MasterContent", len(mcols), len(master))
 master_ws.freeze_panes = "C2"
 amber = PatternFill("solid", fgColor="FFF2CC"); red = PatternFill("solid", fgColor="FCE8E6"); green = PatternFill("solid", fgColor="E2F0D9")
-rng = f"V2:V{mend}"
+rng = f"Y2:Y{mend}"
 master_ws.conditional_formatting.add(rng, CellIsRule(operator="equal", formula=['"OK"'], fill=green))
 master_ws.conditional_formatting.add(rng, CellIsRule(operator="equal", formula=['"No view count"'], fill=amber))
 master_ws.conditional_formatting.add(rng, CellIsRule(operator="equal", formula=['"No public link"'], fill=amber))
@@ -142,10 +145,10 @@ dash["A2"] = f"Kalpana disease channels, Sanjay Agency and Internal PR · data r
 dash["A2"].font = Font(name=F, size=10, italic=True, color="5F6368")
 
 kpis = [("Videos tracked", f"=COUNTA({mc('A')})", "#,##0"),
-        ("Total views", f"=SUM({mc('K')})", "#,##0"),
-        ("Likes + comments", f"=SUM({mc('L')})+SUM({mc('M')})", "#,##0"),
-        ("Engagement rate", f"=IFERROR((SUMIFS({mc('L')},{mc('K')},\">0\")+SUMIFS({mc('M')},{mc('K')},\">0\")+SUMIFS({mc('N')},{mc('K')},\">0\"))/SUM({mc('K')}),0)", "0.0%"),
-        ("Missing data", f"=COUNTA({mc('A')})-COUNTIF({mc('V')},\"OK\")", "#,##0")]
+        ("Total views", f"=SUM({mc('R')})", "#,##0"),
+        ("Likes + comments", f"=SUM({mc('S')})+SUM({mc('T')})", "#,##0"),
+        ("Engagement rate", f"=IFERROR((SUMIFS({mc('S')},{mc('R')},\">0\")+SUMIFS({mc('T')},{mc('R')},\">0\")+SUMIFS({mc('U')},{mc('R')},\">0\"))/SUM({mc('R')}),0)", "0.0%"),
+        ("Missing data", f"=COUNTA({mc('A')})-COUNTIF({mc('Y')},\"OK\")", "#,##0")]
 for i, (label, f, fmt) in enumerate(kpis):
     col = get_column_letter(1 + i) if i == 0 else get_column_letter(1 + i)
     lab = dash.cell(row=4, column=1 + i, value=label); val = dash.cell(row=5, column=1 + i, value=f)
@@ -165,9 +168,9 @@ def block(top, title, header, rows):
 hdr = ["", "Videos", "With views", "Views", "Likes", "Comments", "Shares", "Eng. rate"]
 def agg_row(label, col):
     crit = f'{mc(col)},"{label}"'
-    r = [label, f"=COUNTIFS({crit})", f'=COUNTIFS({crit},{mc("K")},">=0")', f"=SUMIFS({mc('K')},{crit})",
-         f"=SUMIFS({mc('L')},{crit})", f"=SUMIFS({mc('M')},{crit})", f"=SUMIFS({mc('N')},{crit})"]
-    r.append(f"=IFERROR((SUMIFS({mc('L')},{crit},{mc('K')},\">0\")+SUMIFS({mc('M')},{crit},{mc('K')},\">0\")+SUMIFS({mc('N')},{crit},{mc('K')},\">0\"))/SUMIFS({mc('K')},{crit}),\"\")")
+    r = [label, f"=COUNTIFS({crit})", f'=COUNTIFS({crit},{mc("R")},">=0")', f"=SUMIFS({mc('R')},{crit})",
+         f"=SUMIFS({mc('S')},{crit})", f"=SUMIFS({mc('T')},{crit})", f"=SUMIFS({mc('U')},{crit})"]
+    r.append(f"=IFERROR((SUMIFS({mc('S')},{crit},{mc('R')},\">0\")+SUMIFS({mc('T')},{crit},{mc('R')},\">0\")+SUMIFS({mc('U')},{crit},{mc('R')},\">0\"))/SUMIFS({mc('R')},{crit}),\"\")")
     return r
 nxt = block(7, "By platform", ["Platform"] + hdr[1:], [agg_row(p, "B") for p in ("Facebook", "Instagram", "YouTube", "Google Drive Asset")])
 start_src = nxt
@@ -188,9 +191,19 @@ for r, m in enumerate(top10, start=t + 2):
     dash.cell(row=r, column=1).hyperlink = m["canonical_url"]; dash.cell(row=r, column=1).font = Font(name=F, size=10, color="1155CC", underline="single")
     dash.cell(row=r, column=4).number_format = "#,##0"; dash.cell(row=r, column=5).number_format = "#,##0"; dash.cell(row=r, column=6).number_format = "dd-mmm-yyyy"
 t = t + 2 + len(top10) + 1
-fix = [("Fetched, but no view count", f'=COUNTIF({mc("V")},"No view count")', "Facebook hides some counts; re-check later"),
-       ("Fetch failed", f'=COUNTIF({mc("V")},"Fetch failed")', "Link deleted/private or scraper error; open and verify"),
-       ("Drive asset, no public post link", f'=COUNTIF({mc("V")},"No public link")', "Ask Internal PR for the live post URL"),
+dash.cell(row=t, column=1, value="Milestones (Day 2 / Day 7 / Day 30 after upload)").font = Font(name=F, size=11, bold=True, color=NAVY)
+for i, h in enumerate(["Milestone", "Captured", "Captured late", "Due now", "Due later", "Missed", "Views captured"], 1): dash.cell(row=t + 1, column=i, value=h)
+style_header(dash, t + 1, 1, 7)
+for r, (lab, colv, cols) in enumerate([("Day 2", "I", "K"), ("Day 7", "L", "N"), ("Day 30", "O", "Q")], start=t + 2):
+    vals = [lab, f'=COUNTIF({mc(cols)},"Captured")', f'=COUNTIF({mc(cols)},"Captured late*")', f'=COUNTIF({mc(cols)},"Due now")',
+            f'=COUNTIF({mc(cols)},"Due 2*")', f'=COUNTIF({mc(cols)},"Missed")', f"=SUM({mc(colv)})"]
+    for c, v in enumerate(vals, 1):
+        cell = dash.cell(row=r, column=c, value=v); cell.font = Font(name=F, size=10); cell.border = Border(bottom=thin)
+        if c > 1: cell.number_format = "#,##0"
+t = t + 2 + 3 + 1
+fix = [("Fetched, but no view count", f'=COUNTIF({mc("Y")},"No view count")', "Facebook hides some counts; re-check later"),
+       ("Fetch failed", f'=COUNTIF({mc("Y")},"Fetch failed")', "Link deleted/private or scraper error; open and verify"),
+       ("Drive asset, no public post link", f'=COUNTIF({mc("Y")},"No public link")', "Ask Internal PR for the live post URL"),
        ("Missing publish date", f'=COUNTBLANK({mc("H")})', "7/30-day dates can't be scheduled")]
 nxt = block(t, "To fix", ["Issue", "Count", "Next step"], fix)
 
@@ -205,9 +218,9 @@ for r, c in enumerate(DATA["config"], start=4):
         setup.cell(row=r, column=i, value=c[k]).font = Font(name=F, size=10)
 steps = [("Instagram metrics", "Apify Instagram Scraper (apify_instagram.mjs) - plays, likes, comments, date"),
          ("Facebook / YouTube metrics", "Bright Data Scraper API (brightdata_api_pipeline.mjs)"),
-         ("Merge", "python analytics_master_build/merge_results.py <result files>"),
+         ("Daily refresh", "python refresh.py start, then python refresh.py finish (syncs sheets, fetches due milestones, rebuilds)"),
          ("Rebuild workbook", "python analytics_master_build/build_workbook.py"),
-         ("Snapshot types", "BASELINE <7 days old, 7_DAY 7-29 days, 30_DAY 30+ days at capture time"),
+         ("Milestones", "Day 2 = captured 2-6 days after upload, Day 7 = 7-29 days, Day 30 = 30+ days; late captures are flagged"),
          ("Keys", "BRIGHTDATA_API_KEY and APIFY_TOKEN in .env (never commit)")]
 setup.cell(row=9, column=1, value="Refresh workflow").font = Font(name=F, size=11, bold=True, color=NAVY)
 for r, (a, b) in enumerate(steps, start=10):

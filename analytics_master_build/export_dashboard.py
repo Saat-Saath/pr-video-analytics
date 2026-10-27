@@ -22,7 +22,8 @@ def rows():
                     "account": m.get("account") or m.get("channel") or m.get("influencer") or "",
                     "url": m["canonical_url"], "published": (m.get("published_date") or "")[:10] or None,
                     "views": m.get("latest_views"), "likes": m.get("latest_likes"), "comments": m.get("latest_comments"),
-                    "shares": m.get("latest_shares"), "status": m.get("fetch_status"), "fetched_by": m.get("data_source") or None})
+                    "shares": m.get("latest_shares"), "status": m.get("fetch_status"), "fetched_by": m.get("data_source") or None,
+                    **{f"{l}_{k}": m.get(f"{l}_{k}") for l in ("d2", "d7", "d30") for k in ("views", "likes", "status", "due", "age")}})
     return out, d["generated_at"]
 
 

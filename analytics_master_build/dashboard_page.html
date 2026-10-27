@@ -28,6 +28,8 @@
 .pv-tbl a.pv-link{color:inherit;text-decoration:underline;text-decoration-color:var(--color-border-line);text-underline-offset:2px}
 .pv-tbl a.pv-link:hover{text-decoration-color:currentColor}
 .pv-tbl tbody tr:hover td{background:var(--color-bg)}
+.pv-ms{color:var(--color-fg-muted);font-size:.92em}
+.pv-late{color:var(--color-warn);font-size:.85em}
 .pv-pill{display:inline-block;padding:0 var(--cds-pad-sm);border-radius:999px;border:1px solid var(--color-border-line)}
 .pv-pill.ok{color:var(--color-ok)}.pv-pill.warn{color:var(--color-warn)}.pv-pill.bad{color:var(--color-bad)}
 .pv-tools{display:flex;flex-wrap:wrap;gap:var(--cds-gap-sm)}
@@ -45,7 +47,7 @@
   <header class="pv-head" id="overview">
     <h1>PR video analytics</h1>
     <p class="pv-take">The Kalpana channels drew <b data-source="by_source" data-where="source=Kalpana channels" data-field="share" class="dash-skeleton">—</b> of all tracked views from <span data-source="by_source" data-where="source=Kalpana channels" data-field="videos" class="dash-skeleton">—</span> videos. Sanjay Agency's <span data-source="by_source" data-where="source=Sanjay Agency" data-field="videos" class="dash-skeleton">—</span> videos drew <span data-source="by_source" data-where="source=Sanjay Agency" data-field="share" class="dash-skeleton">—</span>.</p>
-    <p class="pv-sub">Latest public counts per video, fetched 27 Oct 2026. Instagram via Apify, Facebook and YouTube via Bright Data. Facebook rounds its counts (54K shows as 54,000).</p>
+    <p class="pv-sub">Day 2, Day 7 and Day 30 counts per video, refreshed daily from the source sheets. Instagram via Apify, Facebook and YouTube via Bright Data. Facebook rounds its counts (54K shows as 54,000).</p>
   </header>
 
   <section class="pv-tiles" aria-label="Headline figures">
@@ -54,6 +56,17 @@
     <div class="pv-tile"><span class="lbl">Likes and comments</span><span class="val dash-skeleton" data-source="kpis" data-row="0" data-field="likes_comments">—</span><span class="note">All fetched videos</span></div>
     <div class="pv-tile"><span class="lbl">Engagement rate</span><span class="val dash-skeleton" data-source="kpis" data-row="0" data-field="eng_rate">—</span><span class="note">Likes, comments, shares ÷ views</span></div>
     <div class="pv-tile warn"><span class="lbl">No view count yet</span><span class="val dash-skeleton" data-source="kpis" data-row="0" data-field="missing">—</span><span class="note">See "To fix" below</span></div>
+  </section>
+
+  <section class="pv-card" id="milestones">
+    <h2>Milestones: Day 2, Day 7 and Day 30 after upload</h2>
+    <p class="hint">Each video is captured once 2, 7 and 30 days after it was posted. "Late" means it was first fetched after that day; the actual day is shown on each video.</p>
+    <div class="pv-tbl-wrap">
+      <table class="pv-tbl" data-source="milestones" data-row-key="milestone">
+        <thead><tr><th data-field="milestone">Milestone</th><th class="num" data-field="captured">Captured on time</th><th class="num" data-field="late">Captured late</th><th class="num" data-field="due_now">Due now</th><th class="num pv-hide-narrow" data-field="due_later">Due later</th><th class="num pv-hide-narrow" data-field="missed">Missed</th><th class="num" data-field="views">Views at milestone</th></tr></thead>
+        <tbody id="tb-ms"></tbody>
+      </table>
+    </div>
   </section>
 
   <section class="pv-grid">
@@ -124,8 +137,11 @@
           <th data-field="source" class="pv-hide-narrow"><button data-k="source">Source</button></th>
           <th data-field="platform"><button data-k="platform">Platform</button></th>
           <th data-field="published" class="pv-hide-narrow"><button data-k="published">Published</button></th>
-          <th class="num" data-field="views"><button data-k="views">Views</button></th>
-          <th class="num" data-field="likes"><button data-k="likes">Likes</button></th>
+          <th class="num" data-field="d2_views"><button data-k="d2_views">Day 2</button></th>
+          <th class="num" data-field="d7_views"><button data-k="d7_views">Day 7</button></th>
+          <th class="num" data-field="d30_views"><button data-k="d30_views">Day 30</button></th>
+          <th class="num" data-field="views"><button data-k="views">Latest views</button></th>
+          <th class="num pv-hide-narrow" data-field="likes"><button data-k="likes">Likes</button></th>
           <th class="num pv-hide-narrow" data-field="comments"><button data-k="comments">Comments</button></th>
           <th class="num pv-hide-narrow" data-field="shares"><button data-k="shares">Shares</button></th>
           <th data-field="status"><button data-k="status">Status</button></th>
@@ -179,6 +195,19 @@ dash.calc('by_source', { inputs: ['videos'], title: 'Totals by source sheet',
     }).sort((a, b) => b.views - a.views || b.videos - a.videos);
   } });
 
+dash.calc('milestones', { inputs: ['videos'], title: 'Milestone progress',
+  description: 'For Day 2, Day 7 and Day 30: videos captured on time, captured late, due now, due later or missed, and total views at that milestone.',
+  fn: (videos) => [['Day 2', 'd2'], ['Day 7', 'd7'], ['Day 30', 'd30']].map(([milestone, l]) => {
+    const st = (v) => v[l + '_status'] || '';
+    return { milestone,
+      captured: videos.filter(v => st(v) === 'Captured').length,
+      late: videos.filter(v => st(v).startsWith('Captured late')).length,
+      due_now: videos.filter(v => st(v) === 'Due now').length,
+      due_later: videos.filter(v => st(v).startsWith('Due 2')).length,
+      missed: videos.filter(v => st(v) === 'Missed').length,
+      views: videos.reduce((a, v) => a + (Number(v[l + '_views']) || 0), 0) };
+  }) });
+
 dash.calc('top10', { inputs: ['videos'], title: 'Top 10 videos by views',
   description: 'The ten videos with the most views at the latest fetch.',
   fn: (videos) => videos.filter(v => v.views != null).sort((a, b) => b.views - a.views).slice(0, 10)
@@ -198,6 +227,7 @@ dash.calc('status', { inputs: ['videos'], title: 'Videos to fix',
     const steps = {
       'No view count': 'Facebook hides the count on some reels. Re-check at day 7, or try another scraper.',
       'Fetch failed': 'Link deleted, private or unreachable. Open it and replace the link in the sheet.',
+      'Not fetched': 'New in the sheet; fetched in the next daily refresh.',
       'No public link': 'Internal PR sheet has a Drive file only. Ask the team for the live post link.'
     };
     return Object.keys(steps).map(s => ({ status: s, videos: videos.filter(v => v.status === s).length, next_step: steps[s] }))
@@ -286,11 +316,22 @@ dash.calc('status', { inputs: ['videos'], title: 'Videos to fix',
   const icon = { Instagram: 'Instagram', Facebook: 'Facebook', YouTube: 'YouTube' };
   const link = (v, r) => { if (!r.url || v == null || v === '') return v == null ? '' : v; const a = document.createElement('a'); a.href = r.url; a.target = '_blank'; a.rel = 'noopener'; a.className = 'pv-link'; a.title = 'Open on ' + (icon[r.platform] || 'Google Drive'); a.textContent = v; return a; };
   const nlink = (v, r) => link(n(v), r);
+  const ms = (v, r, l) => {
+    if (v != null) {
+      const a = link(n(v), r);
+      const age = r[l + '_age'], st = r[l + '_status'] || '';
+      if (st.startsWith('Captured late')) { a.title = 'Captured late, on day ' + age; const w = document.createElement('span'); w.appendChild(a); const t = document.createElement('span'); t.className = 'pv-late'; t.textContent = ' d' + age; w.appendChild(t); return w; }
+      return a;
+    }
+    const st = r[l + '_status'] || '', sp = document.createElement('span'); sp.className = 'pv-ms';
+    sp.textContent = st.startsWith('Due 2') ? 'due ' + dayFmt(new Date(r[l + '_due'])) : st === 'Due now' ? 'due now' : st === 'Missed' ? 'missed' : st.startsWith('Captured') ? 'no count' : '';
+    return sp;
+  };
   const pill = (v) => { const s = document.createElement('span'); s.className = 'pv-pill ' + (v === 'OK' ? 'ok' : v === 'Fetch failed' ? 'bad' : 'warn'); s.textContent = v; return s; };
 
   // All-videos table state
   let sortKey = 'views', sortDir = -1, filled = false;
-  const numKeys = new Set(['views', 'likes', 'comments', 'shares']);
+  const numKeys = new Set(['views', 'likes', 'comments', 'shares', 'd2_views', 'd7_views', 'd30_views']);
   function drawAll() {
     const d = dash.data('videos'); const tb = $('tb-all');
     if (d.status !== 'ok') { tb.textContent = ''; $('count-shown').textContent = '—'; return; }
@@ -311,7 +352,9 @@ dash.calc('status', { inputs: ['videos'], title: 'Videos to fix',
       });
     $('count-shown').textContent = fmt(shown.length) + ' of ' + fmt(rows.length);
     fillRows(tb, shown, [['video', link], ['account', link], ['source', null, 'pv-hide-narrow'], ['platform', link],
-      ['published', v => v ? dayFmt(new Date(v)) : '', 'pv-hide-narrow'], ['views', nlink, 'num'], ['likes', nlink, 'num'],
+      ['published', v => v ? dayFmt(new Date(v)) : '', 'pv-hide-narrow'],
+      ['d2_views', (v, r) => ms(v, r, 'd2'), 'num'], ['d7_views', (v, r) => ms(v, r, 'd7'), 'num'], ['d30_views', (v, r) => ms(v, r, 'd30'), 'num'],
+      ['views', nlink, 'num'], ['likes', nlink, 'num pv-hide-narrow'],
       ['comments', nlink, 'num pv-hide-narrow'], ['shares', nlink, 'num pv-hide-narrow'], ['status', pill]]);
     document.querySelectorAll('#all-videos th').forEach(th => {
       const b = th.querySelector('button'); th.setAttribute('aria-sort', b && b.dataset.k === sortKey ? (sortDir > 0 ? 'ascending' : 'descending') : 'none');
@@ -353,6 +396,10 @@ dash.calc('status', { inputs: ['videos'], title: 'Videos to fix',
     const t = dash.data('top10');
     if (t.status === 'ok') fillRows($('tb-top'), t.data, [['video', link], ['account', link], ['platform', null, 'pv-hide-narrow'], ['views', nlink, 'num'], ['likes', nlink, 'num']]);
     else $('tb-top').textContent = '';
+    const mst = dash.data('milestones');
+    if (mst.status === 'ok') fillRows($('tb-ms'), mst.data, [['milestone'], ['captured', n, 'num'], ['late', n, 'num'], ['due_now', n, 'num'],
+      ['due_later', n, 'num pv-hide-narrow'], ['missed', n, 'num pv-hide-narrow'], ['views', n, 'num']]);
+    else $('tb-ms').textContent = '';
     const st = dash.data('status');
     if (st.status === 'ok') fillRows($('tb-status'), st.data, [['status', pill], ['videos', n, 'num'], ['next_step']]);
     else $('tb-status').textContent = '';
