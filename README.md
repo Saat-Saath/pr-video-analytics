@@ -1,6 +1,6 @@
 # PR video analytics
 
-Tracks views, likes, comments and shares for every PR video posted from three source sheets (Kalpana disease channels, Sanjay Agency, Internal PR) across Instagram, Facebook and YouTube, at **Day 2, Day 7 and Day 30 after upload**.
+Tracks views, likes, comments and shares for every PR video posted from three source sheets (Inhouse ai videos, Sanjay Agency, Internal PR) across Instagram, Facebook and YouTube, at **Day 2, Day 7 and Day 30 after upload**.
 
 **Live dashboard:** https://sagarchauhan7792-bot.github.io/pr-video-analytics/ (served from `docs/`)
 

@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 DOCS = ROOT.parent / "docs"
-SRC = {"Kalpana - Disease Channels": "Kalpana channels", "Sanjay Agency": "Sanjay Agency", "Internal PR": "Internal PR"}
+SRC = {"Inhouse ai videos": "Inhouse ai videos", "Sanjay Agency": "Sanjay Agency", "Internal PR": "Internal PR"}
 PLAT = {"Google Drive Asset": "Drive file"}
 
 

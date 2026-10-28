@@ -141,7 +141,7 @@ def mc(col): return f"{M}!${col}$2:${col}${mend}"
 dash.column_dimensions["A"].width = 30
 for col in "BCDEFGH": dash.column_dimensions[col].width = 15
 dash["A1"] = "PR Video Analytics Master"; dash["A1"].font = Font(name=F, size=16, bold=True, color=NAVY)
-dash["A2"] = f"Kalpana disease channels, Sanjay Agency and Internal PR · data refreshed {datetime.now():%d %b %Y %H:%M}"
+dash["A2"] = f"Inhouse ai videos, Sanjay Agency and Internal PR · data refreshed {datetime.now():%d %b %Y %H:%M}"
 dash["A2"].font = Font(name=F, size=10, italic=True, color="5F6368")
 
 kpis = [("Videos tracked", f"=COUNTA({mc('A')})", "#,##0"),
