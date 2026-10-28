@@ -10,7 +10,7 @@ import time
 from datetime import datetime
 from pathlib import Path
 
-from costs import allocate, missing_rows, read_rows, env as cost_env
+from costs import account_links, allocate, missing_rows, read_rows, env as cost_env
 
 ROOT = Path(__file__).resolve().parent
 DOCS = ROOT.parent / "docs"
@@ -33,6 +33,11 @@ def rows(with_costs=False):
                     w = csv.DictWriter(fh, fieldnames=["Source", "Account", "Month", "Basis", "Videos"])
                     w.writeheader()
                     w.writerows(need)
+                # profile links for every account name in the sheet, so each payment row shows whose page it is
+                with open(DOCS / "costs_links.csv", "w", encoding="utf8", newline="") as fh:
+                    w = csv.DictWriter(fh, fieldnames=["Source", "Account", "Links"])
+                    w.writeheader()
+                    w.writerows(account_links(d, sheet, need))
         except (SystemExit, Exception) as e:  # sheet not shared yet, offline, or missing columns: carry on without costs
             print("costs skipped:", e)
     out = []

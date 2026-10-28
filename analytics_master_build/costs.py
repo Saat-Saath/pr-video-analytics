@@ -169,6 +169,68 @@ def missing_rows(master, rows):
     return sorted(need.values(), key=lambda r: (r["Month"], r["Source"], r["Account"].lower()))
 
 
+def clean_url(u):
+    u = (u or "").strip().split("#")[0].replace("://web.facebook.com", "://www.facebook.com").replace("://m.facebook.com", "://www.facebook.com")
+    if "profile.php?id=" in u:
+        return u.split("&")[0]
+    return u.split("?")[0].rstrip("/") + "/" if u else ""
+
+
+def profile_links(data):
+    """{master_id: the public profile / page link of the account that posted it}."""
+    page = {}
+    for snap in data.get("snapshots", []):
+        if snap.get("page_url"):
+            page[snap["master_id"]] = snap["page_url"]
+    out = {}
+    for v in data["master"]:
+        acc = (v.get("account") or "").strip()
+        u = page.get(v["master_id"]) or v.get("profile_url") or ""
+        if not u and v["platform"] == "Instagram" and re.fullmatch(r"[\w.]+", acc):
+            u = f"https://www.instagram.com/{acc}/"
+        if not u and v["platform"] == "YouTube" and acc.startswith("@"):
+            u = f"https://www.youtube.com/{acc}"
+        if u.startswith("http"):
+            out[v["master_id"]] = clean_url(u)
+    return out
+
+
+def account_links(data, rows, missing=()):
+    """One line per Source + Account name used in the Costs sheet (and each new one in `missing`): the profile links
+    of the accounts its row covers, so the sheet shows whose payment it is."""
+    links = profile_links(data)
+    names = {}
+    for c in list(rows) + [{"source": m["Source"], "account": m["Account"]} for m in missing]:
+        src = SOURCES.get(norm(c["source"]))
+        if src:
+            names.setdefault((src, norm(c["account"])), (c["source"].strip(), c["account"].strip()))
+    by_src = defaultdict(list)
+    for (src, want) in names:
+        by_src[src].append(want)
+    found = defaultdict(set)
+    posts = defaultdict(set)  # when no profile link is known, show one of the account's posts instead
+    for v in data["master"]:
+        u = links.get(v["master_id"])
+        ranked = [(match_rank(w, v), w) for w in by_src[v["source_group"]]]
+        ranked = [r for r in ranked if r[0] is not None]
+        if not ranked:
+            continue
+        best = min(r for r, _ in ranked if r < 3) if any(r < 3 for r, _ in ranked) else None
+        for r, w in ranked:
+            if r == 3 or r == best:
+                if u:
+                    found[(v["source_group"], w)].add(u)
+                elif (v.get("post_url") or v.get("canonical_url") or "").startswith("http"):
+                    posts[(v["source_group"], w)].add(v.get("post_url") or v["canonical_url"])
+    out = []
+    for k in sorted(names, key=lambda k: names[k]):
+        if found.get(k):
+            out.append({"Source": names[k][0], "Account": names[k][1], "Links": "\n".join(sorted(found[k]))})
+        elif posts.get(k):
+            out.append({"Source": names[k][0], "Account": names[k][1], "Links": "Post: " + sorted(posts[k])[0]})
+    return out
+
+
 def allocate(master, rows=None):
     """Return ({master_id: rupees}, report, {master_id: payee}). report lists each cost row with the videos it matched;
     payee is the sheet's Account name the video's cost came from (the source name for whole-source rows)."""
