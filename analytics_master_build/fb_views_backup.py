@@ -45,10 +45,13 @@ def ist_date(iso):
 
 def candidates(hist, today):
     out = defaultdict(list)
+    # Only young reels: scanning a page back a month for a Day 30 or all-time count costs ~10x more.
+    max_age = int(os.environ.get("APIFY_FB_BACKUP_MAX_AGE", "10") or 10000)
     for s in hist:
         if (s.get("source") == "Bright Data" and s.get("fetch_status") == "OK" and s.get("views") is None
                 and s.get("page_url") and reel_id(s.get("post_url")) and s.get("published_at")
-                and ist_date(s["captured_at"]) == today and "facebook.com" in (s.get("post_url") or "")):
+                and ist_date(s["captured_at"]) == today and "facebook.com" in (s.get("post_url") or "")
+                and (today - ist_date(s["published_at"])).days <= max_age):
             out[s["page_url"]].append(s)
     return out
 

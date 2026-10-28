@@ -123,7 +123,9 @@ def occurrences():
         for c, cell in enumerate(row):
             for u in URL_RE.findall(cell):
                 ch = (names[c] or names[c - 1] if c else names[c]).strip()
-                out.append(dict(source_group="Inhouse ai videos", source_workbook="AMJ CHANNELS AI REELS - KALPANA",
+                # Internal key stays "Kalpana - Disease Channels" so existing videos keep matching;
+                # it is shown as "Inhouse ai videos" (DISPLAY_NAMES in export_dashboard.py / build_workbook.py).
+                out.append(dict(source_group="Kalpana - Disease Channels", source_workbook="AMJ CHANNELS AI REELS - KALPANA",
                                 source_tab="Sheet1", source_row=r, source_cell=f"{col(c)}{r}", source_date_text="", published_date="",
                                 influencer="", channel=ch, profile_url="", declared_platform=(plats[c] if c < len(plats) else "").strip(),
                                 posting_status="Published link", url=u))
@@ -244,7 +246,7 @@ def main(dry):
         "removed_from_sheets": [{"id": old_master[k]["master_id"], "url": old_master[k]["canonical_url"], "was": old_master[k]["source_rows"]} for k in gone_keys],
         "by_source_now": Counter(o["source_group"] for o in occ), "by_source_before": Counter(o["source_group"] for o in data["occurrences"]),
         "duplicates_in_sheets": {k: [f"{o['source_tab']}!{o['source_row']}" for o in v] for k, v in by_key.items() if len(v) > 1},
-        "missing_dates": sum(1 for k, v in by_key.items() if not any(o["published_date"] for o in v) and v[0]["source_group"] != "Inhouse ai videos"),
+        "missing_dates": sum(1 for k, v in by_key.items() if not any(o["published_date"] for o in v) and v[0]["source_group"] != "Kalpana - Disease Channels"),
         "internal_pr_post_links": sum(1 for o in occ if o["source_group"] == "Internal PR" and o["detected_platform"] != "Google Drive Asset"),
     }
     (ROOT / "sync_report.json").write_text(json.dumps(report, indent=1, ensure_ascii=False), encoding="utf8")

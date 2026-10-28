@@ -14,6 +14,11 @@ ROOT = Path(__file__).resolve().parent
 DATA = json.loads((ROOT / "analytics_data.json").read_text(encoding="utf8"))
 OUT = ROOT.parent / "outputs" / "PR_Video_Analytics_Master.xlsx"
 
+# Names shown in the workbook (the internal key stays the same so videos keep matching across refreshes).
+DISPLAY_NAMES = {"Kalpana - Disease Channels": "Inhouse ai videos"}
+for _rec in DATA["master"] + DATA["occurrences"] + DATA["config"]:
+    _rec["source_group"] = DISPLAY_NAMES.get(_rec.get("source_group"), _rec.get("source_group"))
+
 NAVY, LIGHT, GRAY, DARK = "1F4E78", "D9EAF7", "F2F2F2", "202124"
 F = "Arial"
 thin = Side(style="thin", color="D9D9D9")
@@ -67,7 +72,7 @@ mcols = [("Master ID", 11), ("Platform", 12), ("Content type", 13), ("Source gro
          ("Day 2 views", 12), ("Day 2 likes", 11), ("Day 2 status", 20),
          ("Day 7 views", 12), ("Day 7 likes", 11), ("Day 7 status", 20),
          ("Day 30 views", 12), ("Day 30 likes", 11), ("Day 30 status", 20),
-         ("Latest views", 13), ("Latest likes", 12), ("Latest comments", 12), ("Latest shares", 12), ("Engagement rate", 12),
+         ("All-time views", 13), ("All-time likes", 12), ("All-time comments", 12), ("All-time shares", 12), ("Engagement rate", 12),
          ("Last fetched", 18), ("Data source", 12), ("Fetch status", 15), ("Sheet status", 14), ("Source rows", 22), ("Occurrences", 11)]
 for i, (h, _) in enumerate(mcols, 1):
     master_ws.cell(row=1, column=i, value=h)

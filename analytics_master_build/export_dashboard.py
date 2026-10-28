@@ -4,12 +4,14 @@ docs/data.json  - one row per video (public post links and public counts only)
 docs/index.html - standalone page: dashboard_page.html + a small loader, hostable on GitHub Pages
 """
 import json
+import time
 from datetime import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 DOCS = ROOT.parent / "docs"
-SRC = {"Inhouse ai videos": "Inhouse ai videos", "Sanjay Agency": "Sanjay Agency", "Internal PR": "Internal PR"}
+SRC = {"Kalpana - Disease Channels": "Inhouse ai videos", "Inhouse ai videos": "Inhouse ai videos",  # display names
+       "Sanjay Agency": "Sanjay Agency", "Internal PR": "Internal PR"}
 PLAT = {"Google Drive Asset": "Drive file"}
 
 
@@ -26,6 +28,8 @@ def rows():
                     "title": (m.get("caption") or "").strip().split("\n")[0][:90] or None,
                     "published_at": m.get("published_at") or None,
                     "post_url": m.get("post_url") or None,
+                    "alltime_at": (m.get("alltime_at") or "")[:10] or None,
+                    "alltime_age": m.get("alltime_age"),
                     "thumb": save_thumb(m),
                     **{f"{l}_{k}": m.get(f"{l}_{k}") for l in ("d2", "d7", "d30")
                        for k in ("views", "likes", "comments", "shares", "status", "due", "age")}})
@@ -39,20 +43,50 @@ def save_thumb(m):
     out = DOCS / "thumbs" / f"{vid}.jpg"
     if out.exists():
         return f"thumbs/{vid}.jpg"
-    if not src:
+    # Download at most ~90 s per run and never retry a link that already failed; the rest come next run.
+    if time.time() > _DEADLINE:
+        return None
+    if not src:  # no thumbnail from the scraper: use the post's public preview image (og:image)
+        page = m.get("post_url") or m.get("canonical_url") or ""
+        if not page or page in _FAILED or "drive.google" in page:
+            return None
+        src = og_image(page)
+        if not src:
+            _FAILED.add(page)
+            return None
+    if src in _FAILED:
         return None
     try:
         import io, urllib.request
         from PIL import Image
         req = urllib.request.Request(src, headers={"User-Agent": "Mozilla/5.0"})
-        with urllib.request.urlopen(req, timeout=20) as r:
+        with urllib.request.urlopen(req, timeout=8) as r:
             img = Image.open(io.BytesIO(r.read())).convert("RGB")
         img.thumbnail((320, 320))
         out.parent.mkdir(parents=True, exist_ok=True)
         img.save(out, "JPEG", quality=72, optimize=True)
         return f"thumbs/{vid}.jpg"
     except Exception:
+        _FAILED.add(src)
         return None
+
+
+def og_image(url):
+    """The preview image a public post shows when its link is shared (og:image), or None."""
+    import html, re, urllib.request
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "facebookexternalhit/1.1"})
+        with urllib.request.urlopen(req, timeout=10) as r:
+            text = r.read(600_000).decode("utf8", "ignore")
+        m = re.search(r'<meta[^>]+property="og:image"[^>]+content="([^"]+)"', text)
+        return html.unescape(m.group(1)) if m else None
+    except Exception:
+        return None
+
+
+_DEADLINE = time.time() + 90
+_FAILED_FILE = ROOT / "thumb_failed.json"
+_FAILED = set(json.loads(_FAILED_FILE.read_text())) if _FAILED_FILE.exists() else set()
 
 
 SHELL = """<!doctype html>
@@ -111,6 +145,7 @@ def main():
     updated = datetime.fromisoformat(generated).strftime("%d %b %Y")
     (DOCS / "index.html").write_text(SHELL.replace("__PAGE__", page).replace("__UPDATED__", updated), encoding="utf8")
     (DOCS / ".nojekyll").write_text("")
+    _FAILED_FILE.write_text(json.dumps(sorted(_FAILED)))
     print(f"docs/ written: {len(data)} videos, updated {updated}")
 
 

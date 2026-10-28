@@ -1,4 +1,5 @@
-"""Daily refresh: sync the sheets, fetch every video that is due for a Day 2 / 7 / 30 capture, rebuild outputs.
+"""Daily refresh: sync the sheets, fetch every video that is due for a Day 2 / 7 / 30 capture or for its
+all-time re-count (every ALL_TIME_REFRESH_DAYS days, default 7), rebuild outputs.
 
   python refresh.py start    # sync sheets, work out what is due today, start the scraper runs
   python refresh.py finish   # collect finished runs, merge, run the Apify backup for missing Facebook views,
@@ -44,6 +45,8 @@ def bd(path, body=None):
 
 
 def due_today():
+    env()
+    every = int(os.environ.get("ALL_TIME_REFRESH_DAYS", "7") or 0)  # re-fetch all-time counts every N days (0 = off)
     data = json.loads((BUILD / "analytics_data.json").read_text(encoding="utf8"))
     snaps = {}
     for s in data["snapshots"]:
@@ -55,7 +58,7 @@ def due_today():
             continue
         ss = snaps.get(m["master_id"], [])
         good = [s for s in ss if s["fetch_status"] == "OK"]
-        if is_due(m.get("published_date"), good, today, bool(ss)):
+        if is_due(m.get("published_date"), good, today, bool(ss), every):
             due[m["platform"]].append(m["canonical_url"])
     return due
 

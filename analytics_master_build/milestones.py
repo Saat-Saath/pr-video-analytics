@@ -53,12 +53,16 @@ def milestone_status(published, good_snaps, today):
     return out
 
 
-def is_due(published, good_snaps, today, has_any_snapshot):
-    """True when a public video should be fetched today."""
+def is_due(published, good_snaps, today, has_any_snapshot, alltime_every_days=7):
+    """True when a public video should be fetched today: a Day 2 / 7 / 30 capture is due, or its
+    all-time count is older than `alltime_every_days` (0 turns the all-time re-fetch off)."""
     if not has_any_snapshot or not published:
         return True  # never fetched: fetch once to learn its publish date and baseline
     age = (today - to_date(published)).days
     w = window_for(age)
-    if w in (None, "early"):
-        return False
-    return not any(window_for(s.get("age_days")) == w for s in good_snaps)
+    if w not in (None, "early") and not any(window_for(s.get("age_days")) == w for s in good_snaps):
+        return True
+    if alltime_every_days and good_snaps:
+        last = max(to_date(s["captured_at"]) for s in good_snaps if s.get("captured_at"))
+        return (today - last).days >= alltime_every_days
+    return False

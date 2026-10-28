@@ -153,8 +153,14 @@ def main(result_files):
         m["published_at"] = (last or {}).get("published_at") or m.get("published_at") or ""
         m["post_url"] = next((s_.get("post_url") for s_ in reversed(good) if s_.get("post_url")), m.get("post_url") or "")
         m["thumb_url"] = next((s_.get("thumb_url") for s_ in reversed(good) if s_.get("thumb_url")), "")
+        # All-time (latest) counts: the most recent capture that has each number, so a re-fetch that comes back
+        # without a view count keeps the last known one instead of blanking it.
         for k in ("views", "likes", "comments", "shares"):
-            m[f"latest_{k}"] = last.get(k) if last else None
+            hit = next((s_ for s_ in reversed(good) if s_.get(k) is not None), None)
+            m[f"latest_{k}"] = hit.get(k) if hit else None
+            if k == "views":
+                m["alltime_at"] = (hit or {}).get("captured_at", "")
+                m["alltime_age"] = (hit or {}).get("age_days")
         v = m["latest_views"]
         inter = sum(x or 0 for x in (m["latest_likes"], m["latest_comments"], m["latest_shares"]))
         m["latest_engagement_rate"] = round(inter / v, 4) if v else None

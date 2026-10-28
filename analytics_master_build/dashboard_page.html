@@ -76,7 +76,7 @@
 .vd-chip.g{background:var(--okbg);color:var(--ok)}.vd-chip.o{background:#FFF1E7;color:var(--accd)}
 .vd-sh{font-size:19px;line-height:1.25;font-weight:700}
 .vd-h3{font-size:13px;font-weight:600;color:var(--mut)}
-.vd-bars{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:end;height:190px}
+.vd-bars{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;align-items:end;height:190px}
 .vd-bar{display:flex;flex-direction:column;justify-content:flex-end;gap:5px;height:100%}
 .vd-bar .on{font-size:11px;font-weight:700;color:var(--accd)}
 .vd-bar .bv{font-size:17px;font-weight:700;font-variant-numeric:tabular-nums}
@@ -189,7 +189,7 @@
 .vd-tbl td{padding:7px 10px;border-bottom:1px solid var(--line2);white-space:nowrap}
 .vd-tbl .num{text-align:right}
 .vd-tbl .ms{border-left:1px solid var(--line)}
-.vd-tbl .g2{background:#F8FAFF}.vd-tbl .g7{background:#F3F6FD}.vd-tbl .g30{background:#EEF2FB}
+.vd-tbl .g2{background:#F8FAFF}.vd-tbl .g7{background:#F3F6FD}.vd-tbl .g30{background:#EEF2FB}.vd-tbl .gall{background:#FFF7F0}
 .vd-tbl .stk{position:sticky;left:0;z-index:1;background:#fff;box-shadow:1px 0 0 var(--line)}
 .vd-tbl th.stk{z-index:3}
 .vd-tbl a{color:inherit;text-decoration:underline;text-decoration-color:#D0D5DD;text-underline-offset:2px}
@@ -219,7 +219,7 @@
     <div style="display:flex;flex-direction:column;gap:8px;min-width:0">
       <p class="vd-eye">PR Analytics · Inhouse ai videos · Sanjay Agency · Internal PR</p>
       <h1 class="vd-title">Video performance</h1>
-      <p class="vd-sub">Every upload, captured at Day 2, Day 7 and Day 30 after posting. Click any video to watch it.</p>
+      <p class="vd-sub">Every upload, captured at Day 2, Day 7 and Day 30 after posting, plus its all-time total. Click any video to watch it.</p>
     </div>
     <div class="vd-right">
       <div class="vd-meta"><span class="vd-live">Live data</span><span id="upd">Instagram via Apify · Facebook and YouTube via Bright Data</span></div>
@@ -227,6 +227,7 @@
         <button type="button" data-s="d2" aria-pressed="false">Day 2</button>
         <button type="button" data-s="d7" aria-pressed="true">Day 7</button>
         <button type="button" data-s="d30" aria-pressed="false">Day 30</button>
+        <button type="button" data-s="all" aria-pressed="false">All time</button>
       </div>
     </div>
   </header>
@@ -254,7 +255,7 @@
 <div class="vd-row">
   <section class="vd-card vd-w3" aria-label="Video wall" id="wall-card">
     <div class="vd-ch"><h2 class="vd-h2">Video wall</h2><span class="vd-note" id="wall-note">—</span></div>
-    <div class="vd-wall" id="wall" data-source="videos"></div>
+    <div class="vd-wall" id="wall" data-source="videos thumbs"></div>
     <button type="button" class="vd-more" id="more" hidden>Show more videos</button>
   </section>
   <aside class="vd-card vd-w2 vd-sticky" aria-label="Selected video" id="deep" data-source="videos">
@@ -269,10 +270,10 @@
       <h2 class="vd-sh" id="d-title">—</h2>
     </div>
     <div style="display:flex;flex-direction:column;gap:10px">
-      <h3 class="vd-h3">Views at each snapshot</h3>
+      <h3 class="vd-h3">Views at each snapshot and all time</h3>
       <div class="vd-bars" id="d-bars"></div>
     </div>
-    <table class="vd-mt"><thead><tr><th>Metric</th><th>Day 2</th><th>Day 7</th><th>Day 30</th></tr></thead><tbody id="d-rows"></tbody></table>
+    <table class="vd-mt"><thead><tr><th>Metric</th><th>Day 2</th><th>Day 7</th><th>Day 30</th><th>All time</th></tr></thead><tbody id="d-rows"></tbody></table>
     <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap">
       <a class="vd-link" id="d-open" href="#" target="_blank" rel="noopener">Open original post</a>
       <button type="button" class="vd-link" id="d-cmp" style="all:unset;cursor:pointer;font-size:14px;font-weight:600;color:var(--b2)">Compare with another video →</button>
@@ -346,8 +347,8 @@
 </div>
 
 <section class="vd-card" aria-label="All videos" id="all-videos">
-  <div class="vd-ch"><h2 class="vd-h2">All videos: Day 2, Day 7 and Day 30</h2><span class="vd-note"><span id="count-shown">—</span> shown</span></div>
-  <p class="vd-note">Views, likes, comments and shares captured 2, 7 and 30 days after each upload. A small "d18" means that capture was taken late, on day 18. Press ▶ to watch, click a number to open the post, click a header to sort; scroll sideways for Day 30.</p>
+  <div class="vd-ch"><h2 class="vd-h2">All videos: Day 2, Day 7, Day 30 and all time</h2><span class="vd-note"><span id="count-shown">—</span> shown</span></div>
+  <p class="vd-note">Views, likes, comments and shares captured 2, 7 and 30 days after each upload, plus the all-time total (re-checked every week; "As of" is its date). A small "d18" means that capture was taken late, on day 18. Press ▶ to watch, click a number to open the post, click a header to sort; scroll sideways for Day 30.</p>
   <div class="vd-tools">
     <input id="f-search" type="search" placeholder="Search account, VID-0022 or a link" aria-label="Search videos">
     <select id="f-status" aria-label="Status"><option value="">Any status</option></select>
@@ -364,13 +365,14 @@
           <th colspan="4" class="grp ms g2">Day 2</th>
           <th colspan="4" class="grp ms g7">Day 7</th>
           <th colspan="4" class="grp ms g30">Day 30</th>
-          <th rowspan="2" class="num ms" data-field="views"><button data-k="views">Latest views</button></th>
+          <th colspan="5" class="grp ms gall">All time</th>
           <th rowspan="2" data-field="status"><button data-k="status">Status</button></th>
         </tr>
         <tr class="r2">
           <th class="num ms g2" data-field="d2_views"><button data-k="d2_views">Views</button></th><th class="num g2" data-field="d2_likes"><button data-k="d2_likes">Likes</button></th><th class="num g2" data-field="d2_comments"><button data-k="d2_comments">Comments</button></th><th class="num g2" data-field="d2_shares"><button data-k="d2_shares">Shares</button></th>
           <th class="num ms g7" data-field="d7_views"><button data-k="d7_views">Views</button></th><th class="num g7" data-field="d7_likes"><button data-k="d7_likes">Likes</button></th><th class="num g7" data-field="d7_comments"><button data-k="d7_comments">Comments</button></th><th class="num g7" data-field="d7_shares"><button data-k="d7_shares">Shares</button></th>
           <th class="num ms g30" data-field="d30_views"><button data-k="d30_views">Views</button></th><th class="num g30" data-field="d30_likes"><button data-k="d30_likes">Likes</button></th><th class="num g30" data-field="d30_comments"><button data-k="d30_comments">Comments</button></th><th class="num g30" data-field="d30_shares"><button data-k="d30_shares">Shares</button></th>
+          <th class="num ms gall" data-field="views"><button data-k="views">Views</button></th><th class="num gall" data-field="likes"><button data-k="likes">Likes</button></th><th class="num gall" data-field="comments"><button data-k="comments">Comments</button></th><th class="num gall" data-field="shares"><button data-k="shares">Shares</button></th><th class="gall" data-field="alltime_at"><button data-k="alltime_at">As of</button></th>
         </tr>
       </thead>
       <tbody id="tb-all"></tbody>
@@ -388,26 +390,27 @@
 <script>
 dash.calc('kpis', {
   inputs: ['videos'], title: 'Headline figures by snapshot, platform and source',
-  description: 'For each snapshot (Day 2, 7, 30) and filter: sums over videos captured at that snapshot, engagement rate, median views, share of videos past 1,000 views, and growth vs the previous snapshot over videos captured at both.',
+  description: 'For each snapshot (Day 2, 7, 30, all time) and filter: sums over videos captured at that snapshot, engagement rate, median views, share of videos past 1,000 views, and growth vs the previous snapshot over videos captured at both.',
   fn: (videos) => {
-    const L = ['d2', 'd7', 'd30'], plats = ['All', ...new Set(videos.map(v => v.platform))], srcs = ['All', ...new Set(videos.map(v => v.source))];
+    const L = ['d2', 'd7', 'd30', 'all'], P = { d7: 'd2', d30: 'd7', all: 'd7' }, plats = ['All', ...new Set(videos.map(v => v.platform))], srcs = ['All', ...new Set(videos.map(v => v.source))];
+    const f = (l, k) => l === 'all' ? k : l + '_' + k;
     const sum = (rs, k) => rs.reduce((a, v) => a + (Number(v[k]) || 0), 0);
     const out = [];
     for (const p of plats) for (const s of srcs) {
       const rs = videos.filter(v => (p === 'All' || v.platform === p) && (s === 'All' || v.source === s));
-      L.forEach((l, i) => {
-        const cap = rs.filter(v => v[l + '_views'] != null), views = sum(cap, l + '_views');
-        const has = (k) => cap.some(v => v[l + '_' + k] != null) ? sum(cap, l + '_' + k) : null;
-        const vs = cap.map(v => v[l + '_views']).sort((a, b) => a - b);
+      L.forEach((l) => {
+        const cap = rs.filter(v => v[f(l, 'views')] != null), views = sum(cap, f(l, 'views'));
+        const has = (k) => cap.some(v => v[f(l, k)] != null) ? sum(cap, f(l, k)) : null;
+        const vs = cap.map(v => v[f(l, 'views')]).sort((a, b) => a - b);
         const row = { key: l + '|' + p + '|' + s, views, likes: has('likes'), comments: has('comments'), shares: has('shares'),
-          eng: views ? (sum(cap, l + '_likes') + sum(cap, l + '_comments') + sum(cap, l + '_shares')) / views : null,
+          eng: views ? (sum(cap, f(l, 'likes')) + sum(cap, f(l, 'comments')) + sum(cap, f(l, 'shares'))) / views : null,
           median: vs.length ? (vs.length % 2 ? vs[(vs.length - 1) / 2] : (vs[vs.length / 2 - 1] + vs[vs.length / 2]) / 2) : null,
           hit1k: vs.length ? vs.filter(x => x >= 1000).length / vs.length : null,
           captured: cap.length, videos: rs.length };
         for (const k of ['views', 'likes', 'comments', 'shares']) {
-          if (!i) { row[k + '_delta'] = null; continue; }
-          const both = rs.filter(v => v[l + '_' + k] != null && v[L[i - 1] + '_' + k] != null), a = sum(both, L[i - 1] + '_' + k);
-          row[k + '_delta'] = both.length && a ? sum(both, l + '_' + k) / a - 1 : null;
+          if (!P[l]) { row[k + '_delta'] = null; continue; }
+          const both = rs.filter(v => v[f(l, k)] != null && v[f(P[l], k)] != null && (l !== 'all' || (v.alltime_age ?? -1) > (v.d7_age ?? 99))), a = sum(both, f(P[l], k));
+          row[k + '_delta'] = both.length && a ? sum(both, f(l, k)) / a - 1 : null;
           row[k + '_pairs'] = both.length;
         }
         out.push(row);
@@ -462,8 +465,8 @@ dash.calc('status', {
 
 (function () {
   const EMBED = !!window.PV_EMBED; // the standalone (GitHub) page can play videos inline; the Claude dashboard links out
-  const L = ['d2', 'd7', 'd30'], LBL = { d2: 'Day 2', d7: 'Day 7', d30: 'Day 30' }, OFF = { d2: 2, d7: 7, d30: 30 };
-  const BLUES = { d2: '#6E9BEA', d7: '#2D5FD3', d30: '#142B66' };
+  const L = ['d2', 'd7', 'd30'], L4 = ['d2', 'd7', 'd30', 'all'], LBL = { d2: 'Day 2', d7: 'Day 7', d30: 'Day 30', all: 'All time' }, OFF = { d2: 2, d7: 7, d30: 30 };
+  const BLUES = { d2: '#6E9BEA', d7: '#2D5FD3', d30: '#142B66', all: '#EA580C' };
   const PCOL = { Facebook: '#2D5FD3', Instagram: '#C2185B', YouTube: '#D92D20', 'Drive file': '#667085' };
   const TINT = { Facebook: '#DCE7FB', Instagram: '#FBE3E8', YouTube: '#FDE7D6', 'Drive file': '#E6E8EC' };
   const HEAT = ['#EEF2F8', '#C3D4F5', '#86A9EC', '#3F70DA', '#142B66'];
@@ -481,6 +484,7 @@ dash.calc('status', {
   const title = (v) => v.title || v.account || v.source;
   const eng = (v) => v.views ? ((v.likes || 0) + (v.comments || 0) + (v.shares || 0)) / v.views : null;
   const statusText = (v, l) => {
+    if (l === 'all') return v.status === 'No public link' ? 'No link' : v.status === 'Fetch failed' ? 'Failed' : 'No count';
     const st = v[l + '_status'] || '';
     if (st.startsWith('Due 2')) return 'Due ' + dmy(v[l + '_due']);
     if (st === 'Due now') return 'Due now';
@@ -506,8 +510,9 @@ dash.calc('status', {
     }
     return null;
   }
+  let THUMBS = new Map(); // small inline thumbnails for the Claude dashboard, which cannot load images from the web
   function thumb(v) {
-    if (!EMBED) return null;
+    if (!EMBED) return THUMBS.get(v.video) || null;
     if (v.thumb) return v.thumb;
     const y = ytId(v.post_url || v.url || '');
     return y ? 'https://i.ytimg.com/vi/' + y + '/hqdefault.jpg' : null;
@@ -522,7 +527,7 @@ dash.calc('status', {
   let rows = [], byId = new Map();
 
   function filtered() { return rows.filter(v => (S.plat === 'All' || v.platform === S.plat) && (S.src === 'All' || v.source === S.src)); }
-  function prev(l) { return L[L.indexOf(l) - 1]; }
+  function prev(l) { return { d7: 'd2', d30: 'd7', all: 'd7' }[l]; }
   function watch(id, scroll) { S.sel = id; S.playing = true; drawWall(); drawDeep(); if (scroll) $('deep').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
 
   // ---- controls
@@ -570,7 +575,7 @@ dash.calc('status', {
   function drawKpis() {
     const k = dash.data('kpis'), key = S.snap + '|' + S.plat + '|' + S.src;
     const r = k.status === 'ok' ? k.data.find(x => x.key === key) : null;
-    $('k-l-views').textContent = 'Views at ' + LBL[S.snap];
+    $('k-l-views').textContent = S.snap === 'all' ? 'All-time views' : 'Views at ' + LBL[S.snap];
     document.querySelectorAll('.vd-kpi [data-source="kpis"]').forEach(e => {
       e.dataset.where = 'key=' + key; e.classList.remove('dash-skeleton');
       const f = e.dataset.field;
@@ -579,7 +584,7 @@ dash.calc('status', {
         const x = r[f], n = r[f.replace('_delta', '_pairs')];
         const pending = (f === 'comments_delta' || f === 'shares_delta') && r[f.replace('_delta', '')] == null;
         e.className = 'd' + (x == null ? ' n' : '');
-        e.textContent = pending ? 'Arrives with the next refresh' : S.snap === 'd2' ? 'First snapshot' : x == null ? 'No video has both ' + LBL[prev(S.snap)] + ' and ' + LBL[S.snap] + ' yet' : sgn(x) + ' vs ' + LBL[prev(S.snap)] + ' · ' + n + ' videos';
+        e.textContent = pending ? 'Arrives with the next refresh' : S.snap === 'd2' ? 'First snapshot' : x == null ? (S.snap === 'all' ? 'Growth since Day 7 shows after the weekly re-check' : 'No video has both ' + LBL[prev(S.snap)] + ' and ' + LBL[S.snap] + ' yet') : (S.snap === 'all' ? sgn(x) + ' since Day 7 · ' : sgn(x) + ' vs ' + LBL[prev(S.snap)] + ' · ') + n + ' videos';
       } else if (f === 'captured') { e.className = 'd n'; e.textContent = r.captured + ' of ' + r.videos + ' videos captured'; }
       else if (f === 'hit1k') { e.className = 'd n'; e.textContent = r.hit1k == null ? '—' : pct0(r.hit1k) + ' of videos past 1K views'; }
       else if (f === 'eng') e.textContent = pct(r.eng);
@@ -605,9 +610,9 @@ dash.calc('status', {
       const bd = el('span', 'vd-badge'); const dot = el('i', 'vd-dot'); dot.style.background = PCOL[v.platform] || '#667085'; bd.append(dot, v.platform);
       th.append(pl, bd, el('span', 'vd-id', v.video));
       if (idx < 3 && val != null) th.append(el('span', 'vd-rank', '#' + (idx + 1)));
-      const vn = el('span', 'vd-vn'); vn.append(el('b', null, val != null ? big(val) : '—'), el('span', null, val != null ? 'views · ' + LBL[l] : statusText(v, l)));
-      const p = prev(l), a = p && v[p + '_views'], gr = val != null && a ? val / a - 1 : null;
-      const g = el('span', 'vd-gr' + (gr == null ? ' n' : ''), l === 'd2' ? (v.d7_views != null && v.d2_views ? sgn(v.d7_views / v.d2_views - 1) + ' by Day 7' : 'Posted ' + dmy(v.published)) : gr != null ? sgn(gr) + ' vs ' + LBL[p] : 'Posted ' + dmy(v.published));
+      const vn = el('span', 'vd-vn'); vn.append(el('b', null, val != null ? big(val) : '—'), el('span', null, val != null ? (l === 'all' ? 'views · all time' : 'views · ' + LBL[l]) : statusText(v, l)));
+      const p = prev(l), a = p && v[p + '_views'], later = l !== 'all' || (v.alltime_age ?? -1) > (v[p + '_age'] ?? 99), gr = val != null && a && later ? val / a - 1 : null;
+      const g = el('span', 'vd-gr' + (gr == null ? ' n' : ''), l === 'all' ? (gr != null ? sgn(gr) + ' since Day 7' : v.alltime_at ? 'As of ' + dmy(v.alltime_at) : 'Posted ' + dmy(v.published)) : l === 'd2' ? (v.d7_views != null && v.d2_views ? sgn(v.d7_views / v.d2_views - 1) + ' by Day 7' : 'Posted ' + dmy(v.published)) : gr != null ? sgn(gr) + ' vs ' + LBL[p] : 'Posted ' + dmy(v.published));
       b.append(th, el('span', 'vd-vt', title(v)), vn, g);
       b.addEventListener('click', () => { S.sel = v.video; S.playing = true; drawWall(); drawDeep(); if (window.innerWidth < 1000) $('deep').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
       wall.appendChild(b);
@@ -641,12 +646,13 @@ dash.calc('status', {
     const chips = $('d-chips'); chips.textContent = '';
     chips.append(el('span', 'vd-chip', (v.account || v.source)), el('span', 'vd-chip', 'Posted ' + dmy(v.published)));
     const caps = L.filter(l => v[l + '_views'] != null);
+    if (v.all_views != null) chips.append(el('span', 'vd-chip o', big(v.all_views) + ' views all time'));
     if (caps.length >= 2) chips.append(el('span', 'vd-chip g', (v[caps[caps.length - 1] + '_views'] / Math.max(1, v[caps[0] + '_views'])).toFixed(1) + '× from ' + LBL[caps[0]] + ' to ' + LBL[caps[caps.length - 1]]));
     const rk = ranked().findIndex(x => x.video === v.video);
     if (rk >= 0 && v[S.snap + '_views'] != null) chips.append(el('span', 'vd-chip o', '#' + (rk + 1) + ' of ' + filtered().length + ' at ' + LBL[S.snap]));
     const bars = $('d-bars'); bars.textContent = '';
-    const mx = Math.max(1, ...caps.map(l => v[l + '_views']));
-    L.forEach(l => {
+    const mx = Math.max(1, ...L4.map(l => v[l + '_views'] || 0));
+    L4.forEach(l => {
       const val = v[l + '_views'], d = el('div', 'vd-bar');
       if (l === S.snap) d.append(el('span', 'on', '● Showing'));
       d.append(el('span', 'bv' + (val == null ? ' n' : ''), val != null ? big(val) : statusText(v, l)));
@@ -654,15 +660,15 @@ dash.calc('status', {
       f.style.height = (val != null ? Math.max(8, Math.round(val / mx * 110)) : 36) + 'px';
       if (val != null) f.style.background = BLUES[l];
       const age = v[l + '_age'], late = (v[l + '_status'] || '').startsWith('Captured late');
-      d.append(f, el('span', 'bl', LBL[l]), el('span', 'vd-small', val != null ? (late ? 'Captured late, day ' + age : 'Captured ' + dmy(v.published, OFF[l])) : 'Due ' + dmy(v.published, OFF[l])));
+      d.append(f, el('span', 'bl', LBL[l]), el('span', 'vd-small', l === 'all' ? (v.alltime_at ? 'As of ' + dmy(v.alltime_at) : '—') : val != null ? (late ? 'Captured late, day ' + age : 'Captured ' + dmy(v.published, OFF[l])) : 'Due ' + dmy(v.published, OFF[l])));
       bars.appendChild(d);
     });
     const tb = $('d-rows'); tb.textContent = '';
-    const cell = (l, k) => { const x = v[l + '_' + k]; if (x != null) return el('td', null, full(x)); const td = el('td'); td.append(el('span', 'na', v[l + '_views'] != null ? '—' : statusText(v, l))); return td; };
+    const cell = (l, k) => { const x = v[l + '_' + k]; if (x != null) return el('td', l === 'all' ? 'win' : null, full(x)); const td = el('td'); td.append(el('span', 'na', v[l + '_views'] != null ? '—' : statusText(v, l))); return td; };
     [['Views', 'views'], ['Likes', 'likes'], ['Comments', 'comments'], ['Shares', 'shares']].forEach(([lab, k]) => {
-      const tr = el('tr'); tr.append(el('td', null, lab), ...L.map(l => cell(l, k))); tb.appendChild(tr);
+      const tr = el('tr'); tr.append(el('td', null, lab), ...L4.map(l => cell(l, k))); tb.appendChild(tr);
     });
-    const tr = el('tr'); tr.append(el('td', null, 'Engagement'), ...L.map(l => {
+    const tr = el('tr'); tr.append(el('td', null, 'Engagement'), ...L4.map(l => {
       const vw = v[l + '_views']; if (!vw) { const td = el('td'); td.append(el('span', 'na', '—')); return td; }
       return el('td', null, pct(((v[l + '_likes'] || 0) + (v[l + '_comments'] || 0) + (v[l + '_shares'] || 0)) / vw));
     })); tb.appendChild(tr);
@@ -906,7 +912,7 @@ dash.calc('status', {
     const box = $('h-grid'); box.textContent = '';
     const l = S.snap, key = (v) => v[l + '_views'] != null ? v[l + '_views'] : null;
     const timed = filtered().filter(v => v.published_at && key(v) != null);
-    $('h-note').textContent = 'Average ' + LBL[l] + ' views by posting slot (IST)';
+    $('h-note').textContent = 'Average ' + (l === 'all' ? 'all-time' : LBL[l]) + ' views by posting slot (IST)';
     if (timed.length < 5) {
       const byDay = filtered().filter(v => v.published && v.views != null);
       if (byDay.length < 5) { box.appendChild(el('p', 'vd-empty', 'Posting times appear here after the next daily refresh adds each video\'s upload time.')); return; }
@@ -943,7 +949,7 @@ dash.calc('status', {
   // ---- top 5
   function drawTop() {
     const l = S.snap, list = ranked().filter(v => v[l + '_views'] != null).slice(0, 5), box = $('t-list'); box.textContent = '';
-    $('t-title').textContent = 'Top 5 by ' + LBL[l] + ' views';
+    $('t-title').textContent = 'Top 5 by ' + (l === 'all' ? 'all-time' : LBL[l]) + ' views';
     if (!list.length) { box.appendChild(el('p', 'vd-empty', 'No videos captured at ' + LBL[l] + ' yet. The first ' + LBL[l] + ' captures arrive as videos reach that age.')); return; }
     const mx = list[0][l + '_views'];
     list.forEach((v, i) => {
@@ -958,7 +964,7 @@ dash.calc('status', {
   }
 
   // ---- all-videos table
-  const NUM = new Set(['views', ...L.flatMap(l => ['views', 'likes', 'comments', 'shares'].map(k => l + '_' + k))]);
+  const NUM = new Set(['views', 'likes', 'comments', 'shares', ...L.flatMap(l => ['views', 'likes', 'comments', 'shares'].map(k => l + '_' + k))]);
   document.querySelectorAll('#all-videos th button').forEach(b => b.addEventListener('click', () => {
     const k = b.dataset.k; if (k === S.sortKey) S.sortDir = -S.sortDir; else { S.sortKey = k; S.sortDir = NUM.has(k) ? -1 : 1; } drawTable();
   }));
@@ -967,7 +973,7 @@ dash.calc('status', {
   function drawTable() {
     const tb = $('tb-all'); tb.textContent = '';
     if (!statusFilled && rows.length) { [...new Set(rows.map(r => r.status))].sort().forEach(s => { const o = el('option', null, s); o.value = s; $('f-status').appendChild(o); }); statusFilled = true; }
-    const qq = $('f-search').value.trim().toLowerCase(), fst = $('f-status').value, key = S.sortKey || S.snap + '_views';
+    const qq = $('f-search').value.trim().toLowerCase(), fst = $('f-status').value, key = S.sortKey || (S.snap === 'all' ? 'views' : S.snap + '_views');
     const list = filtered().filter(r => (!fst || r.status === fst) && (!qq || [r.video, r.account, r.url, r.title].join(' ').toLowerCase().includes(qq)))
       .sort((a, b) => { const A = a[key], B = b[key]; if (A == null && B == null) return 0; if (A == null) return 1; if (B == null) return -1; return (NUM.has(key) ? A - B : String(A).localeCompare(String(B))) * (S.sortKey ? S.sortDir : -1); });
     $('count-shown').textContent = list.length.toLocaleString('en-IN') + ' of ' + rows.length.toLocaleString('en-IN');
@@ -985,7 +991,8 @@ dash.calc('status', {
         else c.appendChild(el('span', 'st', statusText(r, l)));
         ['likes', 'comments', 'shares'].forEach(k => { const x = r[l + '_' + k]; td('num ' + g, x != null ? link(r, full(x)) : ''); });
       });
-      td('num ms', r.views != null ? link(r, full(r.views)) : '');
+      ['views', 'likes', 'comments', 'shares'].forEach((k, i) => td('num gall' + (i ? '' : ' ms'), r[k] != null ? link(r, full(r[k])) : (i ? '' : el('span', 'st', statusText(r, 'all')))));
+      td('gall vd-small', r.alltime_at ? dmy(r.alltime_at) : '');
       const p = el('span', 'vd-pill ' + (r.status === 'OK' ? 'ok' : r.status === 'Fetch failed' ? 'b' : 'w'), r.status); td(null, p);
       frag.appendChild(tr);
     });
@@ -1004,10 +1011,12 @@ dash.calc('status', {
   dash.onData(() => {
     const d = dash.data('videos');
     if (d.status !== 'ok') { document.querySelectorAll('.vd-kpi .v').forEach(e => { e.textContent = '—'; }); return; }
-    rows = d.data; byId = new Map(rows.map(v => [v.video, v]));
+    rows = d.data.map(v => Object.assign({}, v, { all_views: v.views, all_likes: v.likes, all_comments: v.comments, all_shares: v.shares, all_age: v.alltime_age }));
+    byId = new Map(rows.map(v => [v.video, v]));
+    if (!EMBED) { const t = dash.data('thumbs'); if (t.status === 'ok') THUMBS = new Map(t.data.map(r => [r.video, r.img])); }
     if (S.auto) {
       const n = (l) => rows.filter(v => v[l + '_views'] != null).length;
-      S.snap = n('d30') >= 10 ? 'd30' : n('d7') ? 'd7' : 'd2';
+      S.snap = 'all';
     }
     drawAll();
   });
