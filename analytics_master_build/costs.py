@@ -116,10 +116,16 @@ def read_rows(include_blank=False):
     out = []
     for n, r in enumerate(rows[1:], start=2):
         get = lambda k: (r[ix[k]].strip() if ix[k] is not None and ix[k] < len(r) else "")
-        amt = amount(get("amount"))
+        amt, mon = amount(get("amount")), get("month")
+        if not amt and mon:  # an amount typed in the Month column ("120rs per video"): use it as the amount
+            try:
+                month_key(mon)
+            except ValueError:
+                if amount(mon):
+                    amt, mon = amount(mon), ""
         if not amt and not (include_blank and get("source")):
             continue  # rows without an amount are just placeholders
-        out.append({"row": n, "source": get("source"), "account": get("account"), "month": get("month"),
+        out.append({"row": n, "source": get("source"), "account": get("account"), "month": mon,
                     "amount": amt, "basis": "per video" if "video" in get("basis").lower() else "per month",
                     "promised": int(amount(get("promised")) or 0) or None})
     return out
