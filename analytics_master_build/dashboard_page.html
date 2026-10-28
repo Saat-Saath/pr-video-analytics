@@ -351,40 +351,6 @@
   <p class="vd-verdict" id="cmp-verdict" hidden></p>
 </section>
 
-<section class="vd-card" aria-label="Growth curves" id="growth">
-  <div class="vd-ch"><div><h2 class="vd-h2">How views grow after upload</h2><p class="vd-note" style="margin-top:4px">Each video is compared with itself: its count at one mark against its count at the next. Only counts at least 3 days apart are compared, so the growth is real.</p></div><span class="vd-note" id="g-note">—</span></div>
-  <div class="vd-gsum" id="g-sum"></div>
-  <h3 class="vd-h3">By source</h3>
-  <div class="vd-ctw" id="g-table"></div>
-  <details class="vd-gmore" id="g-more"><summary>Show each video's views by day</summary>
-    <div class="vd-chart" id="g-chart" data-source="videos"></div>
-  </details>
-</section>
-
-<h2 class="vd-sec">Deeper analytics</h2>
-
-<section class="vd-card" aria-label="Account leaderboard" id="accounts">
-  <div class="vd-ch"><h2 class="vd-h2">Account leaderboard</h2><span class="vd-note" id="a-note">Latest views · click a best video to play it</span></div>
-  <div style="overflow-x:auto"><table class="vd-lb" data-source="videos"><thead><tr><th>#</th><th>Account</th><th>Source</th><th class="num">Videos</th><th class="num">Total views</th><th class="bar"></th><th class="num">Avg / video</th><th class="num">Eng. rate</th><th>Best video</th></tr></thead><tbody id="a-rows"></tbody></table></div>
-  <button type="button" class="vd-more" id="a-more">Show all accounts</button>
-</section>
-
-<section class="vd-card" aria-label="Views distribution" id="dist">
-  <div class="vd-ch"><h2 class="vd-h2">How many videos hit big?</h2><span class="vd-note">Videos by latest views</span></div>
-  <div class="vd-chart" id="dist-chart" data-source="videos" style="min-height:240px"></div>
-</section>
-
-<section class="vd-card" aria-label="Uploads and views over time" id="timeline">
-  <div class="vd-ch"><h2 class="vd-h2">Uploads and views by publish date</h2><span class="vd-note">Bars: videos posted that day · line: their latest views</span></div>
-  <div class="vd-chart" id="tl-chart" data-source="videos" style="min-height:240px"></div>
-</section>
-
-<section class="vd-card" aria-label="Best time to post" id="heat">
-  <div class="vd-ch"><h2 class="vd-h2">Best time to post</h2><span class="vd-note" id="h-note">—</span></div>
-  <div class="vd-heat" id="h-grid" data-source="videos"></div>
-  <div class="vd-legend" style="align-items:center"><span>Fewer views</span><i style="background:#EEF0FF;width:18px;height:12px;border-radius:3px"></i><i style="background:#C9CCFF;width:18px;height:12px;border-radius:3px"></i><i style="background:#959BFF;width:18px;height:12px;border-radius:3px"></i><i style="background:#4A50D0;width:18px;height:12px;border-radius:3px"></i><i style="background:#2E3192;width:18px;height:12px;border-radius:3px"></i><span>More views</span><span style="margin-left:auto">Ringed cell = best slot</span></div>
-</section>
-
 <section class="vd-card" aria-label="Cost per view" id="cost" hidden>
   <div class="vd-ch"><div><h2 class="vd-h2">Cost per view</h2><p class="vd-note" style="margin-top:4px" id="cost-sub">What each source and account cost for the views it brought.</p></div><span class="vd-note">From the PR Video Costs sheet · lower ₹ per 1,000 views is better</span></div>
   <div id="cost-body" data-source="videos"></div>
@@ -566,10 +532,8 @@ dash.calc('status', {
   // ---- controls
   document.querySelectorAll('#seg button').forEach(b => b.addEventListener('click', () => { S.snap = b.dataset.s; S.auto = false; S.wallN = 12; drawAll(); }));
   $('more').addEventListener('click', () => { S.wallN += 12; drawWall(); });
-  $('g-more').addEventListener('toggle', () => drawGrowth());
   $('d-play').addEventListener('click', () => { S.playing = true; drawDeep(); });
   $('d-cmp').addEventListener('click', () => { S.cmpA = S.sel; $('cmp-a').value = S.sel; drawCompare(); $('compare').scrollIntoView({ behavior: 'smooth', block: 'start' }); $('cmp-b').focus(); });
-  $('a-more').addEventListener('click', () => { S.accAll = !S.accAll; drawAccounts(); });
 
   function drawSeg() {
     document.querySelectorAll('#seg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.s === S.snap)));
@@ -821,194 +785,6 @@ dash.calc('status', {
   }
   const untip = (card) => { const t = card.querySelector('.vd-tip'); if (t) t.hidden = true; };
 
-  // ---- growth curves
-  function drawGrowth() {
-    const box = $('g-chart'), sum = $('g-sum'), tbl = $('g-table'); box.textContent = ''; sum.textContent = ''; tbl.textContent = '';
-    const w = filtered();
-    const median = (a) => { if (!a.length) return null; const s = a.slice().sort((x, y) => x - y), h = s.length >> 1; return s.length % 2 ? s[h] : (s[h - 1] + s[h]) / 2; };
-    const pctTxt = (g) => g == null ? '—' : (g >= 0 ? '+' : '−') + Math.abs(Math.round(g * 100)) + '%';
-    // A pair counts only when the two counts are at least 3 days apart, so the growth is real and not two
-    // counts taken a few hours apart. Each video is compared with itself.
-    const STEPS = [
-      ['d2', 'd7', 'Day 2 → Day 7', 'from 48 hours to 7 days'],
-      ['d7', 'd30', 'Day 7 → Day 30', 'from 7 days to 30 days'],
-      ['d7', 'all', 'Day 7 → today', 'from 7 days to today']
-    ];
-    const val = (v, l) => l === 'all' ? v.views : v[l + '_views'];
-    const hrs = (v, l) => l === 'all' ? v.alltime_hours : v[l + '_hours'];
-    const pairsOf = (rows, a, b) => rows.filter(v => val(v, a) > 0 && val(v, b) != null && hrs(v, a) != null && hrs(v, b) != null && hrs(v, b) - hrs(v, a) >= 72);
-    const nextDue = (rows, a, b) => {
-      if (b === 'all') return null;
-      const today = new Date().toISOString().slice(0, 10);
-      const d = rows.filter(v => val(v, a) > 0 && val(v, b) == null && v[b + '_due'] && hrs(v, a) != null)
-        .filter(v => (new Date(v[b + '_due']) - new Date(v.published_at || v.published)) / 36e5 - hrs(v, a) >= 72)
-        .map(v => v[b + '_due'].slice(0, 10)).sort();
-      return d.find(x => x >= today) || (d.length ? today : null);
-    };
-    STEPS.forEach(([a, b, label, words]) => {
-      const p = pairsOf(w, a, b), g = median(p.map(v => val(v, b) / val(v, a) - 1));
-      const c = el('div', 'vd-gchip');
-      c.append(el('span', 'l', label), el('b', null, pctTxt(g)));
-      if (p.length) {
-        c.append(el('span', 's', 'A typical video went from ' + big(median(p.map(v => val(v, a)))) + ' to ' + big(median(p.map(v => val(v, b)))) + ' views ' + words + ' (' + p.length + ' videos).'));
-      } else {
-        const nd = nextDue(w, a, b);
-        c.append(el('span', 's', nd ? 'Shows from ' + dmy(nd) + ', when the first videos with a ' + LBL[a] + ' count reach ' + LBL[b] + '.' : 'Shows once a video has both counts.'));
-      }
-      sum.appendChild(c);
-    });
-    // the same comparison per source
-    const srcs = [...new Set(w.map(v => v.source))];
-    const t = el('table', 'vd-ct vd-gt'), hr = el('tr');
-    ['Source', 'Day 2 → Day 7', 'Day 7 → Day 30', 'Day 7 → today'].forEach(x => hr.appendChild(el('th', null, x)));
-    const th = el('thead'); th.appendChild(hr); t.appendChild(th);
-    const tb = el('tbody');
-    srcs.forEach(src => {
-      const rs = w.filter(v => v.source === src), tr = el('tr');
-      tr.appendChild(el('td', null, src));
-      STEPS.forEach(([a, b]) => {
-        const p = pairsOf(rs, a, b), g = median(p.map(v => val(v, b) / val(v, a) - 1)), td = el('td');
-        if (p.length) { td.append(el('b', null, pctTxt(g)), el('span', 'na', ' · ' + big(median(p.map(v => val(v, a)))) + ' → ' + big(median(p.map(v => val(v, b)))) + ' · ' + p.length + ' videos')); }
-        else td.append(el('span', 'na', 'not yet'));
-        tr.appendChild(td);
-      });
-      tb.appendChild(tr);
-    });
-    t.appendChild(tb); tbl.appendChild(t);
-
-    // each video's own line, behind a toggle
-    const caps = (v) => {
-      const m = new Map();
-      [['d2_hours', 'd2_views'], ['d7_hours', 'd7_views'], ['d30_hours', 'd30_views'], ['alltime_hours', 'views']].forEach(([a, k]) => {
-        if (v[a] != null && v[k] > 0) m.set(Math.round(v[a] / 24 * 10) / 10, v[k]);
-      });
-      return [...m.entries()].sort((x, y) => x[0] - y[0]);
-    };
-    const lines = w.map(v => ({ v, p: caps(v) })).filter(o => o.p.length >= 2 && o.p[o.p.length - 1][0] - o.p[0][0] >= 1);
-    $('g-note').textContent = lines.length + ' videos counted on two or more days';
-    if (!lines.length || !$('g-more').open) return;
-    const W = Math.max(320, box.clientWidth), H = 300, m = { l: 52, r: 24, t: 20, b: 34 };
-    const svg = d3.select(box).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img')
-      .attr('aria-label', 'Views of each video against days since upload, log scale');
-    const amax = Math.max(32, d3.max(lines, o => o.p[o.p.length - 1][0]) + 1);
-    const x = d3.scaleLinear([0, amax], [m.l, W - m.r]);
-    const vmin = d3.min(lines, o => d3.min(o.p, q => q[1])), vmax = d3.max(lines, o => d3.max(o.p, q => q[1]));
-    const y = d3.scaleLog([Math.max(1, vmin * 0.8), Math.max(10, vmax * 1.2)], [H - m.b, m.t]).nice().clamp(true);
-    y.ticks(6).filter(t => [1, 10, 100, 1000, 1e4, 1e5, 1e6, 1e7].includes(t)).forEach(t => {
-      svg.append('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y(t)).attr('y2', y(t)).attr('stroke', '#EEF0F6');
-      svg.append('text').attr('x', m.l - 10).attr('y', y(t)).attr('text-anchor', 'end').attr('dominant-baseline', 'central').attr('font-size', 12).attr('fill', '#5F6480').text(big(t));
-    });
-    [[2, 'Day 2'], [7, 'Day 7'], [30, 'Day 30']].forEach(([d, tx]) => {
-      svg.append('line').attr('x1', x(d)).attr('x2', x(d)).attr('y1', m.t).attr('y2', H - m.b).attr('stroke', '#D5D8E6').attr('stroke-dasharray', '3 4');
-      svg.append('text').attr('x', x(d)).attr('y', H - 10).attr('text-anchor', 'middle').attr('font-size', 12).attr('font-weight', 600).attr('fill', '#4A4F6A').text(tx);
-    });
-    svg.append('text').attr('x', W - m.r).attr('y', m.t - 6).attr('text-anchor', 'end').attr('font-size', 11).attr('fill', '#5F6480').text('days since upload →');
-    const line = d3.line().x(d => x(d[0])).y(d => y(d[1]));
-    const card = box.closest('.vd-card');
-    lines.forEach(o => {
-      const up = o.p[o.p.length - 1][1] > o.p[0][1];
-      svg.append('path').attr('d', line(o.p)).attr('fill', 'none').attr('stroke', up ? '#6E74F0' : '#C9CCFF').attr('stroke-width', 1.6).style('cursor', 'pointer')
-        .on('mousemove', (ev) => tip(card, ev, [o.v.video + ' · ' + title(o.v), ...o.p.map(q => 'Day ' + q[0] + ': ' + full(q[1]) + ' views')]))
-        .on('mouseleave', () => untip(card)).on('click', () => watch(o.v.video, true));
-    });
-  }
-
-  // ---- accounts
-  function drawAccounts() {
-    const tb = $('a-rows'); tb.textContent = '';
-    const w = filtered().filter(v => v.views != null);
-    const acc = d3.rollups(w, g => { const views = d3.sum(g, v => v.views); return { n: g.length, views, avg: views / g.length, eng: views ? d3.sum(g, v => (v.likes || 0) + (v.comments || 0) + (v.shares || 0)) / views : null, best: g.slice().sort((a, b) => b.views - a.views)[0], src: g[0].source }; }, v => v.account || '—')
-      .sort((a, b) => b[1].views - a[1].views);
-    const mx = acc.length ? acc[0][1].views : 1, shown = S.accAll ? acc : acc.slice(0, 12);
-    shown.forEach(([name, r], i) => {
-      const tr = el('tr');
-      const bar = el('td', 'bar'), s = el('span'), f = el('i'); f.style.width = (r.views / mx * 100).toFixed(1) + '%'; s.appendChild(f); bar.appendChild(s);
-      const bt = el('td'), b = el('button', null, '▶ ' + r.best.video + ' · ' + big(r.best.views)); b.type = 'button'; b.addEventListener('click', () => watch(r.best.video, true)); bt.appendChild(b);
-      tr.append(el('td', 'num', String(i + 1)), el('td', 'acc', name), el('td', 'vd-small', r.src), el('td', 'num', String(r.n)), el('td', 'num', full(r.views)), bar, el('td', 'num', big(r.avg)), el('td', 'num', pct(r.eng)), bt);
-      tb.appendChild(tr);
-    });
-    $('a-note').textContent = acc.length + ' accounts · latest views · click a best video to play it';
-    $('a-more').hidden = acc.length <= 12; $('a-more').textContent = S.accAll ? 'Show top 12' : 'Show all ' + acc.length + ' accounts';
-  }
-
-  // ---- distribution
-  function drawDist() {
-    const box = $('dist-chart'); box.textContent = '';
-    const w = filtered().filter(v => v.views != null);
-    const B = [['Under 100', 0, 100], ['100–999', 100, 1000], ['1K–9.9K', 1000, 1e4], ['10K–99K', 1e4, 1e5], ['1 lakh+', 1e5, Infinity]];
-    const data = B.map(([lab, lo, hi]) => ({ lab, n: w.filter(v => v.views >= lo && v.views < hi).length }));
-    if (!w.length) { box.appendChild(el('p', 'vd-empty', 'No view counts for this filter yet.')); return; }
-    const W = Math.max(300, box.clientWidth), H = 240, m = { l: 8, r: 8, t: 28, b: 30 };
-    const svg = d3.select(box).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', 'Number of videos by view range');
-    const x = d3.scaleBand(data.map(d => d.lab), [m.l, W - m.r]).padding(.28), y = d3.scaleLinear([0, d3.max(data, d => d.n) || 1], [H - m.b, m.t]);
-    const COL = ['#C9CCFF', '#959BFF', '#4A50D0', '#2E3192', '#FF6A3D'];
-    data.forEach((d, i) => {
-      svg.append('rect').attr('x', x(d.lab)).attr('width', x.bandwidth()).attr('y', y(d.n)).attr('height', Math.max(2, y(0) - y(d.n))).attr('rx', 6).attr('fill', COL[i]);
-      svg.append('text').attr('x', x(d.lab) + x.bandwidth() / 2).attr('y', y(d.n) - 8).attr('text-anchor', 'middle').attr('font-size', 13).attr('font-weight', 700).attr('fill', '#14163A').text(d.n + ' · ' + pct0(d.n / w.length));
-      svg.append('text').attr('x', x(d.lab) + x.bandwidth() / 2).attr('y', H - 10).attr('text-anchor', 'middle').attr('font-size', 12).attr('fill', '#5F6480').text(d.lab);
-    });
-  }
-
-  // ---- uploads over time
-  function drawTimeline() {
-    const box = $('tl-chart'); box.textContent = '';
-    const rs = filtered().filter(v => v.published);
-    if (!rs.length) return;
-    const days = d3.rollups(rs, g => ({ n: g.length, views: d3.sum(g, v => v.views || 0) }), v => v.published).sort((a, b) => d3.ascending(a[0], b[0]));
-    const W = Math.max(320, box.clientWidth), H = 240, m = { l: 40, r: 52, t: 14, b: 30 };
-    const svg = d3.select(box).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', 'Videos posted per day and their latest views');
-    const x = d3.scaleBand(days.map(d => d[0]), [m.l, W - m.r]).padding(.25);
-    const yN = d3.scaleLinear([0, d3.max(days, d => d[1].n)], [H - m.b, m.t]).nice(), yV = d3.scaleLinear([0, d3.max(days, d => d[1].views) || 1], [H - m.b, m.t]).nice();
-    yN.ticks(4).forEach(t => { svg.append('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', yN(t)).attr('y2', yN(t)).attr('stroke', '#EEF0F6'); svg.append('text').attr('x', m.l - 6).attr('y', yN(t)).attr('text-anchor', 'end').attr('dominant-baseline', 'central').attr('font-size', 11).attr('fill', '#5F6480').text(t); });
-    yV.ticks(4).forEach(t => svg.append('text').attr('x', W - m.r + 6).attr('y', yV(t)).attr('dominant-baseline', 'central').attr('font-size', 11).attr('fill', '#B53C14').text(big(t)));
-    const card = box.closest('.vd-card');
-    svg.append('g').selectAll('rect').data(days).join('rect').attr('x', d => x(d[0])).attr('width', x.bandwidth()).attr('y', d => yN(d[1].n)).attr('height', d => yN(0) - yN(d[1].n)).attr('rx', 3).attr('fill', '#C9CCFF')
-      .on('mousemove', (ev, d) => tip(card, ev, [dmy(d[0]), d[1].n + ' videos posted', full(d[1].views) + ' latest views'])).on('mouseleave', () => untip(card));
-    svg.append('path').attr('d', d3.line().x(d => x(d[0]) + x.bandwidth() / 2).y(d => yV(d[1].views))(days)).attr('fill', 'none').attr('stroke', '#FF6A3D').attr('stroke-width', 2.5).attr('stroke-linejoin', 'round');
-    svg.append('g').selectAll('circle').data(days).join('circle').attr('cx', d => x(d[0]) + x.bandwidth() / 2).attr('cy', d => yV(d[1].views)).attr('r', 3).attr('fill', '#FF6A3D');
-    const every = Math.ceil(days.length / Math.max(2, Math.floor((W - m.l - m.r) / 52)));
-    days.forEach((d, i) => { if (i % every === 0) svg.append('text').attr('x', x(d[0]) + x.bandwidth() / 2).attr('y', H - 10).attr('text-anchor', 'middle').attr('font-size', 11).attr('fill', '#5F6480').text(dmy(d[0])); });
-  }
-
-  // ---- heatmap
-  function drawHeat() {
-    const box = $('h-grid'); box.textContent = '';
-    const l = S.snap, key = (v) => v[l + '_views'] != null ? v[l + '_views'] : null;
-    const timed = filtered().filter(v => v.published_at && key(v) != null);
-    $('h-note').textContent = 'Average ' + (l === 'all' ? 'all-time' : LBL[l]) + ' views by posting slot (IST)';
-    if (timed.length < 5) {
-      const byDay = filtered().filter(v => v.published && v.views != null);
-      if (byDay.length < 5) { box.appendChild(el('p', 'vd-empty', 'Posting times appear here after the next daily refresh adds each video\'s upload time.')); return; }
-      $('h-note').textContent = 'Average latest views by weekday posted · exact times arrive with the next refresh';
-      const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-      const g = DAYS.map(() => []); byDay.forEach(v => g[(new Date(v.published + 'T00:00:00').getDay() + 6) % 7].push(v.views));
-      const avg = g.map(c => c.length ? d3.mean(c) : null), mx = Math.max(...avg.filter(x => x != null));
-      const grid = el('div', 'vd-hg'); grid.style.gridTemplateColumns = 'repeat(7,minmax(0,1fr))'; grid.style.minWidth = '0';
-      DAYS.forEach(d => grid.appendChild(el('span', 'h', d)));
-      avg.forEach((a, i) => { const lv = a == null ? -1 : Math.min(4, Math.floor(a / mx * 4.999)); const c = el('span', 'c' + (a === mx ? ' best' : ''), a == null ? '' : big(a)); c.style.height = '64px'; c.style.background = lv < 0 ? '#F7F8FC' : HEAT[lv]; c.style.color = lv >= 3 ? '#fff' : '#14163A'; c.title = DAYS[i] + ': ' + (a == null ? 'no videos' : full(a) + ' average views over ' + g[i].length + ' videos'); grid.appendChild(c); });
-      box.appendChild(grid); return;
-    }
-    const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], SL = ['6 AM', '9 AM', '12 PM', '3 PM', '6 PM', '9 PM'];
-    const slot = (h) => h >= 5 && h < 8 ? 0 : h >= 8 && h < 11 ? 1 : h >= 11 && h < 14 ? 2 : h >= 14 && h < 17 ? 3 : h >= 17 && h < 20 ? 4 : 5;
-    const g = DAYS.map(() => SL.map(() => []));
-    timed.forEach(v => { const t = new Date(new Date(v.published_at).getTime() + 330 * 60000); g[(t.getUTCDay() + 6) % 7][slot(t.getUTCHours())].push(key(v)); });
-    const avg = g.map(r => r.map(c => c.length ? d3.mean(c) : null)), all = avg.flat().filter(x => x != null);
-    const q = d3.scaleQuantile(all, [0, 1, 2, 3, 4]);
-    let best = null; avg.forEach((r, i) => r.forEach((c, j) => { if (c != null && g[i][j].length >= 2 && (!best || c > best.v)) best = { i, j, v: c }; }));
-    const grid = el('div', 'vd-hg'); grid.appendChild(el('span'));
-    SL.forEach(s => grid.appendChild(el('span', 'h', s)));
-    DAYS.forEach((dname, i) => {
-      grid.appendChild(el('span', 'd', dname));
-      SL.forEach((s, j) => {
-        const c = avg[i][j], lv = c == null ? -1 : q(c), cell = el('span', 'c' + (best && best.i === i && best.j === j ? ' best' : ''), c == null ? '' : big(c));
-        cell.style.background = lv < 0 ? '#F7F8FC' : HEAT[lv]; cell.style.color = lv >= 3 ? '#fff' : '#14163A';
-        cell.title = dname + ' ' + s + ': ' + (c == null ? 'no videos' : full(c) + ' average ' + LBL[l] + ' views, ' + g[i][j].length + ' videos');
-        grid.appendChild(cell);
-      });
-    });
-    box.appendChild(grid);
-  }
-
   // ---- all-videos table
   const NUM = new Set(['views', 'likes', 'comments', 'shares', ...L.flatMap(l => ['views', 'likes', 'comments', 'shares'].map(k => l + '_' + k))]);
   document.querySelectorAll('#all-videos th button').forEach(b => b.addEventListener('click', () => {
@@ -1172,7 +948,7 @@ dash.calc('status', {
     }
   }
 
-  function drawAll() { drawSeg(); drawTabs(); drawInsights(); drawKpis(); drawCost(); drawWall(); drawDeep(); drawSources(); drawCompare(); drawGrowth(); drawAccounts(); drawDist(); drawTimeline(); drawHeat(); drawTable(); drawFix(); }
+  function drawAll() { drawSeg(); drawTabs(); drawInsights(); drawKpis(); drawCost(); drawWall(); drawDeep(); drawSources(); drawCompare(); drawTable(); drawFix(); }
 
   dash.onData(() => {
     const d = dash.data('videos');
