@@ -16,3 +16,4 @@ analytics_master_build/source_data.prev.json
 analytics_master_build/sync_report.json
 inspect_workbook.mjs
 analytics_master_build/thumb_failed.json
+analytics_master_build/costs.csv

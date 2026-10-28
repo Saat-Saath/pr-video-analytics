@@ -4,9 +4,12 @@ docs/data.json  - one row per video (public post links and public counts only)
 docs/index.html - standalone page: dashboard_page.html + a small loader, hostable on GitHub Pages
 """
 import json
+import os
 import time
 from datetime import datetime
 from pathlib import Path
+
+from costs import allocate
 
 ROOT = Path(__file__).resolve().parent
 DOCS = ROOT.parent / "docs"
@@ -15,8 +18,14 @@ SRC = {"Kalpana - Disease Channels": "Inhouse ai videos", "Inhouse ai videos": "
 PLAT = {"Google Drive Asset": "Drive file"}
 
 
-def rows():
+def rows(with_costs=False):
     d = json.loads((ROOT / "analytics_data.json").read_text(encoding="utf8"))
+    cost, payee = {}, {}
+    if with_costs:
+        try:
+            cost, _, payee = allocate(d["master"])
+        except (SystemExit, Exception) as e:  # sheet not shared yet, offline, or missing columns: carry on without costs
+            print("costs skipped:", e)
     out = []
     for m in d["master"]:
         out.append({"video": m["master_id"], "platform": PLAT.get(m["platform"], m["platform"]),
@@ -33,6 +42,9 @@ def rows():
                     "thumb": save_thumb(m),
                     **{f"{l}_{k}": m.get(f"{l}_{k}") for l in ("d2", "d7", "d30")
                        for k in ("views", "likes", "comments", "shares", "status", "due", "age")}})
+        if with_costs:
+            out[-1]["cost"] = cost.get(m["master_id"])
+            out[-1]["payee"] = payee.get(m["master_id"])
     return out, d["generated_at"]
 
 
@@ -137,8 +149,19 @@ __PAGE__
 """
 
 
+def costs_public():
+    from costs import env
+    return env().get("COSTS_PUBLIC", "off").lower() in ("on", "yes", "true", "1")
+
+
 def main():
-    data, generated = rows()
+    # Cost per video is always in the private copy (outputs/ is never published; the Claude dashboard uses it)
+    # and on the public page only when COSTS_PUBLIC=on.
+    private, generated = rows(with_costs=True)
+    data = private if costs_public() else [{k: v for k, v in r.items() if k not in ("cost", "payee")} for r in private]
+    out = ROOT.parent / "outputs"
+    out.mkdir(exist_ok=True)
+    (out / "dashboard_data_private.json").write_text(json.dumps(private, ensure_ascii=False), encoding="utf8")
     DOCS.mkdir(exist_ok=True)
     (DOCS / "data.json").write_text(json.dumps(data, ensure_ascii=False), encoding="utf8")
     page = (ROOT / "dashboard_page.html").read_text(encoding="utf8")

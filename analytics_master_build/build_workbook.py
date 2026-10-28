@@ -12,6 +12,12 @@ from openpyxl.formatting.rule import CellIsRule
 
 ROOT = Path(__file__).resolve().parent
 DATA = json.loads((ROOT / "analytics_data.json").read_text(encoding="utf8"))
+try:  # cost per video from the PR Video Costs sheet (empty when no amounts are filled in yet)
+    from costs import allocate
+    COST, COST_REPORT, PAYEE = allocate(DATA["master"])
+except (SystemExit, Exception) as _e:
+    print("costs skipped:", _e)
+    COST, COST_REPORT, PAYEE = {}, [], {}
 OUT = ROOT.parent / "outputs" / "PR_Video_Analytics_Master.xlsx"
 
 # Names shown in the workbook (the internal key stays the same so videos keep matching across refreshes).
@@ -73,7 +79,8 @@ mcols = [("Master ID", 11), ("Platform", 12), ("Content type", 13), ("Source gro
          ("Day 7 views", 12), ("Day 7 likes", 11), ("Day 7 status", 20),
          ("Day 30 views", 12), ("Day 30 likes", 11), ("Day 30 status", 20),
          ("All-time views", 13), ("All-time likes", 12), ("All-time comments", 12), ("All-time shares", 12), ("Engagement rate", 12),
-         ("Last fetched", 18), ("Data source", 12), ("Fetch status", 15), ("Sheet status", 14), ("Source rows", 22), ("Occurrences", 11)]
+         ("Last fetched", 18), ("Data source", 12), ("Fetch status", 15), ("Sheet status", 14), ("Source rows", 22), ("Occurrences", 11),
+         ("Cost (₹)", 11), ("₹ per 1,000 views", 12), ("Paid to", 22)]
 for i, (h, _) in enumerate(mcols, 1):
     master_ws.cell(row=1, column=i, value=h)
 style_header(master_ws, 1, 1, len(mcols))
@@ -86,10 +93,11 @@ for r, m in enumerate(master, start=2):
            m.get("d30_views"), m.get("d30_likes"), m.get("d30_status"),
            m.get("latest_views"), m.get("latest_likes"), m.get("latest_comments"), m.get("latest_shares"), m.get("latest_engagement_rate"),
            dt(m.get("last_analytics_at")), m.get("data_source") or "", m.get("fetch_status"), m.get("sheet_status") or "In sheet",
-           m.get("source_rows"), m.get("occurrence_count")]
+           m.get("source_rows"), m.get("occurrence_count"), COST.get(m["master_id"]), None, PAYEE.get(m["master_id"])]
     for c, v in enumerate(row, start=1):
         cell = master_ws.cell(row=r, column=c, value=v)
         cell.font = Font(name=F, size=10, color=DARK)
+    master_ws.cell(row=r, column=30, value=f'=IF(AND(ISNUMBER(AC{r}),N(R{r})>0),AC{r}/R{r}*1000,"")')
     master_ws.cell(row=r, column=7).hyperlink = m["canonical_url"]
     master_ws.cell(row=r, column=7).font = Font(name=F, size=10, color="1155CC", underline="single")
 mend = len(master) + 1
@@ -97,6 +105,8 @@ for c in master_ws[f"H2:H{mend}"]: c[0].number_format = "dd-mmm-yyyy"
 for col in "IJLMOPRSTU":
     for c in master_ws[f"{col}2:{col}{mend}"]: c[0].number_format = "#,##0"
 for c in master_ws[f"V2:V{mend}"]: c[0].number_format = "0.0%"
+for col in ("AC", "AD"):
+    for c in master_ws[f"{col}2:{col}{mend}"]: c[0].number_format = '"₹"#,##0.00'
 for c in master_ws[f"W2:W{mend}"]: c[0].number_format = "dd-mmm-yyyy hh:mm"
 add_table(master_ws, "MasterContent", len(mcols), len(master))
 master_ws.freeze_panes = "C2"
@@ -211,6 +221,55 @@ fix = [("Fetched, but no view count", f'=COUNTIF({mc("Y")},"No view count")', "F
        ("Drive asset, no public post link", f'=COUNTIF({mc("Y")},"No public link")', "Ask Internal PR for the live post URL"),
        ("Missing publish date", f'=COUNTBLANK({mc("H")})', "7/30-day dates can't be scheduled")]
 nxt = block(t, "To fix", ["Issue", "Count", "Next step"], fix)
+
+# ---------- Cost per view ----------
+cost_ws = wb.create_sheet("Cost per view", index=1)
+cost_ws.sheet_view.showGridLines = False
+cost_ws["A1"] = "Cost per view"; cost_ws["A1"].font = Font(name=F, size=14, bold=True, color=NAVY)
+cost_ws["A2"] = ("From the PR Video Costs sheet. A monthly amount is shared equally by that account's videos posted that month. "
+                 "₹ per 1,000 views uses all-time views and counts only videos that have a view count.")
+cost_ws["A2"].font = Font(name=F, size=10, italic=True, color="5F6368")
+for col, w in zip("ABCDEFG", (30, 22, 10, 14, 14, 14, 16)): cost_ws.column_dimensions[col].width = w
+
+
+def cost_groups(key):
+    g = {}
+    for m in master:
+        c = COST.get(m["master_id"])
+        if not c: continue
+        k = key(m); e = g.setdefault(k, {"source": m["source_group"], "n": 0, "spend": 0.0, "cspend": 0.0, "views": 0})
+        e["n"] += 1; e["spend"] += c
+        if m.get("latest_views") is not None: e["cspend"] += c; e["views"] += m["latest_views"]
+    out = [[k, e["source"], e["n"], round(e["spend"]), e["views"], round(e["spend"] / e["n"]),
+            (e["cspend"] / e["views"] * 1000) if e["views"] else None] for k, e in g.items()]
+    return sorted(out, key=lambda r: (r[6] is None, r[6] or 0))
+
+
+hdr_c = ["Paid to", "Source", "Videos", "Spend (₹)", "Views", "Per video (₹)", "₹ per 1,000 views"]
+row_i = 4
+for title, key in (("By source", lambda m: m["source_group"]),
+                   ("By account (cheapest views first)", lambda m: PAYEE.get(m["master_id"]) or m["source_group"])):
+    cost_ws.cell(row=row_i, column=1, value=title).font = Font(name=F, size=11, bold=True, color=NAVY)
+    for i, h in enumerate(hdr_c, 1): cost_ws.cell(row=row_i + 1, column=i, value=h)
+    style_header(cost_ws, row_i + 1, 1, len(hdr_c))
+    data_rows = cost_groups(key)
+    if not data_rows:
+        cost_ws.cell(row=row_i + 2, column=1, value="No amounts yet: fill in the PR Video Costs sheet").font = Font(name=F, size=10, italic=True)
+    for r, vals in enumerate(data_rows, start=row_i + 2):
+        for c, v in enumerate(vals, 1):
+            cell = cost_ws.cell(row=r, column=c, value=v); cell.font = Font(name=F, size=10); cell.border = Border(bottom=thin)
+        for c in (4, 6): cost_ws.cell(row=r, column=c).number_format = '"₹"#,##0'
+        cost_ws.cell(row=r, column=5).number_format = "#,##0"; cost_ws.cell(row=r, column=7).number_format = '"₹"#,##0.00'
+    row_i += 2 + max(1, len(data_rows)) + 1
+cost_ws.cell(row=row_i, column=1, value="Rows read from the PR Video Costs sheet").font = Font(name=F, size=11, bold=True, color=NAVY)
+for i, h in enumerate(["Sheet row", "Source", "Account", "Month", "Amount (₹)", "Basis", "Videos matched / problem"], 1):
+    cost_ws.cell(row=row_i + 1, column=i, value=h)
+style_header(cost_ws, row_i + 1, 1, 7)
+for r, c in enumerate(COST_REPORT, start=row_i + 2):
+    vals = [c["row"], c["source"], c["account"] or "(all)", c["month"] or "(all months)", c["amount"], c["basis"], c["problem"] or c["videos"]]
+    for k, v in enumerate(vals, 1):
+        cost_ws.cell(row=r, column=k, value=v).font = Font(name=F, size=10, color="B3261E" if c["problem"] and k == 7 else DARK)
+    cost_ws.cell(row=r, column=5).number_format = '"₹"#,##0'
 
 # ---------- Setup ----------
 setup.column_dimensions["A"].width = 26; setup.column_dimensions["B"].width = 36
