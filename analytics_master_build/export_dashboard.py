@@ -42,6 +42,10 @@ def rows(with_costs=False):
             print("costs skipped:", e)
     out = []
     for m in d["master"]:
+        # not shown: a video removed from the sheets, a second copy of a post already listed, and a Drive file with
+        # no public post yet (it has no counts; the workbook still lists it)
+        if m.get("sheet_status") == "Removed from sheet" or m.get("duplicate_of") or m.get("content_type") == "Drive asset":
+            continue
         out.append({"video": m["master_id"], "platform": PLAT.get(m["platform"], m["platform"]),
                     "source": SRC.get(m["source_group"], m["source_group"]),
                     "account": m.get("account") or m.get("channel") or m.get("influencer") or "",

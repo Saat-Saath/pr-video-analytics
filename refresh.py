@@ -22,6 +22,8 @@ BD_DATASETS = {"Facebook": "gd_lyclm1571iy3mv57zw", "YouTube": "gd_lk56epmy2i5g7
 
 
 def env():
+    if not (ROOT / ".env").exists():
+        return
     for line in (ROOT / ".env").read_text(encoding="utf8").splitlines():
         if "=" in line and not line.strip().startswith("#"):
             k, v = line.split("=", 1)
@@ -54,11 +56,14 @@ def due_today():
     today = datetime.now(timezone(timedelta(hours=5, minutes=30))).date()  # India calendar day
     due = {"Instagram": [], "Facebook": [], "YouTube": []}
     for m in data["master"]:
-        if m["content_type"] != "Public post" or m.get("sheet_status") == "Removed from sheet" or m["platform"] not in due:
+        if (m["content_type"] != "Public post" or m.get("sheet_status") == "Removed from sheet" or m.get("duplicate_of")
+                or m["platform"] not in due):
             continue
         ss = snaps.get(m["master_id"], [])
         good = [s for s in ss if s["fetch_status"] == "OK"]
-        if is_due(m.get("published_date"), good, today, bool(ss), every):
+        since = m.get("link_replaced_on") or ""  # failures of an old link do not count against a new one
+        failed = [s for s in ss if s["fetch_status"] != "OK" and s["captured_at"][:10] > since]
+        if is_due(m.get("published_date"), good, today, bool(ss), every, failed):
             due[m["platform"]].append(m["canonical_url"])
     return due
 

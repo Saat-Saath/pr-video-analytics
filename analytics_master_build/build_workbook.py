@@ -207,11 +207,12 @@ for r, m in enumerate(top10, start=t + 2):
     dash.cell(row=r, column=4).number_format = "#,##0"; dash.cell(row=r, column=5).number_format = "#,##0"; dash.cell(row=r, column=6).number_format = "dd-mmm-yyyy"
 t = t + 2 + len(top10) + 1
 dash.cell(row=t, column=1, value="Milestones (Day 2 / Day 7 / Day 30 after upload)").font = Font(name=F, size=11, bold=True, color=NAVY)
-for i, h in enumerate(["Milestone", "Captured", "Captured late", "Due now", "Due later", "Missed", "Views captured"], 1): dash.cell(row=t + 1, column=i, value=h)
-style_header(dash, t + 1, 1, 7)
+for i, h in enumerate(["Milestone", "Captured", "Captured late", "Due now", "Due later", "Added late", "Missed", "Views captured"], 1): dash.cell(row=t + 1, column=i, value=h)
+style_header(dash, t + 1, 1, 8)
 for r, (lab, colv, cols) in enumerate([("Day 2", "I", "K"), ("Day 7", "L", "N"), ("Day 30", "O", "Q")], start=t + 2):
     vals = [lab, f'=COUNTIF({mc(cols)},"Captured")', f'=COUNTIF({mc(cols)},"Captured late*")', f'=COUNTIF({mc(cols)},"Due now")',
-            f'=COUNTIF({mc(cols)},"Due 2*")', f'=COUNTIF({mc(cols)},"Missed")', f"=SUM({mc(colv)})"]
+            f'=COUNTIF({mc(cols)},"Due 2*")', f'=COUNTIF({mc(cols)},"Added late")', f'=COUNTIF({mc(cols)},"Missed")',
+            f"=SUM({mc(colv)})"]
     for c, v in enumerate(vals, 1):
         cell = dash.cell(row=r, column=c, value=v); cell.font = Font(name=F, size=10); cell.border = Border(bottom=thin)
         if c > 1: cell.number_format = "#,##0"

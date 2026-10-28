@@ -97,6 +97,15 @@ def load_records(path):
     return out
 
 
+def post_key(url):
+    """The platform's own id of a post (Facebook video/reel id, Instagram shortcode, YouTube id), or None."""
+    u = (url or "").lower()
+    m = (re.search(r"facebook\.com/(?:reel|reels|watch/\?v=|[^/]+/videos)/?(\d{6,})", u) or re.search(r"[?&]v=(\d{6,})", u)
+         or re.search(r"instagram\.com/(?:[^/]+/)?(?:p|reel|reels|tv)/([\w-]+)", u)
+         or re.search(r"(?:youtu\.be/|shorts/|[?&]v=|embed/)([\w-]{11})", u))
+    return m.group(1) if m else None
+
+
 def main(result_files):
     src = json.loads(SOURCE.read_text(encoding="utf8"))
     master = src["master"]
@@ -129,13 +138,14 @@ def main(result_files):
 
     for s in history:  # recount ages in calendar days and label with the current milestone rules
         pub, cap = parse_dt(s.get("published_at")), parse_dt(s.get("captured_at"))
-        if pub and cap:
+        if pub and cap and s.get("fetch_status") == "OK":  # a failed fetch has no real publish time
             s["age_days"] = (ist_day(cap) - ist_day(pub)).days
         s["snapshot_type"] = snapshot_type(s.get("age_days"))
     snaps = {}
     for s in history:
         snaps.setdefault(s["master_id"], []).append(s)
     today = datetime.now(timezone.utc)
+    seen_posts = {}
     for m in master:
         m["platform"] = platform_of(m["canonical_url"])
         ss = sorted(snaps.get(m["master_id"], []), key=lambda s: s["captured_at"])
@@ -153,6 +163,14 @@ def main(result_files):
         m["published_at"] = (last or {}).get("published_at") or m.get("published_at") or ""
         m["post_url"] = next((s_.get("post_url") for s_ in reversed(good) if s_.get("post_url")), m.get("post_url") or "")
         m["thumb_url"] = next((s_.get("thumb_url") for s_ in reversed(good) if s_.get("thumb_url")), "")
+        # the same post submitted twice (two share links that open the same reel) is counted once
+        pk = post_key(m["post_url"])
+        m.pop("duplicate_of", None)
+        if pk and m.get("sheet_status") != "Removed from sheet":
+            if pk in seen_posts:
+                m["duplicate_of"] = seen_posts[pk]
+            else:
+                seen_posts[pk] = m["master_id"]
         # All-time (latest) counts: the most recent capture that has each number, so a re-fetch that comes back
         # without a view count keeps the last known one instead of blanking it.
         for k in ("views", "likes", "comments", "shares"):
@@ -166,11 +184,12 @@ def main(result_files):
         m["latest_engagement_rate"] = round(inter / v, 4) if v else None
         m["last_analytics_at"] = last["captured_at"] if last else ""
         m["data_source"] = last["source"] if last else ""
-        for s_ in good:  # re-age snapshots when the publish date became known later
-            if m.get("published_date") and s_.get("age_days") is None:
+        for s_ in ss:  # re-age snapshots (failed ones too) when the publish date is known from another capture
+            if m.get("published_date") and (s_.get("age_days") is None or s_.get("fetch_status") != "OK"):
                 s_["age_days"] = (ist_day(parse_dt(s_["captured_at"])) - date.fromisoformat(m["published_date"][:10])).days
                 s_["snapshot_type"] = snapshot_type(s_["age_days"])
-        ms = milestone_status(m.get("published_date"), good, today.astimezone(IST).date())
+        first_try = ss[0].get("age_days") if ss else None
+        ms = milestone_status(m.get("published_date"), good, today.astimezone(IST).date(), first_try)
         for label, _, _, _ in MILESTONES:
             hit = ms[label]["snap"]
             m[f"{label}_status"] = "No public link" if m["content_type"] == "Drive asset" else ms[label]["status"]
@@ -185,6 +204,8 @@ def main(result_files):
             m.pop(old_key, None)
         if m.get("sheet_status") == "Removed from sheet":
             m["fetch_status"] = "Removed from sheet"
+        elif m.get("duplicate_of"):
+            m["fetch_status"] = "Duplicate"
         elif m["content_type"] == "Drive asset":
             m["fetch_status"] = "No public link"
         elif not ss:

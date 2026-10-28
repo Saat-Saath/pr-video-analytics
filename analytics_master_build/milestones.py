@@ -28,14 +28,18 @@ def window_for(age):
     return "early"  # age 0-1
 
 
-def milestone_status(published, good_snaps, today):
-    """good_snaps: OK snapshots with 'age_days'. Returns {label: {...}} for d2/d7/d30."""
+def milestone_status(published, good_snaps, today, first_try_age=None):
+    """good_snaps: OK snapshots with 'age_days'; first_try_age: age (days) at the first fetch attempt of any kind.
+    Returns {label: {...}} for d2/d7/d30. A window that closed before the video was first fetched is
+    "Added late" (it was posted before tracking began or added to the sheet late), not "Missed"."""
     out = {}
     pub = to_date(published)
     age_today = (today - pub).days if pub else None
     for label, lo, hi, grace in MILESTONES:
-        hit = next((s for s in sorted(good_snaps, key=lambda s: s["captured_at"])
-                    if s.get("age_days") is not None and lo <= s["age_days"] < hi), None)
+        in_win = [s for s in sorted(good_snaps, key=lambda s: s["captured_at"])
+                  if s.get("age_days") is not None and lo <= s["age_days"] < hi]
+        # the first capture in the window that has a view count (Facebook sometimes hides it on one fetch)
+        hit = next((s for s in in_win if s.get("views") is not None), in_win[0] if in_win else None)
         due = (pub + timedelta(days=lo)) if pub else None
         if hit:
             late = hit["age_days"] > lo + grace
@@ -46,6 +50,8 @@ def milestone_status(published, good_snaps, today):
             st = f"Due {due.isoformat()}"
         elif age_today < hi:
             st = "Due now"
+        elif first_try_age is None or first_try_age >= hi:
+            st = "Added late"
         else:
             st = "Missed"
         out[label] = {"status": st, "due": due.isoformat() if due else None, "snap": hit,
@@ -53,9 +59,13 @@ def milestone_status(published, good_snaps, today):
     return out
 
 
-def is_due(published, good_snaps, today, has_any_snapshot, alltime_every_days=7):
+def is_due(published, good_snaps, today, has_any_snapshot, alltime_every_days=7, failed_snaps=()):
     """True when a public video should be fetched today: a Day 2 / 7 / 30 capture is due, or its
-    all-time count is older than `alltime_every_days` (0 turns the all-time re-fetch off)."""
+    all-time count is older than `alltime_every_days` (0 turns the all-time re-fetch off).
+    A link that has never worked is tried at most 3 times, then once a week (it is listed under "To fix")."""
+    if not good_snaps and len(failed_snaps) >= 3:
+        last = max(to_date(s["captured_at"]) for s in failed_snaps)
+        return (today - last).days >= 7
     if not has_any_snapshot or not published:
         return True  # never fetched: fetch once to learn its publish date and baseline
     age = (today - to_date(published)).days

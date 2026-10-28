@@ -145,6 +145,11 @@ DISPLAY = {"Kalpana - Disease Channels": "Inhouse ai videos"}
 MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
 
+def counted(v):
+    """Videos that take a share of the payments: not a second copy of the same post, not removed from the sheets."""
+    return not v.get("duplicate_of") and v.get("sheet_status") != "Removed from sheet"
+
+
 def missing_rows(master, rows):
     """Rows the Costs sheet still needs: one per source / account / month whose videos no sheet row covers
     (a row covers a video when its source and account match and its month is blank or the video's month).
@@ -161,6 +166,8 @@ def missing_rows(master, rows):
         known.append((src, norm(c["account"]), c["account"].strip(), mk))
     need = {}
     for v in master:
+        if not counted(v):
+            continue
         src, vm = v["source_group"], (v.get("published_date") or "")[:7]
         if not vm:
             continue
@@ -262,7 +269,8 @@ def allocate(master, rows=None):
     report = []
     by_source = defaultdict(list)
     for v in master:
-        by_source[v["source_group"]].append(v)
+        if counted(v):
+            by_source[v["source_group"]].append(v)
     # which rows match which videos (account > channel > influencer precedence within a source)
     matches = defaultdict(list)  # row index -> videos
     best = {}  # master_id -> (rank, [row idx])

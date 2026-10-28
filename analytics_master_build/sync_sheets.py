@@ -72,6 +72,9 @@ def canonical(url):
     u = re.sub(r"^http://", "https://", u)
     if "drive.google" in u:
         return u
+    m = re.match(r"(https://(?:www\.|m\.|web\.)?facebook\.com/share/(?:[rvp]/)?[\w-]+)", u)
+    if m:  # text typed right after a share link ("…/1DH1gGJ57a/25-10-26") is not part of it
+        return m.group(1) + "/"
     if "youtu" in u or "facebook.com/share" in u or "?" in u and re.search(r"(story|permalink|video|photo)\.php|/watch", u):
         return u.split("#")[0]
     return u.split("?")[0].split("#")[0]
