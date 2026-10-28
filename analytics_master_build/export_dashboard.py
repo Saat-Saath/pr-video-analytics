@@ -3,13 +3,14 @@ Usage: python analytics_master_build/export_dashboard.py
 docs/data.json  - one row per video (public post links and public counts only)
 docs/index.html - standalone page: dashboard_page.html + a small loader, hostable on GitHub Pages
 """
+import csv
 import json
 import os
 import time
 from datetime import datetime
 from pathlib import Path
 
-from costs import allocate
+from costs import allocate, missing_rows, read_rows, env as cost_env
 
 ROOT = Path(__file__).resolve().parent
 DOCS = ROOT.parent / "docs"
@@ -23,7 +24,15 @@ def rows(with_costs=False):
     cost, payee = {}, {}
     if with_costs:
         try:
-            cost, _, payee = allocate(d["master"])
+            sheet = read_rows(include_blank=True)
+            cost, _, payee = allocate(d["master"], sheet)
+            # accounts / months the Costs sheet has no row for yet; the sheet's script adds them as new rows
+            need = missing_rows(d["master"], sheet)
+            if cost_env().get("SHEET_COSTS"):  # only when the real sheet was read, so the list reflects it
+                with open(DOCS / "costs_missing.csv", "w", encoding="utf8", newline="") as fh:
+                    w = csv.DictWriter(fh, fieldnames=["Source", "Account", "Month", "Basis", "Videos"])
+                    w.writeheader()
+                    w.writerows(need)
         except (SystemExit, Exception) as e:  # sheet not shared yet, offline, or missing columns: carry on without costs
             print("costs skipped:", e)
     out = []

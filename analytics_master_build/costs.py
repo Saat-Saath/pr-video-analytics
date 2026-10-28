@@ -74,8 +74,9 @@ def amount(text):
     return float(t) if t else None
 
 
-def read_rows():
-    """Cost rows as text tables: from the Costs sheet when configured, else costs.csv, else []."""
+def read_rows(include_blank=False):
+    """Cost rows from the Costs sheet when configured, else costs.csv, else []. Rows without an amount are left out
+    unless include_blank (they still count as "this account already has a row" for missing_rows)."""
     e = env()
     sid = e.get("SHEET_COSTS", "")
     if sid:
@@ -109,17 +110,69 @@ def read_rows():
     for n, r in enumerate(rows[1:], start=2):
         get = lambda k: (r[ix[k]].strip() if ix[k] is not None and ix[k] < len(r) else "")
         amt = amount(get("amount"))
-        if not amt:
+        if not amt and not (include_blank and get("source")):
             continue  # rows without an amount are just placeholders
         out.append({"row": n, "source": get("source"), "account": get("account"), "month": get("month"),
                     "amount": amt, "basis": "per video" if "video" in get("basis").lower() else "per month"})
     return out
 
 
+def match_rank(want, v):
+    """How a cost row's (normalised) Account name matches a video: 0 its account, 1 its channel, 2 its influencer
+    name, 3 a blank Account (the whole source); None when it does not match."""
+    if not want:
+        return 3
+    fields = [v.get("account"), v.get("channel"), v.get("influencer")]
+    return next((k for k, f in enumerate(fields) if norm(f) and want in norm(f)), None)
+
+
+DEFAULT_BASIS = {"Kalpana - Disease Channels": "per video", "Sanjay Agency": "per month", "Internal PR": "per month"}
+DISPLAY = {"Kalpana - Disease Channels": "Inhouse ai videos"}
+MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+
+def missing_rows(master, rows):
+    """Rows the Costs sheet still needs: one per source / account / month whose videos no sheet row covers
+    (a row covers a video when its source and account match and its month is blank or the video's month).
+    New accounts and new months show up here; reuse the name an earlier sheet row already uses for that account."""
+    known = []  # (source, normalised account, account as typed, month key)
+    for c in rows:
+        src = SOURCES.get(norm(c["source"]))
+        if not src:
+            continue
+        try:
+            mk = month_key(c["month"])
+        except ValueError:
+            mk = "?"
+        known.append((src, norm(c["account"]), c["account"].strip(), mk))
+    need = {}
+    for v in master:
+        src, vm = v["source_group"], (v.get("published_date") or "")[:7]
+        if not vm:
+            continue
+        ranks = [(match_rank(w, v), name, mk) for s_, w, name, mk in known if s_ == src]
+        ranks = [r for r in ranks if r[0] is not None]
+        if any(mk in (None, vm) for _, _, mk in ranks):
+            continue  # covered
+        named = sorted((r for r in ranks if r[0] < 3), key=lambda r: r[0])
+        if src == "Kalpana - Disease Channels":
+            label, month = "", ""  # one per-video rate for all inhouse videos
+        else:
+            label = named[0][1] if named else (v.get("influencer") if src == "Internal PR" else None) or v.get("account") or v.get("channel") or v.get("influencer") or ""
+            y, m = vm.split("-")
+            month = f"{MON[int(m) - 1]} {y}"
+        k = (src, norm(label), month)
+        if k not in need:
+            need[k] = {"Source": DISPLAY.get(src, src), "Account": label.strip(), "Month": month,
+                       "Basis": DEFAULT_BASIS.get(src, "per month"), "Videos": 0}
+        need[k]["Videos"] += 1
+    return sorted(need.values(), key=lambda r: (r["Month"], r["Source"], r["Account"].lower()))
+
+
 def allocate(master, rows=None):
     """Return ({master_id: rupees}, report, {master_id: payee}). report lists each cost row with the videos it matched;
     payee is the sheet's Account name the video's cost came from (the source name for whole-source rows)."""
-    rows = read_rows() if rows is None else rows
+    rows = read_rows() if rows is None else [c for c in rows if c.get("amount")]
     cost = defaultdict(float)
     payee = defaultdict(list)
     report = []
@@ -147,13 +200,9 @@ def allocate(master, rows=None):
         for v in by_source[src]:
             if mk and (v.get("published_date") or "")[:7] != mk:
                 continue
-            if not want:
-                rank = 3  # whole source
-            else:
-                fields = [v.get("account"), v.get("channel"), v.get("influencer")]
-                rank = next((k for k, f in enumerate(fields) if norm(f) and (want in norm(f) or norm(f) == want)), None)
-                if rank is None:
-                    continue
+            rank = match_rank(want, v)
+            if rank is None:
+                continue
             matches[i].append((v, rank))
     # keep only the best-ranked named rows per video; whole-source rows always apply
     for i, vs in matches.items():
