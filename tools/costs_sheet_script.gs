@@ -53,7 +53,7 @@ function inhousePerVideo_() {
   for (let r = 1; r < vals.length; r++) {
     const row = vals[r];
     if (norm_(row[c.source]) === 'inhouseaivideos' && !String(row[c.account]).trim() && !String(row[c.amount]).trim()) {
-      sh.getRange(r + 1, c.month + 1).setNumberFormat('@').setValue('');
+      sh.getRange(r + 1, c.month + 1).setValue('');
       sh.getRange(r + 1, c.basis + 1).setValue('per video');
       if (c.notes >= 0) sh.getRange(r + 1, c.notes + 1).setValue('Cost of one inhouse video (all channels, all months)');
     }
@@ -74,14 +74,14 @@ function addNewAccounts() {
     if (!src || have.has(key_(src, acc, mon))) return;
     have.add(key_(src, acc, mon));
     const row = new Array(vals[0].length).fill('');
-    row[c.source] = src; row[c.account] = acc; row[c.month] = mon; row[c.basis] = r[at('basis')] || 'per month';
+    row[c.source] = src; row[c.account] = acc; row[c.month] = monthDate_(mon); row[c.basis] = r[at('basis')] || 'per month';
     if (c.notes >= 0) row[c.notes] = 'Added automatically: ' + r[at('videos')] + ' videos, fill in the amount';
     add.push(row);
   });
   if (add.length) {
     const start = sh.getLastRow() + 1;
-    sh.getRange(start, c.month + 1, add.length, 1).setNumberFormat('@'); // keep "Nov 2026" as text
     sh.getRange(start, 1, add.length, add[0].length).setValues(add);
+    sh.getRange(start, c.month + 1, add.length, 1).setNumberFormat('mmm yyyy');
   }
   fillLinks_();
 }
@@ -102,6 +102,12 @@ function month_(v) {
   if (!s) return '';
   const d = new Date('1 ' + s);
   return isNaN(d) ? s.toLowerCase() : Utilities.formatDate(d, 'Asia/Kolkata', 'yyyy-MM');
+}
+
+/** "Nov 2026" -> 1 Nov 2026 as a date (the Month column holds dates); blank stays blank. */
+function monthDate_(s) {
+  const d = new Date('1 ' + String(s).trim());
+  return String(s).trim() && !isNaN(d) ? new Date(d.getFullYear(), d.getMonth(), 1) : '';
 }
 
 function key_(src, acc, mon) { return norm_(src) + '|' + norm_(acc) + '|' + month_(mon); }

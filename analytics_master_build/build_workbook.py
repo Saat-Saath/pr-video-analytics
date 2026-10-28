@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parent
 DATA = json.loads((ROOT / "analytics_data.json").read_text(encoding="utf8"))
 try:  # cost per video from the PR Video Costs sheet (empty when no amounts are filled in yet)
     from costs import allocate
-    COST, COST_REPORT, PAYEE = allocate(DATA["master"])
+    COST, COST_REPORT, PAYEE, _ = allocate(DATA["master"])
 except (SystemExit, Exception) as _e:
     print("costs skipped:", _e)
     COST, COST_REPORT, PAYEE = {}, [], {}

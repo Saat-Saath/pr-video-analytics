@@ -240,11 +240,13 @@ def account_links(data, rows, missing=()):
 
 
 def allocate(master, rows=None):
-    """Return ({master_id: rupees}, report, {master_id: payee}). report lists each cost row with the videos it matched;
-    payee is the sheet's Account name the video's cost came from (the source name for whole-source rows)."""
+    """Return ({master_id: rupees}, report, {master_id: payee}, {master_id: videos promised that month}).
+    report lists each cost row with the videos it matched; payee is the sheet's Account name the video's cost came
+    from (the source name for whole-source rows)."""
     rows = read_rows() if rows is None else [c for c in rows if c.get("amount")]
     cost = defaultdict(float)
     payee = defaultdict(list)
+    promised = {}  # master_id -> videos promised per month by the row that pays for it
     report = []
     by_source = defaultdict(list)
     for v in master:
@@ -293,15 +295,17 @@ def allocate(master, rows=None):
             label = c["account"].strip() or (c["source"].strip() + " (all)")
             for v in vids:
                 cost[v["master_id"]] += share
+                if c.get("promised"):
+                    promised[v["master_id"]] = promised.get(v["master_id"], 0) + c["promised"]
                 if label not in payee[v["master_id"]]:
                     payee[v["master_id"]].append(label)
         report.append({**c, "videos": len(vids), "problem": "" if vids else "no videos match this account and month"})
-    return {k: round(v, 2) for k, v in cost.items()}, report, {k: " + ".join(v) for k, v in payee.items()}
+    return ({k: round(v, 2) for k, v in cost.items()}, report, {k: " + ".join(v) for k, v in payee.items()}, promised)
 
 
 if __name__ == "__main__":
     data = json.loads((ROOT / "analytics_data.json").read_text(encoding="utf8"))
-    costs, rep, _ = allocate(data["master"])
+    costs, rep, _, _ = allocate(data["master"])
     for r in rep:
         print(f"row {r['row']}: {r['source']} / {r['account'] or '(all)'} / {r['month'] or '(all months)'} ₹{r['amount']:,.0f} "
               f"{r['basis']} -> {r['videos']} videos {r['problem']}")

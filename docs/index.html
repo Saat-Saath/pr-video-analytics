@@ -1116,11 +1116,12 @@ dash.calc('status', {
     const group = (key) => {
       const m = new Map();
       paid.forEach(v => {
-        const k = key(v); if (!m.has(k)) m.set(k, { name: k, source: v.source, n: 0, spend: 0, counted: 0, cspend: 0, views: 0 });
+        const k = key(v); if (!m.has(k)) m.set(k, { name: k, source: v.source, n: 0, spend: 0, counted: 0, cspend: 0, views: 0, months: new Map() });
         const g = m.get(k); g.n++; g.spend += v.cost;
+        if (v.promised) g.months.set((v.published || '').slice(0, 7), v.promised);
         if (v[vk] != null) { g.counted++; g.cspend += v.cost; g.views += v[vk]; }
       });
-      return [...m.values()].map(g => Object.assign(g, { cpk: per1k(g.cspend, g.views), per: g.spend / g.n }));
+      return [...m.values()].map(g => Object.assign(g, { cpk: per1k(g.cspend, g.views), per: g.spend / g.n, promised: [...g.months.values()].reduce((a, b) => a + b, 0) }));
     };
     const spend = paid.reduce((a, v) => a + v.cost, 0), cnt = paid.filter(v => v[vk] != null);
     const cspend = cnt.reduce((a, v) => a + v.cost, 0), views = cnt.reduce((a, v) => a + v[vk], 0);
@@ -1130,6 +1131,11 @@ dash.calc('status', {
     stat('hi', 'Spend', rs(spend), paid.length + ' of ' + w.length + ' videos have a cost');
     stat('', '₹ per 1,000 views', r1k(per1k(cspend, views)), big(views) + ' views' + (cnt.length < paid.length ? ' · ' + (paid.length - cnt.length) + ' paid videos have no count yet' : ''));
     stat('', 'Cost per video', rs(spend / paid.length), 'average across paid videos');
+    const allPay = group(v => v.payee || v.account || v.source), prom = allPay.filter(g => g.promised);
+    if (prom.length) {
+      const pr = prom.reduce((a, g) => a + g.promised, 0), dl = prom.reduce((a, g) => a + Math.min(g.n, g.promised), 0);
+      stat('', 'Delivered vs promised', pct0(dl / pr), dl.toLocaleString('en-IN') + ' of ' + pr.toLocaleString('en-IN') + ' promised videos posted (current month counts so far)');
+    }
     if (accs.length) stat('best', 'Best value', accs[0].name, r1k(accs[0].cpk) + ' per 1,000 views · ' + accs[0].source);
     body.appendChild(top);
 
@@ -1148,14 +1154,22 @@ dash.calc('status', {
     }
     const h2 = el('h3', 'vd-h3', 'By account, cheapest views first'); h2.style.marginTop = '18px'; body.appendChild(h2);
     const tw = el('div', 'vd-ctw'), t = el('table', 'vd-ct'); tw.style.marginTop = '8px';
-    const hr = el('tr'); ['Paid to', 'Source', 'Videos', 'Spend', 'Views', 'Per video', '₹ per 1,000 views'].forEach(x => hr.appendChild(el('th', null, x)));
+    const hr = el('tr'); ['Paid to', 'Source', 'Videos posted', 'Spend', 'Views', 'Per video', '₹ per 1,000 views'].forEach(x => hr.appendChild(el('th', null, x)));
     const th = el('thead'); th.appendChild(hr); t.appendChild(th);
     const tb = el('tbody');
+    const delivered = (g) => {
+      const td = el('td');
+      if (!g.promised) { td.textContent = String(g.n); return td; }
+      const b = el('b', null, String(g.n)); td.append(b, ' / ' + g.promised);
+      td.title = g.n + ' videos posted, ' + g.promised + ' promised';
+      if (g.n < g.promised * 0.5) b.style.color = 'var(--accd)';
+      return td;
+    };
     const all = group(v => v.payee || v.account || v.source).sort((a, b) => (a.cpk ?? 1e12) - (b.cpk ?? 1e12));
     (S.costAll ? all : all.slice(0, 10)).forEach((g, i) => {
       const tr = el('tr', i === 0 && g.cpk != null ? 'top1' : '');
       const c = el('td'); c.appendChild(el('b', g.cpk == null ? 'na' : null, g.cpk == null ? 'no counts yet' : r1k(g.cpk)));
-      tr.append(el('td', null, g.name), el('td', null, g.source), el('td', null, String(g.n)), el('td', null, rs(g.spend)), el('td', null, g.views ? full(g.views) : '—'), el('td', null, rs(g.per)), c);
+      tr.append(el('td', null, g.name), el('td', null, g.source), delivered(g), el('td', null, rs(g.spend)), el('td', null, g.views ? full(g.views) : '—'), el('td', null, rs(g.per)), c);
       tb.appendChild(tr);
     });
     t.appendChild(tb); tw.appendChild(t); body.appendChild(tw);
