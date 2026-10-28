@@ -27,9 +27,7 @@ _E = _env()
 SHEETS = {  # name: (spreadsheet id, tab gid)
     "kalpana": (_E.get("SHEET_KALPANA", ""), "0"),
     "sanjay": (_E.get("SHEET_SANJAY", ""), _E.get("SHEET_SANJAY_GID", "1765950165")),
-    "Radhika Vlogs": (_E.get("SHEET_INTERNAL_PR", ""), "0"),
-    "Astha Gupta": (_E.get("SHEET_INTERNAL_PR", ""), "1107058259"),
-    "Jyoti": (_E.get("SHEET_INTERNAL_PR", ""), "1297562858"),
+    "internal_pr": (_E.get("SHEET_INTERNAL_PR", ""), ""),  # every tab is read; see internal_pr_tabs()
 }
 if not all(v[0] for v in SHEETS.values()):
     raise SystemExit("Add SHEET_KALPANA, SHEET_SANJAY and SHEET_INTERNAL_PR to .env (see .env.example)")
@@ -40,6 +38,28 @@ def fetch(sid, gid):
     url = f"https://docs.google.com/spreadsheets/d/{sid}/export?format=csv&gid={gid}"
     with urllib.request.urlopen(url, timeout=60) as r:
         return list(csv.reader(io.StringIO(r.read().decode("utf8"))))
+
+
+def sheet_tabs(sid):
+    """[(tab name, gid)] of a link-shared spreadsheet, in the order the tabs appear."""
+    with urllib.request.urlopen(f"https://docs.google.com/spreadsheets/d/{sid}/htmlview", timeout=60) as r:
+        html = r.read().decode("utf8", "ignore")
+    tabs = re.findall(r'\{name: "((?:[^"\\]|\\.)*)", pageUrl: "[^"]*", gid: "(\d+)"', html)
+    return [(json.loads('"' + n + '"'), g) for n, g in tabs]
+
+
+def internal_pr_tabs():
+    """Influencer Daily posting Record: the "All links" overview tab (one column per influencer: name, platform,
+    then links) and one tab per influencer (date, status, Drive file...). New influencer tabs are picked up by name."""
+    sid = SHEETS["internal_pr"][0]
+    try:
+        tabs = sheet_tabs(sid)
+    except Exception as e:  # fall back to the tabs known when this was written
+        print("could not list Internal PR tabs:", e)
+        tabs = [("All links", "1345412239"), ("Radhika Vlogs", "0"), ("Astha Gupta", "1107058259"), ("Jyoti", "1297562858"),
+                ("Shivangi", "1151558042"), ("Renuka", "2052046322"), ("Vinita", "38318596")]
+    overview = next(((n, g) for n, g in tabs if n.strip().lower() in ("all links", "all link", "links")), None)
+    return sid, overview, [(n, g) for n, g in tabs if (n, g) != overview]
 
 
 def col(i):
@@ -141,10 +161,26 @@ def occurrences():
                             source_row=r, source_cell=f"D{r}", source_date_text=row[4].strip(), published_date=parse_date(row[4], row[0]),
                             influencer=row[1].strip(), channel=row[2].strip(), profile_url="", declared_platform="",
                             posting_status="Published link", url=u, cell_url_sequence=i, form_timestamp=row[0].strip()))
-    # Internal PR: one tab per influencer. Columns are found by header, and a live post link (any non-Drive URL
-    # outside the profile column) is preferred over the Drive file the video was shared as.
-    for tab in ("Radhika Vlogs", "Astha Gupta", "Jyoti"):
-        rows = fetch(*SHEETS[tab])
+    # Internal PR. "All links" lists every influencer's posts (row 1 = influencer, row 2 = platform, rows 3+ = links);
+    # its column header is the influencer's name. Each influencer tab adds the date, status and Drive file of a post.
+    sid, overview, tabs = internal_pr_tabs()
+    who = {}  # post key -> (influencer, platform, cell) from the All links tab
+    if overview:
+        rows = fetch(sid, overview[1])
+        names = rows[0] if rows else []
+        plats = rows[1] if len(rows) > 1 else []
+        for r, row in enumerate(rows[2:], start=3):
+            for c, cell in enumerate(row):
+                for u in URL_RE.findall(cell):
+                    if "drive.google" in u.lower():
+                        continue
+                    who.setdefault(key_of(canonical(u)), ((names[c] if c < len(names) else "").strip(),
+                                                           (plats[c] if c < len(plats) else "").strip(), f"{col(c)}{r}"))
+    seen = set()
+    for tab, gid in tabs:
+        rows = fetch(sid, gid)
+        if not rows:
+            continue
         head = [h.strip().lower() for h in rows[0]]
         find = lambda *names: next((i for i, h in enumerate(head) if any(n in h for n in names)), None)
         c_date, c_name, c_prof, c_plat, c_grp, c_stat = find("date"), find("influencer"), find("profile"), find("platform"), find("telegram"), find("posting status")
@@ -165,11 +201,30 @@ def occurrences():
             pick = post or drive
             if not pick:
                 continue
+            k = key_of(canonical(pick[0]))
+            name, plat, _ = who.get(k, ("", "", ""))
+            name = name or tab.strip() or get(c_name)  # the All links header, else the tab name (the Name column can be a copy-paste)
+            seen.add(k)
             out.append(dict(source_group="Internal PR", source_workbook="Influencer Daily posting Record", source_tab=tab,
                             source_row=r, source_cell=f"{col(pick[1])}{r}", source_date_text=get(c_date), published_date=parse_date(get(c_date)),
-                            influencer=get(c_name), channel=get(c_name), profile_url="", profile_label=get(c_prof),
-                            declared_platform=get(c_plat), telegram_group=get(c_grp), posting_status=get(c_stat) or ("Posted" if post else "Unknown"),
+                            influencer=name, channel=name, profile_url="", profile_label=get(c_prof),
+                            declared_platform=plat or get(c_plat), telegram_group=get(c_grp), posting_status=get(c_stat) or ("Posted" if post else "Unknown"),
                             url=pick[0], drive_url=drive[0] if drive else ""))
+    # a post that is only in All links (no row in an influencer tab yet)
+    if overview:
+        rows = fetch(sid, overview[1])
+        for r, row in enumerate(rows[2:], start=3):
+            for c, cell in enumerate(row):
+                for u in URL_RE.findall(cell):
+                    k = key_of(canonical(u))
+                    if "drive.google" in u.lower() or k in seen:
+                        continue
+                    seen.add(k)
+                    name, plat, cellref = who[k]
+                    out.append(dict(source_group="Internal PR", source_workbook="Influencer Daily posting Record", source_tab=overview[0],
+                                    source_row=r, source_cell=cellref, source_date_text="", published_date="",
+                                    influencer=name, channel=name, profile_url="", profile_label="", declared_platform=plat,
+                                    telegram_group="", posting_status="Posted", url=u, drive_url=""))
     for o in out:
         o["canonical_url"] = canonical(o["url"])
         o["key"] = key_of(o["canonical_url"])
