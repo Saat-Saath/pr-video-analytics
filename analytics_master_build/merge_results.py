@@ -8,7 +8,7 @@ import json, re, sys
 from datetime import datetime, timezone, date, timedelta
 from pathlib import Path
 
-from milestones import MILESTONES, milestone_status, window_for
+from milestones import MILESTONES, hours_between, milestone_status, to_dt, window_for
 
 ROOT = Path(__file__).resolve().parent
 SOURCE = ROOT / "source_data.json"
@@ -56,8 +56,16 @@ def ist_day(dt):
     return dt.astimezone(IST).date() if dt.tzinfo else dt.date()
 
 
-def snapshot_type(age):
-    return {"d2": "DAY_2", "d7": "DAY_7", "d30": "DAY_30", "early": "EARLY", None: "UNDATED"}[window_for(age)]
+def snapshot_type(hours):
+    return {"d2": "DAY_2", "d7": "DAY_7", "d30": "DAY_30", "early": "EARLY", None: "UNDATED"}[window_for(hours)]
+
+
+def set_age(s, published):
+    """Age of a capture: hours since the exact upload time, and whole days (48 h = day 2)."""
+    h = hours_between(published, s.get("captured_at"))
+    s["age_hours"] = round(h, 1) if h is not None else None
+    s["age_days"] = int(h // 24) if h is not None else None
+    s["snapshot_type"] = snapshot_type(h)
 
 
 def load_records(path):
@@ -122,13 +130,10 @@ def main(result_files):
                 unmatched.append(rec["input_url"]); continue
             pub = parse_dt(rec["published_at"])
             fetched = parse_dt(rec["fetched_at"]) or datetime.now(timezone.utc)
-            age = (ist_day(fetched) - ist_day(pub)).days if pub else None
             history.append({
                 "snapshot_id": f"SNAP-{len(history) + 1:05d}",
                 "master_id": m["master_id"],
-                "snapshot_type": snapshot_type(age),
                 "captured_at": fetched.isoformat(),
-                "age_days": age,
                 **{k: rec[k] for k in ("views", "likes", "comments", "shares", "saves", "published_at", "account", "page_url", "caption", "thumb_url", "source", "error")},
                 "post_url": rec["resolved_url"],
                 "fetch_status": "OK" if rec["ok"] else "Failed",
@@ -136,11 +141,8 @@ def main(result_files):
 
     HISTORY.write_text(json.dumps(history, indent=1, ensure_ascii=False), encoding="utf8")
 
-    for s in history:  # recount ages in calendar days and label with the current milestone rules
-        pub, cap = parse_dt(s.get("published_at")), parse_dt(s.get("captured_at"))
-        if pub and cap and s.get("fetch_status") == "OK":  # a failed fetch has no real publish time
-            s["age_days"] = (ist_day(cap) - ist_day(pub)).days
-        s["snapshot_type"] = snapshot_type(s.get("age_days"))
+    for s in history:  # ages in hours from the upload time each capture reported (a failed fetch has none)
+        set_age(s, s.get("published_at") if s.get("fetch_status") == "OK" else None)
     snaps = {}
     for s in history:
         snaps.setdefault(s["master_id"], []).append(s)
@@ -163,7 +165,8 @@ def main(result_files):
         m["published_at"] = (last or {}).get("published_at") or m.get("published_at") or ""
         m["post_url"] = next((s_.get("post_url") for s_ in reversed(good) if s_.get("post_url")), m.get("post_url") or "")
         m["thumb_url"] = next((s_.get("thumb_url") for s_ in reversed(good) if s_.get("thumb_url")), "")
-        # the same post submitted twice (two share links that open the same reel) is counted once
+        # the same post submitted twice (two share links that open the same reel): both entries stay and are
+        # counted; the later one only notes which entry it repeats
         pk = post_key(m["post_url"])
         m.pop("duplicate_of", None)
         if pk and m.get("sheet_status") != "Removed from sheet":
@@ -179,22 +182,27 @@ def main(result_files):
             if k == "views":
                 m["alltime_at"] = (hit or {}).get("captured_at", "")
                 m["alltime_age"] = (hit or {}).get("age_days")
+                m["alltime_hours"] = (hit or {}).get("age_hours")
         v = m["latest_views"]
         inter = sum(x or 0 for x in (m["latest_likes"], m["latest_comments"], m["latest_shares"]))
         m["latest_engagement_rate"] = round(inter / v, 4) if v else None
         m["last_analytics_at"] = last["captured_at"] if last else ""
         m["data_source"] = last["source"] if last else ""
-        for s_ in ss:  # re-age snapshots (failed ones too) when the publish date is known from another capture
-            if m.get("published_date") and (s_.get("age_days") is None or s_.get("fetch_status") != "OK"):
-                s_["age_days"] = (ist_day(parse_dt(s_["captured_at"])) - date.fromisoformat(m["published_date"][:10])).days
-                s_["snapshot_type"] = snapshot_type(s_["age_days"])
-        first_try = ss[0].get("age_days") if ss else None
-        ms = milestone_status(m.get("published_date"), good, today.astimezone(IST).date(), first_try)
+        upload = m.get("published_at") or m.get("published_date")  # exact upload time when a capture reported it
+        for s_ in ss:  # captures without their own upload time (failed fetches) are aged from the video's
+            if upload and (s_.get("age_hours") is None or s_.get("fetch_status") != "OK"):
+                set_age(s_, upload)
+        first_try = ss[0].get("age_hours") if ss else None
+        bad = [s_ for s_ in ss if s_.get("fetch_status") != "OK"]
+        m["fetch_tries"] = len(ss)
+        m["last_error"] = (bad[-1].get("error") or "")[:160] if bad and not good else ""
+        ms = milestone_status(upload, good, today, first_try)
         for label, _, _, _ in MILESTONES:
             hit = ms[label]["snap"]
             m[f"{label}_status"] = "No public link" if m["content_type"] == "Drive asset" else ms[label]["status"]
             m[f"{label}_due"] = ms[label]["due"]
             m[f"{label}_age"] = hit["age_days"] if hit else None
+            m[f"{label}_hours"] = hit.get("age_hours") if hit else None
             for k in ("views", "likes", "comments", "shares"):
                 m[f"{label}_{k}"] = hit.get(k) if hit else None
             ints = sum(x or 0 for x in ((hit or {}).get("likes"), (hit or {}).get("comments"), (hit or {}).get("shares")))
@@ -204,8 +212,6 @@ def main(result_files):
             m.pop(old_key, None)
         if m.get("sheet_status") == "Removed from sheet":
             m["fetch_status"] = "Removed from sheet"
-        elif m.get("duplicate_of"):
-            m["fetch_status"] = "Duplicate"
         elif m["content_type"] == "Drive asset":
             m["fetch_status"] = "No public link"
         elif not ss:

@@ -42,9 +42,9 @@ def rows(with_costs=False):
             print("costs skipped:", e)
     out = []
     for m in d["master"]:
-        # not shown: a video removed from the sheets, a second copy of a post already listed, and a Drive file with
-        # no public post yet (it has no counts; the workbook still lists it)
-        if m.get("sheet_status") == "Removed from sheet" or m.get("duplicate_of") or m.get("content_type") == "Drive asset":
+        # not shown: a video removed from the sheets and a Drive file with no public post yet (it has no counts;
+        # the workbook still lists it). Every other sheet entry is shown, even when two entries are the same post.
+        if m.get("sheet_status") == "Removed from sheet" or m.get("content_type") == "Drive asset":
             continue
         out.append({"video": m["master_id"], "platform": PLAT.get(m["platform"], m["platform"]),
                     "source": SRC.get(m["source_group"], m["source_group"]),
@@ -58,8 +58,11 @@ def rows(with_costs=False):
                     "alltime_at": (m.get("alltime_at") or "")[:10] or None,
                     "alltime_age": m.get("alltime_age"),
                     "thumb": save_thumb(m),
+                    "alltime_hours": m.get("alltime_hours"), "same_post_as": m.get("duplicate_of"),
+                    "sheet_row": m.get("source_rows") or "", "sheet_link": m.get("original_url") or m["canonical_url"],
+                    "tries": m.get("fetch_tries"), "last_error": m.get("last_error") or "",
                     **{f"{l}_{k}": m.get(f"{l}_{k}") for l in ("d2", "d7", "d30")
-                       for k in ("views", "likes", "comments", "shares", "status", "due", "age")}})
+                       for k in ("views", "likes", "comments", "shares", "status", "due", "age", "hours")}})
         if with_costs:
             out[-1]["cost"] = cost.get(m["master_id"])
             out[-1]["payee"] = payee.get(m["master_id"])

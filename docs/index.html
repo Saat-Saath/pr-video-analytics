@@ -286,6 +286,8 @@ window.dash = (function () {
 .vd-ct .cpk i{display:block;height:100%;border-radius:999px;background:var(--b2)}
 .vd-ct tr.top1 td:first-child{color:var(--accd)}
 .vd-ct .na{color:var(--mut2);font-weight:500}
+#fix-list .vd-ct th,#fix-list .vd-ct td{text-align:left}
+#fix-list .vd-ct{min-width:1000px}
 .vd-gsum{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
 .vd-gchip{border-radius:16px;padding:12px 16px;background:#F7F8FC;display:flex;flex-direction:column;gap:2px}
 .vd-gchip .l{font-size:13px;font-weight:600;color:var(--ink2)}
@@ -309,7 +311,7 @@ window.dash = (function () {
     <div style="display:flex;flex-direction:column;gap:8px;min-width:0">
       <p class="vd-eye">PR video analytics · Inhouse ai videos · Sanjay Agency · Internal PR</p>
       <h1 class="vd-title">Video performance</h1>
-      <p class="vd-sub">Every upload, captured at Day 2, Day 7 and Day 30 after posting, plus its all-time total. Click any video to watch it.</p>
+      <p class="vd-sub">Day 2 = counts 48 hours after upload · Day 7 = counts after the first 7 days · Day 30 = counts after the first 30 days · All time = counts today. Click any video to watch it.</p>
     </div>
     <div class="vd-right">
       <div class="vd-meta"><span class="vd-live">Live data</span><span id="upd">Instagram via Apify · Facebook and YouTube via Bright Data</span></div>
@@ -421,7 +423,7 @@ window.dash = (function () {
 
 <section class="vd-card" aria-label="All videos" id="all-videos">
   <div class="vd-ch"><h2 class="vd-h2">All videos: Day 2, Day 7, Day 30 and all time</h2><span class="vd-note"><span id="count-shown">—</span> shown</span></div>
-  <p class="vd-note">Views, likes, comments and shares captured 2, 7 and 30 days after each upload, plus the all-time total (re-checked every week; "As of" is its date). A small "d18" means that capture was taken late, on day 18. "Added late" means the video was already past that day when it was first tracked (posted before tracking began or added to the sheet late), so that count can no longer be fetched. Press ▶ to watch, click a number to open the post, click a header to sort; scroll sideways for Day 30.</p>
+  <p class="vd-note">Day 2 = views, likes, comments and shares once 48 hours have passed since upload; Day 7 = after the first 7 days; Day 30 = after the first 30 days; All time = today (re-checked every week; "As of" is its date). The refresh runs four times a day, so each count is taken within a few hours of the mark. A small "d18" means that capture was taken late, on day 18. "Added late" means the video was already past that day when it was first tracked (posted before tracking began or added to the sheet late), so that count can no longer be fetched. Press ▶ to watch, click a number to open the post, click a header to sort; scroll sideways for Day 30.</p>
   <div class="vd-tools">
     <input id="f-search" type="search" placeholder="Search account, VID-0022 or a link" aria-label="Search videos">
     <select id="f-status" aria-label="Status"><option value="">Any status</option></select>
@@ -456,6 +458,8 @@ window.dash = (function () {
 <section class="vd-card" aria-label="To fix" id="to-fix">
   <div class="vd-ch"><h2 class="vd-h2">To fix</h2><span class="vd-note">Videos without numbers, and what to do</span></div>
   <div class="vd-fix" id="fix" data-source="status"></div>
+  <h3 class="vd-h3" style="margin-top:8px">Links to check</h3>
+  <div class="vd-ctw" id="fix-list" data-source="videos"></div>
 </section>
 
 </div></div>
@@ -513,8 +517,8 @@ dash.calc('status', {
   description: 'Count of videos per fetch problem, with the next step for each.',
   fn: (videos) => {
     const steps = {
-      'No view count': 'Facebook hides the count on this reel; the Apify Reels-tab backup retries it on the next refresh.',
-      'Fetch failed': 'Link deleted, private or unreachable. Open it and replace the link in the sheet.',
+      'No view count': 'The post opens but the platform does not show its view count (mostly new Facebook reels). It is retried at Day 2, Day 7 and Day 30, and the Apify Reels-tab backup looks for it every morning.',
+      'Fetch failed': 'Link deleted, private or wrong. Open it and replace the link in the sheet row shown below.',
       'No public link': 'Internal PR sheet has a Drive file only. Add the live post link in the sheet.',
       'Not fetched': 'New in the sheet; fetched in the next daily refresh.'
     };
@@ -854,12 +858,12 @@ dash.calc('status', {
     };
     const gap = median(lines.map(o => o.p[o.p.length - 1][0] - o.p[0][0]));
     const days = (n) => n + (n === 1 ? ' day' : ' days');
-    // Day 2 → Day 7 only where both captures were on time (Day 2 by day 3, Day 7 by day 9), so it really spans ~5 days
-    const onTime = w.filter(v => v.d2_views > 0 && v.d7_views != null && v.d2_age <= 3 && v.d7_age <= 9);
-    const firstDue = w.filter(v => v.d2_views > 0 && v.d2_age <= 3 && v.d7_views == null && v.d7_due).map(v => v.d7_due).sort()[0];
+    // Day 2 → Day 7 only where both captures were on time (within a day of 48 h and of 7 days), so it really spans ~5 days
+    const onTime = w.filter(v => v.d2_views > 0 && v.d7_views != null && v.d2_hours <= 72 && v.d7_hours <= 192);
+    const firstDue = w.filter(v => v.d2_views > 0 && v.d2_hours <= 72 && v.d7_views == null && v.d7_due).map(v => v.d7_due).sort()[0];
     const sumChip = (label, pairs, note) => { chip(label, pairs); if (!pairs.length && note) sum.lastChild.querySelector('.s').textContent = note; };
     sumChip('Day 2 → Day 7', onTime.map(v => [v.d2_views, v.d7_views]), firstDue ? 'first on-time pairs arrive ' + dmy(firstDue) : null);
-    sumChip('Day 7 → Day 30', w.filter(v => v.d7_views > 0 && v.d30_views != null && v.d7_age <= 9).map(v => [v.d7_views, v.d30_views]));
+    sumChip('Day 7 → Day 30', w.filter(v => v.d7_views > 0 && v.d30_views != null && v.d7_hours <= 192).map(v => [v.d7_views, v.d30_views]));
     chip('Between captures so far', lines.map(o => [o.p[0][1], o.p[o.p.length - 1][1]]));
     if (gap != null && lines.length) sum.lastChild.querySelector('.s').textContent = 'median of ' + lines.length + ' videos, captured ' + days(gap) + ' apart';
     $('g-note').textContent = lines.length + ' videos captured at two or more ages · log scale';
@@ -1048,6 +1052,23 @@ dash.calc('status', {
     if (d.status !== 'ok') return;
     if (!d.data.length) { box.appendChild(el('p', 'vd-empty', 'Nothing to fix.')); return; }
     d.data.forEach(r => { const row = el('div'); row.append(el('span', 'vd-pill ' + (r.status === 'Fetch failed' ? 'b' : 'w'), r.status), el('b', null, String(r.videos)), el('span', 'vd-note', r.next_step)); box.appendChild(row); });
+    // every link that does not work or has no view count, with the sheet row to fix it in
+    const list = rows.filter(v => v.status === 'Fetch failed' || v.status === 'No view count')
+      .sort((a, b) => (a.status === b.status ? 0 : a.status === 'Fetch failed' ? -1 : 1) || String(a.sheet_row).localeCompare(String(b.sheet_row), undefined, { numeric: true }));
+    const tw = $('fix-list'); tw.textContent = '';
+    if (!list.length) return;
+    const t = el('table', 'vd-ct'), hr = el('tr');
+    ['Video', 'Problem', 'Sheet row', 'Account', 'Link', 'Tries', 'Last error'].forEach(x => hr.appendChild(el('th', null, x)));
+    const th = el('thead'); th.appendChild(hr); t.appendChild(th);
+    const tb = el('tbody');
+    list.forEach(v => {
+      const tr = el('tr'), a = el('a', null, v.sheet_link || v.url); a.href = v.sheet_link || v.url; a.target = '_blank'; a.rel = 'noopener';
+      const lk = el('td'); lk.appendChild(a); lk.style.maxWidth = '320px'; lk.style.overflow = 'hidden'; lk.style.textOverflow = 'ellipsis';
+      tr.append(el('td', null, v.video), el('td', null, v.status === 'Fetch failed' ? 'Link not working' : 'No view count'), el('td', null, v.sheet_row || ''),
+        el('td', null, v.account || v.source), lk, el('td', null, v.tries == null ? '' : String(v.tries)), el('td', 'na', v.last_error || ''));
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb); tw.appendChild(t);
   }
 
 

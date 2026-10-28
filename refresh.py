@@ -53,17 +53,16 @@ def due_today():
     snaps = {}
     for s in data["snapshots"]:
         snaps.setdefault(s["master_id"], []).append(s)
-    today = datetime.now(timezone(timedelta(hours=5, minutes=30))).date()  # India calendar day
+    now = datetime.now(timezone.utc)  # milestones are counted in hours from the exact upload time
     due = {"Instagram": [], "Facebook": [], "YouTube": []}
     for m in data["master"]:
-        if (m["content_type"] != "Public post" or m.get("sheet_status") == "Removed from sheet" or m.get("duplicate_of")
-                or m["platform"] not in due):
+        if m["content_type"] != "Public post" or m.get("sheet_status") == "Removed from sheet" or m["platform"] not in due:
             continue
         ss = snaps.get(m["master_id"], [])
         good = [s for s in ss if s["fetch_status"] == "OK"]
         since = m.get("link_replaced_on") or ""  # failures of an old link do not count against a new one
         failed = [s for s in ss if s["fetch_status"] != "OK" and s["captured_at"][:10] > since]
-        if is_due(m.get("published_date"), good, today, bool(ss), every, failed):
+        if is_due(m.get("published_at") or m.get("published_date"), good, now, bool(ss), every, failed):
             due[m["platform"]].append(m["canonical_url"])
     return due
 

@@ -287,6 +287,31 @@ for r, c in enumerate(COST_REPORT, start=row_i + 2):
         cost_ws.cell(row=r, column=k, value=v).font = Font(name=F, size=10, color="B3261E" if c["problem"] and k == 7 else DARK)
     cost_ws.cell(row=r, column=5).number_format = '"₹"#,##0'; cost_ws.cell(row=r, column=9).number_format = '"₹"#,##0'
 
+# ---------- Links to check ----------
+fix_ws = wb.create_sheet("Links to check", index=2)
+fix_ws.sheet_view.showGridLines = False
+fix_cols = [("Video", 10), ("Problem", 16), ("Source", 18), ("Sheet row", 26), ("Account", 26), ("Platform", 11),
+            ("Posted", 12), ("Link in the sheet", 60), ("Tries", 7), ("Last error", 50)]
+for i, (h, w_) in enumerate(fix_cols, 1):
+    fix_ws.cell(row=1, column=i, value=h); fix_ws.column_dimensions[get_column_letter(i)].width = w_
+style_header(fix_ws, 1, 1, len(fix_cols))
+probs = [m for m in master if m.get("fetch_status") in ("Fetch failed", "No view count", "No public link")
+         and m.get("sheet_status") != "Removed from sheet"]
+probs.sort(key=lambda m: ({"Fetch failed": 0, "No public link": 1}.get(m["fetch_status"], 2), m.get("source_rows") or ""))
+for r, m in enumerate(probs, start=2):
+    link = m.get("original_url") or m["canonical_url"]
+    prob = {"Fetch failed": "Link not working", "No public link": "Drive file only"}.get(m["fetch_status"], "No view count")
+    vals = [m["master_id"], prob, m["source_group"], m.get("source_rows"), m.get("account") or m.get("channel") or m.get("influencer"),
+            m["platform"], d(m.get("published_date")), link, m.get("fetch_tries"), m.get("last_error")]
+    for c, v in enumerate(vals, 1):
+        fix_ws.cell(row=r, column=c, value=v).font = Font(name=F, size=10)
+    fix_ws.cell(row=r, column=8).hyperlink = link
+    fix_ws.cell(row=r, column=8).font = Font(name=F, size=10, color="1155CC", underline="single")
+    fix_ws.cell(row=r, column=7).number_format = "dd-mmm-yyyy"
+if probs:
+    add_table(fix_ws, "LinksToCheck", len(fix_cols), len(probs))
+fix_ws.freeze_panes = "B2"
+
 # ---------- Setup ----------
 setup.column_dimensions["A"].width = 26; setup.column_dimensions["B"].width = 36
 for col in "CDEF": setup.column_dimensions[col].width = 30
@@ -300,7 +325,7 @@ steps = [("Instagram metrics", "Apify Instagram Scraper (apify_instagram.mjs) - 
          ("Facebook / YouTube metrics", "Bright Data Scraper API (brightdata_api_pipeline.mjs)"),
          ("Daily refresh", "python refresh.py start, then python refresh.py finish (syncs sheets, fetches due milestones, rebuilds)"),
          ("Rebuild workbook", "python analytics_master_build/build_workbook.py"),
-         ("Milestones", "Day 2 = captured 2-6 days after upload, Day 7 = 7-29 days, Day 30 = 30+ days; late captures are flagged"),
+         ("Milestones", "Day 2 = counts once 48 hours have passed since upload, Day 7 = after 7 days, Day 30 = after 30 days, All time = today; a capture more than a day after the mark is flagged late"),
          ("Keys", "BRIGHTDATA_API_KEY and APIFY_TOKEN in .env (never commit)")]
 setup.cell(row=9, column=1, value="Refresh workflow").font = Font(name=F, size=11, bold=True, color=NAVY)
 for r, (a, b) in enumerate(steps, start=10):

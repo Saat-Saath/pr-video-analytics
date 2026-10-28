@@ -146,8 +146,8 @@ MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "No
 
 
 def counted(v):
-    """Videos that take a share of the payments: not a second copy of the same post, not removed from the sheets."""
-    return not v.get("duplicate_of") and v.get("sheet_status") != "Removed from sheet"
+    """Videos that take a share of the payments: everything still in the sheets."""
+    return v.get("sheet_status") != "Removed from sheet"
 
 
 def missing_rows(master, rows):
