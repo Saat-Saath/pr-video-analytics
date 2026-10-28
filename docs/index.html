@@ -167,6 +167,21 @@ window.dash = (function () {
 .vd-sc{border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px;background:#fff}
 .vd-sc.best{border:2px solid var(--acc)}
 .vd-sc h3{font-size:16px;font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.vd-source-main{border-top:4px solid var(--acc);gap:18px}
+.vd-sm-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:#fff}
+.vd-sm{width:100%;border-collapse:separate;border-spacing:0;min-width:900px;font-variant-numeric:tabular-nums}
+.vd-sm th{padding:12px 14px;background:#F8FAFD;border-bottom:1px solid var(--line);font-size:12px;color:var(--mut);text-align:left;white-space:nowrap}
+.vd-sm th:first-child{position:sticky;left:0;z-index:2;background:#F8FAFD;min-width:190px}
+.vd-sm td{padding:0;border-bottom:1px solid var(--line2);border-right:1px solid var(--line2);vertical-align:top}
+.vd-sm tr:last-child td{border-bottom:0}.vd-sm td:last-child{border-right:0}
+.vd-sm .src{position:sticky;left:0;z-index:1;background:#fff;padding:15px 14px;min-width:190px}
+.vd-sm .src b{display:block;font-size:14px}.vd-sm .src span{display:block;margin-top:4px;font-size:11px;color:var(--mut2)}
+.vd-smc{all:unset;box-sizing:border-box;display:flex;min-width:170px;min-height:116px;width:100%;padding:14px;cursor:pointer;flex-direction:column;gap:7px;background:#fff}
+.vd-smc:hover{background:#F8FAFD}.vd-smc:focus-visible{outline:2px solid var(--b2);outline-offset:-3px}
+.vd-smc .v{font-size:22px;font-weight:750;line-height:1.05}.vd-smc .l{font-size:11px;color:var(--mut2)}
+.vd-smc .r{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;color:var(--ink2)}
+.vd-smc .cov{height:5px;background:#EEF2F8;border-radius:999px;overflow:hidden}.vd-smc .cov i{display:block;height:100%;border-radius:999px}
+.vd-smc.empty{cursor:default;color:#98A2B3;justify-content:center}.vd-smc.empty:hover{background:#fff}
 .vd-sg{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}
 .vd-sg div{display:flex;flex-direction:column;gap:1px}
 .vd-sg b{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
@@ -270,6 +285,13 @@ window.dash = (function () {
   <div class="vd-kpi"><span class="l">Median views / video</span><span class="v dash-skeleton" data-source="kpis" data-where="key=d7|All|All" data-field="median">—</span><span class="d n" data-source="kpis" data-where="key=d7|All|All" data-field="hit1k">—</span></div>
 </section>
 
+<section class="vd-card vd-source-main" aria-label="Source and platform response comparison" id="sources">
+  <div class="vd-ch"><div><h2 class="vd-h2">Source × platform response</h2><p class="vd-note" style="margin-top:4px">Compare coverage and performance at the selected Day 2, Day 7 or Day 30 snapshot.</p></div><span class="vd-note">Click a cell to filter the dashboard</span></div>
+  <div class="vd-sm-wrap"><table class="vd-sm" data-source="videos"><thead id="src-matrix-head"></thead><tbody id="src-matrix"></tbody></table></div>
+  <div class="vd-ch"><h3 class="vd-h3">Overall source scorecard</h3><span class="vd-note">Latest views per video · the orange card leads on average views</span></div>
+  <div class="vd-src" id="src-cards" data-source="src_score"></div>
+</section>
+
 <div class="vd-row">
   <section class="vd-card vd-w3" aria-label="Video wall" id="wall-card">
     <div class="vd-ch"><h2 class="vd-h2">Video wall</h2><span class="vd-note" id="wall-note">—</span></div>
@@ -300,11 +322,6 @@ window.dash = (function () {
 </div>
 
 <h2 class="vd-sec">Comparisons</h2>
-
-<section class="vd-card" aria-label="Source comparison" id="sources">
-  <div class="vd-ch"><h2 class="vd-h2">Source scorecard: who delivers?</h2><span class="vd-note">Latest views per video · the orange card leads on average views</span></div>
-  <div class="vd-src" id="src-cards" data-source="src_score"></div>
-</section>
 
 <section class="vd-card" aria-label="Compare two videos" id="compare">
   <div class="vd-ch"><h2 class="vd-h2">Compare two videos</h2><span class="vd-note">Pick any two by ID or account. Bars are scaled per row.</span></div>
@@ -694,6 +711,30 @@ dash.calc('status', {
 
   // ---- source scorecard
   function drawSources() {
+    const l = S.snap, sources = [...new Set(rows.map(v => v.source))], platforms = [...new Set(rows.map(v => v.platform))];
+    const head = $('src-matrix-head'), body = $('src-matrix'); head.textContent = ''; body.textContent = '';
+    const hr = el('tr'); hr.appendChild(el('th', null, 'Source'));
+    platforms.forEach(p => { const th = el('th'); const dot = el('i', 'vd-dot'); dot.style.background = PCOL[p] || '#667085'; th.append(dot, ' ' + p); hr.appendChild(th); });
+    head.appendChild(hr);
+    sources.forEach(source => {
+      const tr = el('tr'), all = rows.filter(v => v.source === source), src = el('td', 'src');
+      src.append(el('b', null, source), el('span', null, all.length + ' videos across ' + new Set(all.map(v => v.platform)).size + ' platforms')); tr.appendChild(src);
+      platforms.forEach(platform => {
+        const td = el('td'), g = all.filter(v => v.platform === platform);
+        if (!g.length) { const empty = el('span', 'vd-smc empty'); empty.append(el('span', 'l', 'No videos')); td.appendChild(empty); tr.appendChild(td); return; }
+        const got = g.filter(v => v[l + '_views'] != null), views = d3.sum(got, v => v[l + '_views'] || 0), avg = got.length ? views / got.length : null;
+        const actions = d3.sum(got, v => (v[l + '_likes'] || 0) + (v[l + '_comments'] || 0) + (v[l + '_shares'] || 0)), rate = views ? actions / views : null, coverage = got.length / g.length;
+        const b = el('button', 'vd-smc'); b.type = 'button'; b.setAttribute('aria-label', source + ', ' + platform + ': ' + got.length + ' of ' + g.length + ' responses, ' + full(views) + ' views at ' + LBL[l] + '. Filter dashboard.');
+        b.append(el('span', 'v', got.length ? big(views) : '—'), el('span', 'l', 'views at ' + LBL[l]));
+        const r1 = el('span', 'r'); r1.append(el('span', null, got.length + '/' + g.length + ' responses'), el('span', null, pct0(coverage))); b.appendChild(r1);
+        const cov = el('span', 'cov'), fill = el('i'); fill.style.width = (coverage * 100).toFixed(1) + '%'; fill.style.background = PCOL[platform] || '#667085'; cov.appendChild(fill); b.appendChild(cov);
+        const r2 = el('span', 'r'); r2.append(el('span', null, 'Avg ' + (avg == null ? '—' : big(avg))), el('span', null, 'Eng ' + pct(rate))); b.appendChild(r2);
+        b.addEventListener('click', () => { S.src = source; S.plat = platform; S.wallN = 12; drawAll(); $('wall-card').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+        td.appendChild(b); tr.appendChild(td);
+      });
+      body.appendChild(tr);
+    });
+
     const d = dash.data('src_score'), box = $('src-cards'); box.textContent = '';
     if (d.status !== 'ok') return;
     const data = d.data.slice().sort((a, b) => (b.avg ?? -1) - (a.avg ?? -1));
