@@ -15,6 +15,7 @@ import csv
 import io
 import json
 import re
+import urllib.error
 import urllib.request
 from collections import defaultdict
 from datetime import datetime
@@ -79,8 +80,11 @@ def read_rows():
     sid = e.get("SHEET_COSTS", "")
     if sid:
         url = f"https://docs.google.com/spreadsheets/d/{sid}/export?format=csv&gid={e.get('SHEET_COSTS_GID', '0')}"
-        with urllib.request.urlopen(url, timeout=60) as r:
-            text = r.read().decode("utf8")
+        try:
+            with urllib.request.urlopen(url, timeout=60) as r:
+                text = r.read().decode("utf8")
+        except urllib.error.HTTPError as err:
+            raise SystemExit(f"Costs sheet could not be read (HTTP {err.code}): set it to 'Anyone with the link - Viewer'")
         if text.lstrip().lower().startswith("<!doctype html"):
             raise SystemExit("Costs sheet is not shared: set it to 'Anyone with the link - Viewer'")
         rows = list(csv.reader(io.StringIO(text)))
