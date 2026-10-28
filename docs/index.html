@@ -49,379 +49,124 @@ window.dash = (function () {
 </script>
 </head><body><div id="dash-root">
 <style>
-#dash-root{--dash-gutter:0}
-.vd{--ink:#101828;--ink2:#344054;--mut:#475467;--mut2:#5D6679;--line:#E4E7EC;--line2:#F0F2F5;--bg:#F5F6F8;--card:#FFFFFF;--b1:#6E9BEA;--b2:#2D5FD3;--b3:#142B66;--acc:#EA580C;--accd:#9A3B0B;--ok:#1F6F43;--okbg:#E7F4EC;--chip:#EEF2F8;--navy:#0F1E45;
-  --disp:'Bricolage Grotesque',var(--font-anthropic-sans),system-ui,sans-serif;--body:'Inter',var(--font-anthropic-sans),system-ui,sans-serif;
-  background:var(--bg);color:var(--ink);font-family:var(--body);border-radius:16px}
-.vd *{box-sizing:border-box}
-.vd-in{max-width:1360px;margin:0 auto;padding:0 clamp(14px,2vw,24px) 56px;display:flex;flex-direction:column;gap:24px}
-.vd h1,.vd h2,.vd h3,.vd p{margin:0}
-.vd-hero{background:var(--navy);color:#fff;border-radius:0 0 28px 28px;padding:32px clamp(18px,3vw,40px) 28px;margin:0 calc(-1*clamp(14px,2vw,24px));display:flex;flex-direction:column;gap:22px}
-.vd-head{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-end;justify-content:space-between}
-.vd-eye{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#AFC3EE}
-.vd-title{font-family:var(--disp);font-size:clamp(32px,4.4vw,48px);line-height:1.02;font-weight:700;letter-spacing:-.01em}
-.vd-sub{font-size:15px;color:#C9D4EE;max-width:60ch}
-.vd-right{display:flex;flex-direction:column;align-items:flex-end;gap:10px}
-.vd-meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:flex-end;font-size:12px;color:#AFC3EE}
-.vd-live{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:rgba(74,222,128,.14);color:#86EFAC;font-weight:600}
-.vd-live::before{content:"";width:7px;height:7px;border-radius:50%;background:#4ADE80}
-.vd-seg{display:flex;gap:4px;padding:4px;border-radius:12px;background:rgba(255,255,255,.1)}
-.vd-seg button{min-height:40px;padding:0 16px;border:0;border-radius:9px;cursor:pointer;font:600 14px/1 var(--body);background:transparent;color:#C9D4EE}
-.vd-seg button[aria-pressed=true]{background:#fff;color:var(--ink)}
-.vd-ins{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
-.vd-in1{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start}
-.vd-in1 .ic{flex:0 0 34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700}
-.vd-in1 .tx{display:flex;flex-direction:column;gap:3px;min-width:0}
-.vd-in1 .big{font-family:var(--disp);font-size:22px;font-weight:700;line-height:1.1}
-.vd-in1 .sm{font-size:13px;color:#C9D4EE;line-height:1.4}
-.vd-nav{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.vd-tab{min-height:44px;padding:0 16px;border-radius:999px;cursor:pointer;font:600 14px/1 var(--body);border:1px solid #D0D5DD;background:#fff;color:var(--ink2);display:inline-flex;align-items:center;gap:8px}
-.vd-tab[aria-pressed=true]{border-color:var(--ink);background:var(--ink);color:#fff}
-.vd-tab span{opacity:.7;font-weight:500}
-.vd-tab i,.vd-dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex:0 0 9px}
-.vd-sel{margin-left:auto;min-height:44px;padding:0 14px;border-radius:999px;border:1px solid #D0D5DD;background:#fff;color:var(--ink2);font:600 14px/1 var(--body)}
-.vd-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px}
-.vd-kpi{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px;display:flex;flex-direction:column;gap:6px}
-.vd-kpi .l{font-size:13px;font-weight:500;color:var(--mut)}
-.vd-kpi .v{font-size:28px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.1}
-.vd-kpi .d{font-size:12px;font-weight:600;color:var(--ok)}
-.vd-kpi .d.n{color:var(--mut2);font-weight:500}
-.vd-row{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
-.vd-row.st{align-items:stretch}
-.vd-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;min-width:0;display:flex;flex-direction:column;gap:14px;position:relative}
-.vd-w3{flex:999 1 560px}.vd-w2{flex:1 1 380px}.vd-g3{flex:3 1 560px}.vd-g2{flex:2 1 380px}.vd-half{flex:1 1 440px}
-.vd-sticky{position:sticky;top:12px}
-.vd-ch{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:baseline}
-.vd-h2{font-size:18px;font-weight:700}
-.vd-sec{font-family:var(--disp);font-size:24px;font-weight:700;margin-top:8px}
-.vd-note{font-size:13px;color:var(--mut2)}
-.vd-wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}
-.vd-vc{display:flex;flex-direction:column;gap:8px;padding:8px 8px 12px;border-radius:14px;background:#fff;text-align:left;cursor:pointer;font:inherit;color:inherit;border:2px solid var(--line);transition:border-color .15s,box-shadow .15s,transform .15s}
-.vd-vc:hover{border-color:#B9C6E4;transform:translateY(-2px);box-shadow:0 8px 20px rgba(16,24,40,.08)}
-.vd-vc[aria-pressed=true]{border-color:var(--acc);box-shadow:0 8px 20px rgba(234,88,12,.14)}
-.vd button:focus-visible,.vd a:focus-visible,.vd input:focus-visible,.vd select:focus-visible{outline:2px solid var(--b2);outline-offset:2px}
-.vd-th{position:relative;display:flex;align-items:center;justify-content:center;aspect-ratio:1/1;border-radius:10px;overflow:hidden;background-size:cover;background-position:center}
-.vd-th.has::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 55%,rgba(0,0,0,.35))}
-.vd-pl{position:relative;z-index:1;width:44px;height:44px;border-radius:999px;background:rgba(255,255,255,.94);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.18)}
-.vd-badge{position:absolute;z-index:1;left:8px;top:8px;padding:3px 8px;border-radius:999px;background:#fff;color:var(--ink2);font-size:11px;font-weight:600;display:inline-flex;align-items:center;gap:5px}
-.vd-id{position:absolute;z-index:1;right:8px;bottom:8px;padding:3px 7px;border-radius:6px;background:rgba(16,24,40,.8);color:#fff;font-size:11px;font-weight:600}
-.vd-rank{position:absolute;z-index:1;left:8px;bottom:8px;padding:3px 7px;border-radius:6px;background:var(--acc);color:#fff;font-size:11px;font-weight:700}
-.vd-vt{font-size:13px;font-weight:600;line-height:1.3;min-height:34px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-.vd-vn{display:flex;align-items:baseline;justify-content:space-between;gap:6px}
-.vd-vn b{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
-.vd-vn span,.vd-small{font-size:11px;color:var(--mut2)}
-.vd-gr{display:block;font-size:12px;font-weight:600;color:var(--ok)}
-.vd-gr.n{color:var(--mut2);font-weight:500}
-.vd-more{align-self:center;min-height:44px;padding:0 18px;border-radius:999px;border:1px solid #D0D5DD;background:#fff;color:var(--ink2);font:600 14px/1 var(--body);cursor:pointer}
-.vd-player{position:relative;display:flex;align-items:center;justify-content:center;border-radius:14px;overflow:hidden;background:#0B1220;background-size:cover;background-position:center;width:100%;max-width:380px;margin:0 auto;aspect-ratio:9/14}
-.vd-player.wide{aspect-ratio:16/9;max-width:none}
-.vd-player iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}
-.vd-play{position:relative;z-index:1;width:68px;height:68px;border-radius:999px;border:0;background:rgba(255,255,255,.95);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 18px rgba(0,0,0,.25)}
-.vd-ptag{position:absolute;z-index:1;left:12px;top:12px}
-.vd-plink{position:absolute;z-index:1;left:12px;right:12px;bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;border-radius:10px;background:rgba(16,24,40,.8);color:#fff;font-size:12px;font-weight:600}
-.vd-plink a{color:#fff}
-.vd-pnote{font-size:12px;color:var(--mut2);text-align:center}
-.vd-chips{display:flex;flex-wrap:wrap;gap:6px}
-.vd-chip{padding:3px 9px;border-radius:999px;background:var(--chip);color:var(--ink2);font-size:12px;font-weight:600}
-.vd-chip.g{background:var(--okbg);color:var(--ok)}.vd-chip.o{background:#FFF1E7;color:var(--accd)}
-.vd-sh{font-size:19px;line-height:1.25;font-weight:700}
-.vd-h3{font-size:13px;font-weight:600;color:var(--mut)}
-.vd-bars{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;align-items:end;height:190px}
-.vd-bar{display:flex;flex-direction:column;justify-content:flex-end;gap:5px;height:100%}
-.vd-bar .on{font-size:11px;font-weight:700;color:var(--accd)}
-.vd-bar .bv{font-size:17px;font-weight:700;font-variant-numeric:tabular-nums}
-.vd-bar .bv.n{font-size:12px;font-weight:600;color:var(--mut2)}
-.vd-bar .bl{font-size:13px;font-weight:600}
-.vd-bar .bf{display:block;width:100%;border-radius:8px 8px 4px 4px}
-.vd-bar .bf.e{border:2px dashed #D0D5DD;background:transparent}
-.vd-mt{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
-.vd-mt th{font-size:12px;font-weight:600;color:var(--mut2);text-align:right;padding:0 0 6px;border-bottom:1px solid var(--line)}
-.vd-mt th:first-child,.vd-mt td:first-child{text-align:left}
-.vd-mt td{padding:7px 0;border-bottom:1px solid var(--line2);text-align:right}
-.vd-mt td:first-child{color:var(--ink2)}
-.vd-mt .na{color:#98A2B3;font-weight:500;font-size:12px}
-.vd-mt .win{color:var(--ok);font-weight:700}
-.vd-link{font-size:14px;font-weight:600;color:var(--b2)}
-.vd-legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--mut)}
-.vd-legend span{display:flex;align-items:center;gap:6px}
-.vd-legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
-.vd-chart{position:relative;min-height:260px}
-.vd-chart svg{display:block;width:100%;height:auto;font-family:var(--body)}
-.vd-pc{display:flex;flex-direction:column;gap:4px}
-.vd-pc .top{display:flex;justify-content:space-between;font-size:13px}
-.vd-pc .top b{font-weight:600;display:flex;align-items:center;gap:6px}
-.vd-pb{display:flex;align-items:center;gap:8px}
-.vd-pb .t{flex:1 1 auto;height:10px;background:#F2F4F7;border-radius:4px;overflow:hidden}
-.vd-pb .t i{display:block;height:100%;border-radius:4px}
-.vd-pb .n{width:56px;text-align:right;font-size:12px;font-variant-numeric:tabular-nums;color:var(--ink2)}
-.vd-heat{overflow-x:auto}
-.vd-hg{min-width:480px;display:grid;grid-template-columns:48px repeat(6,minmax(0,1fr));gap:6px;align-items:center}
-.vd-hg .h{font-size:12px;color:var(--mut2);text-align:center}
-.vd-hg .d{font-size:12px;font-weight:600;color:var(--ink2)}
-.vd-hg .c{display:flex;align-items:center;justify-content:center;height:34px;border-radius:6px;font-size:11px;font-weight:600;font-variant-numeric:tabular-nums}
-.vd-hg .c.best{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--acc)}
-.vd-empty{font-size:13px;color:var(--mut2);padding:24px 0;text-align:center}
-.vd-top{display:grid;grid-template-columns:24px 48px minmax(0,1fr) auto;gap:12px;align-items:center;padding:6px 0;border:0;border-bottom:1px solid var(--line2);background:none;text-align:left;font:inherit;color:inherit;cursor:pointer;width:100%}
-.vd-top:hover .tt b{color:var(--b2)}
-.vd-top .r{font-size:16px;font-weight:700;color:var(--mut2);font-variant-numeric:tabular-nums}
-.vd-top .tb{position:relative;display:flex;align-items:center;justify-content:center;width:48px;height:60px;border-radius:8px;background-size:cover;background-position:center}
-.vd-top .tt{display:flex;flex-direction:column;gap:4px;min-width:0}
-.vd-top .tt b{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.vd-top .tt span{height:6px;background:#F2F4F7;border-radius:4px;overflow:hidden;display:block}
-.vd-top .tt i{display:block;height:100%;border-radius:4px}
-.vd-top .tv{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
-.vd-top .tv b{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums}
-.vd-mini{width:20px;height:20px;border-radius:999px;background:rgba(255,255,255,.94);display:flex;align-items:center;justify-content:center}
-.vd-src{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
-.vd-sc{border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px;background:#fff}
-.vd-sc.best{border:2px solid var(--acc)}
-.vd-sc h3{font-size:16px;font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:8px}
-.vd-source-main{border-top:4px solid var(--acc);gap:18px}
-.vd-sm-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:#fff}
-.vd-sm{width:100%;border-collapse:separate;border-spacing:0;min-width:900px;font-variant-numeric:tabular-nums}
-.vd-sm th{padding:12px 14px;background:#F8FAFD;border-bottom:1px solid var(--line);font-size:12px;color:var(--mut);text-align:left;white-space:nowrap}
-.vd-sm th:first-child{position:sticky;left:0;z-index:2;background:#F8FAFD;min-width:190px}
-.vd-sm td{padding:0;border-bottom:1px solid var(--line2);border-right:1px solid var(--line2);vertical-align:top}
-.vd-sm tr:last-child td{border-bottom:0}.vd-sm td:last-child{border-right:0}
-.vd-sm .src{position:sticky;left:0;z-index:1;background:#fff;padding:15px 14px;min-width:190px}
-.vd-sm .src b{display:block;font-size:14px}.vd-sm .src span{display:block;margin-top:4px;font-size:11px;color:var(--mut2)}
-.vd-smc{all:unset;box-sizing:border-box;display:flex;min-width:170px;min-height:116px;width:100%;padding:14px;cursor:pointer;flex-direction:column;gap:7px;background:#fff}
-.vd-smc:hover{background:#F8FAFD}.vd-smc:focus-visible{outline:2px solid var(--b2);outline-offset:-3px}
-.vd-smc .v{font-size:22px;font-weight:750;line-height:1.05}.vd-smc .l{font-size:11px;color:var(--mut2)}
-.vd-smc .r{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;color:var(--ink2)}
-.vd-smc .cov{height:5px;background:#EEF2F8;border-radius:999px;overflow:hidden}.vd-smc .cov i{display:block;height:100%;border-radius:999px}
-.vd-smc.empty{cursor:default;color:#98A2B3;justify-content:center}.vd-smc.empty:hover{background:#fff}
-.vd-sg{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}
-.vd-sg div{display:flex;flex-direction:column;gap:1px}
-.vd-sg b{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
-.vd-sg span{font-size:12px;color:var(--mut2)}
-.vd-sg .w{color:var(--ok)}
-.vd-share{height:10px;border-radius:5px;background:#F2F4F7;overflow:hidden}
-.vd-share i{display:block;height:100%;background:var(--acc);border-radius:5px}
-.vd-cmp{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
-.vd-cside{display:flex;flex-direction:column;gap:10px;min-width:0}
-.vd-cpick{display:flex;flex-direction:column;gap:4px}
-.vd-cpick label{font-size:12px;font-weight:600;color:var(--mut)}
-.vd-cpick input{font:500 14px/1 var(--body);min-height:42px;padding:0 12px;border:1px solid #D0D5DD;border-radius:10px;background:#fff;color:var(--ink);width:100%}
-.vd-ccard{display:flex;gap:12px;align-items:center;padding:10px;border-radius:12px;background:#F9FAFB;border:0;font:inherit;color:inherit;text-align:left;cursor:pointer;width:100%}
-.vd-ccard .tb{flex:0 0 64px;height:80px;border-radius:8px;display:flex;align-items:center;justify-content:center;background-size:cover;background-position:center}
-.vd-ccard b{font-size:14px;display:block}
-.vd-cbars{display:flex;flex-direction:column;gap:10px}
-.vd-cb .lb{display:flex;justify-content:space-between;font-size:12px;color:var(--mut);margin-bottom:4px}
-.vd-cb .pair{display:grid;grid-template-columns:1fr 1fr;gap:4px}
-.vd-cb .side{height:22px;background:#F2F4F7;border-radius:6px;position:relative;overflow:hidden}
-.vd-cb .side.a{direction:rtl}
-.vd-cb .side i{display:block;height:100%;border-radius:6px}
-.vd-cb .side span{position:absolute;top:50%;transform:translateY(-50%);font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink);direction:ltr}
-.vd-cb .side.a span{right:8px}.vd-cb .side.b span{left:8px}
-.vd-verdict{padding:12px 14px;border-radius:12px;background:#FFF7F0;color:var(--accd);font-size:14px;font-weight:600}
-.vd-lb{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
-.vd-lb th{font-size:12px;font-weight:600;color:var(--mut2);text-align:left;padding:0 8px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
-.vd-lb td{padding:8px;border-bottom:1px solid var(--line2);vertical-align:middle}
-.vd-lb .num{text-align:right}
-.vd-lb .acc{font-weight:600;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.vd-lb .bar{width:140px}
-.vd-lb .bar span{display:block;height:8px;border-radius:4px;background:#F2F4F7;overflow:hidden}
-.vd-lb .bar i{display:block;height:100%;border-radius:4px;background:var(--b2)}
-.vd-lb button{all:unset;cursor:pointer;color:var(--b2);font-weight:600}
-.vd-lb button:focus-visible{outline:2px solid var(--b2)}
-.vd-tools{display:flex;flex-wrap:wrap;gap:8px}
-.vd-tools input,.vd-tools select{font:500 13px/1 var(--body);min-height:40px;padding:0 12px;border:1px solid #D0D5DD;border-radius:10px;background:#fff;color:var(--ink)}
-.vd-tools input{flex:1 1 14rem;min-width:0}
-.vd-tw{overflow:auto;max-height:34rem;border:1px solid var(--line);border-radius:12px}
-.vd-tbl{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;font-variant-numeric:tabular-nums;background:#fff}
-.vd-tbl th{position:sticky;background:#fff;color:var(--mut2);font-weight:600;font-size:12px;text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap;z-index:2}
-.vd-tbl .r1 th{top:0;height:34px}
-.vd-tbl .r2 th{top:34px}
-.vd-tbl th[rowspan]{vertical-align:bottom}
-.vd-tbl th.grp{text-align:center;color:var(--ink);font-size:13px}
-.vd-tbl th button{all:unset;cursor:pointer}
-.vd-tbl td{padding:7px 10px;border-bottom:1px solid var(--line2);white-space:nowrap}
-.vd-tbl .num{text-align:right}
-.vd-tbl .ms{border-left:1px solid var(--line)}
-.vd-tbl .g2{background:#F8FAFF}.vd-tbl .g7{background:#F3F6FD}.vd-tbl .g30{background:#EEF2FB}.vd-tbl .gall{background:#FFF7F0}
-.vd-tbl .stk{position:sticky;left:0;z-index:1;background:#fff;box-shadow:1px 0 0 var(--line)}
-.vd-tbl th.stk{z-index:3}
-.vd-tbl a{color:inherit;text-decoration:underline;text-decoration-color:#D0D5DD;text-underline-offset:2px}
-.vd-tbl a:hover{text-decoration-color:currentColor;color:var(--b2)}
-.vd-tbl tbody tr:hover td{background:#F9FAFB}
-.vd-tbl .st{color:#98A2B3;font-size:12px}
-.vd-tbl .late{color:var(--accd);font-size:11px;margin-left:3px}
-.vd-tbl .pbtn{all:unset;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:999px;background:var(--chip);margin-right:6px;vertical-align:middle}
-.vd-tbl .pbtn:hover{background:#DCE7FB}
-.vd-pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;background:var(--chip);color:var(--ink2)}
-.vd-pill.ok{background:var(--okbg);color:var(--ok)}.vd-pill.w{background:#FFF1E7;color:var(--accd)}.vd-pill.b{background:#FDECEC;color:#B42318}
-.vd-fix{display:flex;flex-direction:column}
-.vd-fix div{display:grid;grid-template-columns:auto 64px 1fr;gap:12px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line2);font-size:13px}
-.vd-fix b{font-variant-numeric:tabular-nums;text-align:right}
-.vd-tip{position:absolute;pointer-events:none;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px rgba(16,24,40,.12);padding:6px 10px;font-size:12px;white-space:nowrap;z-index:5}
-.vd-tip .k{color:var(--mut2)}
-.dash-skeleton{color:transparent!important}
-[data-dash-source-state=refreshing]{opacity:.5;transition:opacity var(--cds-dur-slow,.3s)}
-@media (max-width:720px){.vd-sel{margin-left:0}.vd-right{align-items:flex-start}.vd-kpi .v{font-size:24px}.vd-cmp{grid-template-columns:1fr}.vd-sticky{position:static}.vd-lb .bar{display:none}}
-@media (prefers-reduced-motion:reduce){.vd-vc{transition:none}.vd-vc:hover{transform:none}}
+.pv{display:flex;flex-direction:column;gap:var(--cds-gap-lg);font-family:var(--font-anthropic-sans);color:var(--color-fg)}
+.pv-head h1{font-family:var(--font-anthropic-serif);font-weight:400;font-size:var(--cds-font-size-title);margin:0 0 var(--cds-gap-xs)}
+.pv-take{margin:0;font-size:var(--cds-font-size-body);max-width:62ch;text-wrap:pretty}
+.pv-sub{margin:var(--cds-gap-xs) 0 0;font-size:var(--cds-font-size-caption);color:var(--color-fg-muted)}
+.pv-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,10rem),1fr));gap:var(--cds-gap-md)}
+.pv-tile{background:var(--color-panel);border:1px solid var(--color-border-line);border-radius:var(--cds-radius);padding:var(--cds-pad-md) var(--cds-pad-lg);display:flex;flex-direction:column;gap:var(--cds-gap-xs)}
+.pv-tile .lbl{font-size:var(--cds-font-size-caption);color:var(--color-fg-muted)}
+.pv-tile .val{font-family:var(--font-anthropic-serif);font-weight:400;font-size:var(--cds-font-size-title);font-variant-numeric:tabular-nums;line-height:1.15}
+.pv-tile .note{font-size:var(--cds-font-size-caption);color:var(--color-fg-muted)}
+.pv-tile.warn .val{color:var(--color-warn)}
+.pv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,20rem),1fr));gap:var(--cds-gap-md)}
+.pv-card{background:var(--color-panel);border:1px solid var(--color-border-line);border-radius:var(--cds-radius);padding:var(--cds-pad-lg);display:flex;flex-direction:column;gap:var(--cds-gap-sm);min-width:0;position:relative}
+.pv-card h2{font-size:var(--cds-font-size-heading);font-weight:var(--cds-font-weight-medium);margin:0}
+.pv-card .hint{font-size:var(--cds-font-size-caption);color:var(--color-fg-muted);margin:0}
+.pv-chart{min-height:150px;position:relative}
+.pv-chart svg text{font-size:var(--cds-font-size-caption);fill:var(--color-fg-muted)}
+.pv-chart svg text.lab{fill:var(--color-fg)}
+.pv-tip{position:absolute;pointer-events:none;background:var(--cds-surface-popover);border:1px solid var(--cds-border);border-radius:var(--cds-radius);box-shadow:var(--cds-shadow-popover);padding:var(--cds-pad-xs) var(--cds-pad-sm);font-size:var(--cds-font-size-caption);white-space:nowrap;z-index:2}
+.pv-tip .k{color:var(--cds-text-secondary)}
+.pv-tbl-wrap{overflow:auto;max-height:28rem}
+.pv-tbl{width:100%;border-collapse:collapse;font-size:var(--cds-font-size-caption);font-variant-numeric:tabular-nums}
+.pv-tbl th{position:sticky;top:0;background:var(--color-panel);text-align:left;font-weight:var(--cds-font-weight-medium);color:var(--color-fg-muted);padding:var(--cds-pad-xs) var(--cds-pad-sm);border-bottom:1px solid var(--color-border-line);white-space:nowrap}
+.pv-tbl td{padding:var(--cds-pad-xs) var(--cds-pad-sm);border-bottom:1px solid var(--color-border-line);white-space:nowrap}
+.pv-tbl .num{text-align:right}
+.pv-tbl th button{all:unset;cursor:pointer}
+.pv-tbl th button:focus-visible{outline:2px solid var(--color-fg)}
+.pv-tbl a.pv-link{color:inherit;text-decoration:underline;text-decoration-color:var(--color-border-line);text-underline-offset:2px}
+.pv-tbl a.pv-link:hover{text-decoration-color:currentColor}
+.pv-tbl tbody tr:hover td{background:var(--color-bg)}
+.pv-ms{color:var(--color-fg-muted);font-size:.92em}
+.pv-late{color:var(--color-warn);font-size:.85em}
+.pv-pill{display:inline-block;padding:0 var(--cds-pad-sm);border-radius:999px;border:1px solid var(--color-border-line)}
+.pv-pill.ok{color:var(--color-ok)}.pv-pill.warn{color:var(--color-warn)}.pv-pill.bad{color:var(--color-bad)}
+.pv-tools{display:flex;flex-wrap:wrap;gap:var(--cds-gap-sm)}
+.pv-tools input,.pv-tools select{font:inherit;font-size:var(--cds-font-size-caption);padding:var(--cds-pad-xs) var(--cds-pad-sm);border:1px solid var(--color-border-line);border-radius:var(--cds-radius);background:var(--color-bg);color:var(--color-fg)}
+.pv-tools input{flex:1 1 12rem;min-width:0}
+.pv-fail{display:flex;align-items:center;justify-content:center;gap:var(--cds-gap-xs);min-height:inherit;color:var(--color-fg-muted);font-size:var(--cds-font-size-caption)}
+.pv-fail::before{content:"";width:.375rem;height:.375rem;border-radius:50%;background:var(--color-bad)}
+[data-dash-source-state=empty]{color:transparent}
+[data-dash-source-state=refreshing]{opacity:.5;transition:opacity var(--cds-dur-slow)}
+.pv-hide-narrow{}
+@media (max-width:640px){.pv-hide-narrow{display:none}}
 </style>
 
 <div class="pv">
   <header class="pv-head" id="overview">
     <h1>PR video analytics</h1>
-    <p class="pv-take">The Kalpana channels drew <b data-source="by_source" data-where="source=Kalpana channels" data-field="share" class="dash-skeleton">—</b> of all tracked views from <span data-source="by_source" data-where="source=Kalpana channels" data-field="videos" class="dash-skeleton">—</span> videos. Sanjay Agency's <span data-source="by_source" data-where="source=Sanjay Agency" data-field="videos" class="dash-skeleton">—</span> videos drew <span data-source="by_source" data-where="source=Sanjay Agency" data-field="share" class="dash-skeleton">—</span>.</p>
-    <p class="pv-sub">Day 2, Day 7 and Day 30 counts per video, refreshed daily from the source sheets. Instagram via Apify, Facebook and YouTube via Bright Data. Facebook rounds its counts (54K shows as 54,000).</p>
+    <p class="pv-take">Inhouse ai videos drew <b data-source="by_source" data-where="source=Inhouse ai videos" data-field="share" class="dash-skeleton">—</b> of all tracked views from <span data-source="by_source" data-where="source=Inhouse ai videos" data-field="videos" class="dash-skeleton">—</span> videos. Sanjay Agency's <span data-source="by_source" data-where="source=Sanjay Agency" data-field="videos" class="dash-skeleton">—</span> videos drew <span data-source="by_source" data-where="source=Sanjay Agency" data-field="share" class="dash-skeleton">—</span>.</p>
+    <p class="pv-sub">Day 2, Day 7 and Day 30 counts per video plus all-time views (re-checked weekly), refreshed daily from the source sheets. Instagram via Apify, Facebook and YouTube via Bright Data. Facebook rounds its counts (54K shows as 54,000).</p>
   </header>
 
-<section class="vd-hero" id="overview" data-source="videos">
-  <header class="vd-head">
-    <div style="display:flex;flex-direction:column;gap:8px;min-width:0">
-      <p class="vd-eye">PR Analytics · Inhouse ai videos · Sanjay Agency · Internal PR</p>
-      <h1 class="vd-title">Video performance</h1>
-      <p class="vd-sub">Every upload, captured at Day 2, Day 7 and Day 30 after posting, plus its all-time total. Click any video to watch it.</p>
+  <section class="pv-tiles" aria-label="Headline figures">
+    <div class="pv-tile"><span class="lbl">All-time views</span><span class="val dash-skeleton" data-source="kpis" data-row="0" data-field="views">—</span><span class="note">Videos with a view count</span></div>
+    <div class="pv-tile"><span class="lbl">Videos tracked</span><span class="val dash-skeleton" data-source="kpis" data-row="0" data-field="videos">—</span><span class="note">Unique posts across 3 sheets</span></div>
+    <div class="pv-tile"><span class="lbl">Likes and comments</span><span class="val dash-skeleton" data-source="kpis" data-row="0" data-field="likes_comments">—</span><span class="note">All fetched videos</span></div>
+    <div class="pv-tile"><span class="lbl">Engagement rate</span><span class="val dash-skeleton" data-source="kpis" data-row="0" data-field="eng_rate">—</span><span class="note">Likes, comments, shares ÷ views</span></div>
+    <div class="pv-tile warn"><span class="lbl">No view count yet</span><span class="val dash-skeleton" data-source="kpis" data-row="0" data-field="missing">—</span><span class="note">See "To fix" below</span></div>
+  </section>
+
+  <section class="pv-card" id="milestones">
+    <h2>Milestones: Day 2, Day 7 and Day 30 after upload</h2>
+    <p class="hint">Each video is captured once 2, 7 and 30 days after it was posted. "Late" means it was first fetched after that day; the actual day is shown on each video.</p>
+    <div class="pv-tbl-wrap">
+      <table class="pv-tbl" data-source="milestones" data-row-key="milestone">
+        <thead><tr><th data-field="milestone">Milestone</th><th class="num" data-field="captured">Captured on time</th><th class="num" data-field="late">Captured late</th><th class="num" data-field="due_now">Due now</th><th class="num pv-hide-narrow" data-field="due_later">Due later</th><th class="num pv-hide-narrow" data-field="missed">Missed</th><th class="num" data-field="views">Views at milestone</th></tr></thead>
+        <tbody id="tb-ms"></tbody>
+      </table>
     </div>
-    <div class="vd-right">
-      <div class="vd-meta"><span class="vd-live">Live data</span><span id="upd">Instagram via Apify · Facebook and YouTube via Bright Data</span></div>
-      <div class="vd-seg" role="group" aria-label="Snapshot" id="seg">
-        <button type="button" data-s="d2" aria-pressed="false">Day 2</button>
-        <button type="button" data-s="d7" aria-pressed="true">Day 7</button>
-        <button type="button" data-s="d30" aria-pressed="false">Day 30</button>
-        <button type="button" data-s="all" aria-pressed="false">All time</button>
+  </section>
+
+  <section class="pv-grid">
+    <div class="pv-card" id="by-platform">
+      <h2>Views by platform</h2>
+      <p class="hint">Bar shows views; label shows how many videos had a view count.</p>
+      <div class="pv-chart dash-skeleton" id="chart-platform" data-source="by_platform"></div>
+    </div>
+    <div class="pv-card" id="by-source">
+      <h2>Views by source</h2>
+      <p class="hint">Which sheet's videos reach the most people.</p>
+      <div class="pv-chart dash-skeleton" id="chart-source" data-source="by_source"></div>
+    </div>
+  </section>
+
+  <section class="pv-card" id="source-table">
+    <h2>Source summary</h2>
+    <p class="hint">Engagement rate counts only videos that have a view count.</p>
+    <div class="pv-tbl-wrap">
+      <table class="pv-tbl" data-source="by_source" data-row-key="source">
+        <thead><tr><th data-field="source">Source</th><th class="num" data-field="videos">Videos</th><th class="num" data-field="with_views">With views</th><th class="num" data-field="views">Views</th><th class="num" data-field="likes">Likes</th><th class="num pv-hide-narrow" data-field="comments">Comments</th><th class="num pv-hide-narrow" data-field="shares">Shares</th><th class="num" data-field="eng_rate">Eng. rate</th></tr></thead>
+        <tbody id="tb-source"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="pv-grid">
+    <div class="pv-card" id="top-videos">
+      <h2>Top 10 videos by views</h2>
+      <p class="hint">Click a video, account or number to open the post.</p>
+      <div class="pv-tbl-wrap">
+        <table class="pv-tbl" data-source="top10" data-row-key="video">
+          <thead><tr><th data-field="video">Video</th><th data-field="account">Account</th><th data-field="platform" class="pv-hide-narrow">Platform</th><th class="num" data-field="views">Views</th><th class="num" data-field="likes">Likes</th></tr></thead>
+          <tbody id="tb-top"></tbody>
+        </table>
       </div>
     </div>
-  </header>
-  <div class="vd-ins" id="insights" aria-label="Key insights"></div>
-</section>
-
-<nav class="vd-nav" aria-label="Platform" id="tabs"></nav>
-
-<section class="vd-kpis" aria-label="Totals">
-  <div class="vd-kpi"><span class="l" id="k-l-views">Views</span><span class="v dash-skeleton" data-source="kpis" data-where="key=d7|All|All" data-field="views">—</span><span class="d n" data-source="kpis" data-where="key=d7|All|All" data-field="views_delta">—</span></div>
-  <div class="vd-kpi"><span class="l">Likes</span><span class="v dash-skeleton" data-source="kpis" data-where="key=d7|All|All" data-field="likes">—</span><span class="d n" data-source="kpis" data-where="key=d7|All|All" data-field="likes_delta">—</span></div>
-  <div class="vd-kpi"><span class="l">Comments</span><span class="v dash-skeleton" data-source="kpis" data-where="key=d7|All|All" data-field="comments">—</span><span class="d n" data-source="kpis" data-where="key=d7|All|All" data-field="comments_delta">—</span></div>
-  <div class="vd-kpi"><span class="l">Shares</span><span class="v dash-skeleton" data-source="kpis" data-where="key=d7|All|All" data-field="shares">—</span><span class="d n" data-source="kpis" data-where="key=d7|All|All" data-field="shares_delta">—</span></div>
-  <div class="vd-kpi"><span class="l">Engagement rate</span><span class="v dash-skeleton" data-source="kpis" data-where="key=d7|All|All" data-field="eng">—</span><span class="d n" data-source="kpis" data-where="key=d7|All|All" data-field="captured">—</span></div>
-  <div class="vd-kpi"><span class="l">Median views / video</span><span class="v dash-skeleton" data-source="kpis" data-where="key=d7|All|All" data-field="median">—</span><span class="d n" data-source="kpis" data-where="key=d7|All|All" data-field="hit1k">—</span></div>
-</section>
-
-<section class="vd-card vd-source-main" aria-label="Source and platform response comparison" id="sources">
-  <div class="vd-ch"><div><h2 class="vd-h2">Source × platform response</h2><p class="vd-note" style="margin-top:4px">Compare coverage and performance at the selected Day 2, Day 7 or Day 30 snapshot.</p></div><span class="vd-note">Click a cell to filter the dashboard</span></div>
-  <div class="vd-sm-wrap"><table class="vd-sm" data-source="videos"><thead id="src-matrix-head"></thead><tbody id="src-matrix"></tbody></table></div>
-  <div class="vd-ch"><h3 class="vd-h3">Overall source scorecard</h3><span class="vd-note">Latest views per video · the orange card leads on average views</span></div>
-  <div class="vd-src" id="src-cards" data-source="src_score"></div>
-</section>
-
-<div class="vd-row">
-  <section class="vd-card vd-w3" aria-label="Video wall" id="wall-card">
-    <div class="vd-ch"><h2 class="vd-h2">Video wall</h2><span class="vd-note" id="wall-note">—</span></div>
-    <div class="vd-wall" id="wall" data-source="videos thumbs"></div>
-    <button type="button" class="vd-more" id="more" hidden>Show more videos</button>
-  </section>
-  <aside class="vd-card vd-w2 vd-sticky" aria-label="Selected video" id="deep" data-source="videos">
-    <div class="vd-player" id="d-player">
-      <span class="vd-badge vd-ptag" id="d-badge">—</span>
-      <button type="button" class="vd-play" id="d-play" aria-label="Play video"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="#101828"></path></svg></button>
-      <div class="vd-plink"><span id="d-id">—</span><a id="d-watch" href="#" target="_blank" rel="noopener">Watch ↗</a></div>
+    <div class="pv-card" id="by-day">
+      <h2>Views by publish date</h2>
+      <p class="hint">Day 7 vs day 30 growth appears here once the scheduled re-checks run.</p>
+      <div class="pv-chart dash-skeleton" id="chart-day" data-source="by_day" style="min-height:200px"></div>
     </div>
-    <p class="vd-pnote" id="d-pnote" hidden></p>
-    <div style="display:flex;flex-direction:column;gap:8px">
-      <div class="vd-chips" id="d-chips"></div>
-      <h2 class="vd-sh" id="d-title">—</h2>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:10px">
-      <h3 class="vd-h3">Views at each snapshot and all time</h3>
-      <div class="vd-bars" id="d-bars"></div>
-    </div>
-    <table class="vd-mt"><thead><tr><th>Metric</th><th>Day 2</th><th>Day 7</th><th>Day 30</th><th>All time</th></tr></thead><tbody id="d-rows"></tbody></table>
-    <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap">
-      <a class="vd-link" id="d-open" href="#" target="_blank" rel="noopener">Open original post</a>
-      <button type="button" class="vd-link" id="d-cmp" style="all:unset;cursor:pointer;font-size:14px;font-weight:600;color:var(--b2)">Compare with another video →</button>
-    </div>
-  </aside>
-</div>
-
-<h2 class="vd-sec">Comparisons</h2>
-
-<section class="vd-card" aria-label="Compare two videos" id="compare">
-  <div class="vd-ch"><h2 class="vd-h2">Compare two videos</h2><span class="vd-note">Pick any two by ID or account. Bars are scaled per row.</span></div>
-  <div class="vd-cmp">
-    <div class="vd-cside"><div class="vd-cpick"><label for="cmp-a">Video A</label><input id="cmp-a" list="cmp-list" placeholder="VID-0022 or account name" autocomplete="off"></div><div id="cmp-a-card"></div></div>
-    <div class="vd-cside"><div class="vd-cpick"><label for="cmp-b">Video B</label><input id="cmp-b" list="cmp-list" placeholder="VID-0039 or account name" autocomplete="off"></div><div id="cmp-b-card"></div></div>
-  </div>
-  <datalist id="cmp-list"></datalist>
-  <div class="vd-cbars" id="cmp-bars" data-source="videos"></div>
-  <p class="vd-verdict" id="cmp-verdict" hidden></p>
-</section>
-
-<div class="vd-row st">
-  <section class="vd-card vd-g3" aria-label="Growth curves" id="growth">
-    <div class="vd-ch"><h2 class="vd-h2">How views grow: Day 2 → Day 7 → Day 30</h2><span class="vd-note" id="g-note">—</span></div>
-    <div class="vd-chart" id="g-chart" data-source="videos"></div>
   </section>
 
-<h2 class="vd-sec">Deeper analytics</h2>
-
-<section class="vd-card" aria-label="Account leaderboard" id="accounts">
-  <div class="vd-ch"><h2 class="vd-h2">Account leaderboard</h2><span class="vd-note" id="a-note">Latest views · click a best video to play it</span></div>
-  <div style="overflow-x:auto"><table class="vd-lb" data-source="videos"><thead><tr><th>#</th><th>Account</th><th>Source</th><th class="num">Videos</th><th class="num">Total views</th><th class="bar"></th><th class="num">Avg / video</th><th class="num">Eng. rate</th><th>Best video</th></tr></thead><tbody id="a-rows"></tbody></table></div>
-  <button type="button" class="vd-more" id="a-more">Show all accounts</button>
-</section>
-
-<div class="vd-row st">
-  <section class="vd-card vd-half" aria-label="Views distribution" id="dist">
-    <div class="vd-ch"><h2 class="vd-h2">How many videos hit big?</h2><span class="vd-note">Videos by latest views</span></div>
-    <div class="vd-chart" id="dist-chart" data-source="videos" style="min-height:240px"></div>
-  </section>
-  <section class="vd-card vd-half" aria-label="Engagement vs views" id="scatter">
-    <div class="vd-ch"><h2 class="vd-h2">Reach vs engagement</h2><span class="vd-note">Each dot is a video · click to watch</span></div>
-    <div class="vd-chart" id="sc-chart" data-source="videos" style="min-height:240px"></div>
-    <div class="vd-legend" id="sc-legend"></div>
-  </section>
-</div>
-
-<section class="vd-card" aria-label="Uploads and views over time" id="timeline">
-  <div class="vd-ch"><h2 class="vd-h2">Uploads and views by publish date</h2><span class="vd-note">Bars: videos posted that day · line: their latest views</span></div>
-  <div class="vd-chart" id="tl-chart" data-source="videos" style="min-height:240px"></div>
-</section>
-
-<div class="vd-row st">
-  <section class="vd-card vd-g3" aria-label="Best time to post" id="heat">
-    <div class="vd-ch"><h2 class="vd-h2">Best time to post</h2><span class="vd-note" id="h-note">—</span></div>
-    <div class="vd-heat" id="h-grid" data-source="videos"></div>
-    <div class="vd-legend" style="align-items:center"><span>Fewer views</span><i style="background:#EEF2F8;width:18px;height:12px;border-radius:3px"></i><i style="background:#C3D4F5;width:18px;height:12px;border-radius:3px"></i><i style="background:#86A9EC;width:18px;height:12px;border-radius:3px"></i><i style="background:#3F70DA;width:18px;height:12px;border-radius:3px"></i><i style="background:#142B66;width:18px;height:12px;border-radius:3px"></i><span>More views</span><span style="margin-left:auto">Ringed cell = best slot</span></div>
-  </section>
-  <section class="vd-card vd-g2" aria-label="Top videos" id="top">
-    <h2 class="vd-h2" id="t-title">Top 5</h2>
-    <div id="t-list" data-source="videos"></div>
-  </section>
-</div>
-
-<section class="vd-card" aria-label="All videos" id="all-videos">
-  <div class="vd-ch"><h2 class="vd-h2">All videos: Day 2, Day 7, Day 30 and all time</h2><span class="vd-note"><span id="count-shown">—</span> shown</span></div>
-  <p class="vd-note">Views, likes, comments and shares captured 2, 7 and 30 days after each upload, plus the all-time total (re-checked every week; "As of" is its date). A small "d18" means that capture was taken late, on day 18. Press ▶ to watch, click a number to open the post, click a header to sort; scroll sideways for Day 30.</p>
-  <div class="vd-tools">
-    <input id="f-search" type="search" placeholder="Search account, VID-0022 or a link" aria-label="Search videos">
-    <select id="f-status" aria-label="Status"><option value="">Any status</option></select>
-  </div>
-  <div class="vd-tw">
-    <table class="vd-tbl" data-source="videos" data-row-key="video">
-      <thead>
-        <tr class="r1">
-          <th rowspan="2" class="stk" data-field="video"><button data-k="video">Video</button></th>
-          <th rowspan="2" data-field="account"><button data-k="account">Account</button></th>
-          <th rowspan="2" data-field="platform"><button data-k="platform">Platform</button></th>
-          <th rowspan="2" data-field="source"><button data-k="source">Source</button></th>
-          <th rowspan="2" data-field="published"><button data-k="published">Posted</button></th>
-          <th colspan="4" class="grp ms g2">Day 2</th>
-          <th colspan="4" class="grp ms g7">Day 7</th>
-          <th colspan="4" class="grp ms g30">Day 30</th>
-          <th colspan="5" class="grp ms gall">All time</th>
-          <th rowspan="2" data-field="status"><button data-k="status">Status</button></th>
-        </tr>
-        <tr class="r2">
-          <th class="num ms g2" data-field="d2_views"><button data-k="d2_views">Views</button></th><th class="num g2" data-field="d2_likes"><button data-k="d2_likes">Likes</button></th><th class="num g2" data-field="d2_comments"><button data-k="d2_comments">Comments</button></th><th class="num g2" data-field="d2_shares"><button data-k="d2_shares">Shares</button></th>
-          <th class="num ms g7" data-field="d7_views"><button data-k="d7_views">Views</button></th><th class="num g7" data-field="d7_likes"><button data-k="d7_likes">Likes</button></th><th class="num g7" data-field="d7_comments"><button data-k="d7_comments">Comments</button></th><th class="num g7" data-field="d7_shares"><button data-k="d7_shares">Shares</button></th>
-          <th class="num ms g30" data-field="d30_views"><button data-k="d30_views">Views</button></th><th class="num g30" data-field="d30_likes"><button data-k="d30_likes">Likes</button></th><th class="num g30" data-field="d30_comments"><button data-k="d30_comments">Comments</button></th><th class="num g30" data-field="d30_shares"><button data-k="d30_shares">Shares</button></th>
-          <th class="num ms gall" data-field="views"><button data-k="views">Views</button></th><th class="num gall" data-field="likes"><button data-k="likes">Likes</button></th><th class="num gall" data-field="comments"><button data-k="comments">Comments</button></th><th class="num gall" data-field="shares"><button data-k="shares">Shares</button></th><th class="gall" data-field="alltime_at"><button data-k="alltime_at">As of</button></th>
-        </tr>
-      </thead>
-      <tbody id="tb-all"></tbody>
+  <section class="pv-card" id="to-fix">
+    <h2>To fix</h2>
+    <p class="hint">Videos that have no view count yet, and what to do about them.</p>
+    <table class="pv-tbl" data-source="status" data-row-key="status">
+      <thead><tr><th data-field="status">Issue</th><th class="num" data-field="videos">Videos</th><th data-field="next_step">Next step</th></tr></thead>
+      <tbody id="tb-status"></tbody>
     </table>
   </section>
 
@@ -445,7 +190,8 @@ window.dash = (function () {
           <th class="num" data-field="d2_views"><button data-k="d2_views">Day 2</button></th>
           <th class="num" data-field="d7_views"><button data-k="d7_views">Day 7</button></th>
           <th class="num" data-field="d30_views"><button data-k="d30_views">Day 30</button></th>
-          <th class="num" data-field="views"><button data-k="views">Latest views</button></th>
+          <th class="num" data-field="views"><button data-k="views">All-time views</button></th>
+          <th class="pv-hide-narrow" data-field="alltime_at"><button data-k="alltime_at">As of</button></th>
           <th class="num pv-hide-narrow" data-field="likes"><button data-k="likes">Likes</button></th>
           <th class="num pv-hide-narrow" data-field="comments"><button data-k="comments">Comments</button></th>
           <th class="num pv-hide-narrow" data-field="shares"><button data-k="shares">Shares</button></th>
@@ -459,34 +205,19 @@ window.dash = (function () {
 
 <script>
 dash.calc('kpis', {
-  inputs: ['videos'], title: 'Headline figures by snapshot, platform and source',
-  description: 'For each snapshot (Day 2, 7, 30, all time) and filter: sums over videos captured at that snapshot, engagement rate, median views, share of videos past 1,000 views, and growth vs the previous snapshot over videos captured at both.',
+  inputs: ['videos'], title: 'Headline figures',
+  description: 'Totals across all videos; engagement rate is (likes + comments + shares) / views over videos that have a view count.',
   fn: (videos) => {
-    const L = ['d2', 'd7', 'd30', 'all'], P = { d7: 'd2', d30: 'd7', all: 'd7' }, plats = ['All', ...new Set(videos.map(v => v.platform))], srcs = ['All', ...new Set(videos.map(v => v.source))];
-    const f = (l, k) => l === 'all' ? k : l + '_' + k;
-    const sum = (rs, k) => rs.reduce((a, v) => a + (Number(v[k]) || 0), 0);
-    const out = [];
-    for (const p of plats) for (const s of srcs) {
-      const rs = videos.filter(v => (p === 'All' || v.platform === p) && (s === 'All' || v.source === s));
-      L.forEach((l) => {
-        const cap = rs.filter(v => v[f(l, 'views')] != null), views = sum(cap, f(l, 'views'));
-        const has = (k) => cap.some(v => v[f(l, k)] != null) ? sum(cap, f(l, k)) : null;
-        const vs = cap.map(v => v[f(l, 'views')]).sort((a, b) => a - b);
-        const row = { key: l + '|' + p + '|' + s, views, likes: has('likes'), comments: has('comments'), shares: has('shares'),
-          eng: views ? (sum(cap, f(l, 'likes')) + sum(cap, f(l, 'comments')) + sum(cap, f(l, 'shares'))) / views : null,
-          median: vs.length ? (vs.length % 2 ? vs[(vs.length - 1) / 2] : (vs[vs.length / 2 - 1] + vs[vs.length / 2]) / 2) : null,
-          hit1k: vs.length ? vs.filter(x => x >= 1000).length / vs.length : null,
-          captured: cap.length, videos: rs.length };
-        for (const k of ['views', 'likes', 'comments', 'shares']) {
-          if (!P[l]) { row[k + '_delta'] = null; continue; }
-          const both = rs.filter(v => v[f(l, k)] != null && v[f(P[l], k)] != null && (l !== 'all' || (v.alltime_age ?? -1) > (v.d7_age ?? 99))), a = sum(both, f(P[l], k));
-          row[k + '_delta'] = both.length && a ? sum(both, f(l, k)) / a - 1 : null;
-          row[k + '_pairs'] = both.length;
-        }
-        out.push(row);
-      });
-    }
-    return out;
+    const w = videos.filter(v => v.views != null);
+    const s = (rows, k) => rows.reduce((a, v) => a + (Number(v[k]) || 0), 0);
+    const views = s(w, 'views');
+    return [{
+      videos: videos.length,
+      views,
+      likes_comments: s(videos, 'likes') + s(videos, 'comments'),
+      eng_rate: views ? (s(w, 'likes') + s(w, 'comments') + s(w, 'shares')) / views : null,
+      missing: videos.length - w.length
+    }];
   }
 });
 
@@ -555,298 +286,26 @@ dash.calc('status', { inputs: ['videos'], title: 'Videos to fix',
   } });
 
 (function () {
-  const EMBED = !!window.PV_EMBED; // the standalone (GitHub) page can play videos inline; the Claude dashboard links out
-  const L = ['d2', 'd7', 'd30'], L4 = ['d2', 'd7', 'd30', 'all'], LBL = { d2: 'Day 2', d7: 'Day 7', d30: 'Day 30', all: 'All time' }, OFF = { d2: 2, d7: 7, d30: 30 };
-  const BLUES = { d2: '#6E9BEA', d7: '#2D5FD3', d30: '#142B66', all: '#EA580C' };
-  const PCOL = { Facebook: '#2D5FD3', Instagram: '#C2185B', YouTube: '#D92D20', 'Drive file': '#667085' };
-  const TINT = { Facebook: '#DCE7FB', Instagram: '#FBE3E8', YouTube: '#FDE7D6', 'Drive file': '#E6E8EC' };
-  const HEAT = ['#EEF2F8', '#C3D4F5', '#86A9EC', '#3F70DA', '#142B66'];
-  const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  const PLAY = '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="#101828"></path></svg>';
-  const PLAYS = '<svg width="11" height="11" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="#101828"></path></svg>';
-  const big = (n) => n == null ? '—' : n >= 1e6 ? (n / 1e6).toFixed(n >= 1e7 ? 0 : 1).replace(/\.0$/, '') + 'M' : n >= 1000 ? (n / 1000).toFixed(n >= 1e5 ? 0 : 1).replace(/\.0$/, '') + 'K' : String(Math.round(n));
-  const full = (n) => n == null ? '' : Math.round(n).toLocaleString('en-IN');
-  const pct = (x) => x == null ? '—' : (x * 100).toFixed(1) + '%';
-  const pct0 = (x) => x == null ? '—' : Math.round(x * 100) + '%';
-  const sgn = (x) => (x >= 0 ? '+' : '−') + Math.abs(Math.round(x * 100)) + '%';
-  const dmy = (iso, add) => { if (!iso) return '—'; const d = new Date(iso.slice(0, 10) + 'T00:00:00'); d.setDate(d.getDate() + (add || 0)); return d.getDate() + ' ' + MON[d.getMonth()]; };
+  const fmt = d3.format(',');
+  const big = new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 });
+  const pct = d3.format('.1%');
+  const n = (v) => v == null || v === '' ? '' : fmt(v);
+  const dayFmt = d3.utcFormat('%b %-d');
   const $ = (id) => document.getElementById(id);
-  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
-  const title = (v) => v.title || v.account || v.source;
-  const eng = (v) => v.views ? ((v.likes || 0) + (v.comments || 0) + (v.shares || 0)) / v.views : null;
-  const statusText = (v, l) => {
-    if (l === 'all') return v.status === 'No public link' ? 'No link' : v.status === 'Fetch failed' ? 'Failed' : 'No count';
-    const st = v[l + '_status'] || '';
-    if (st.startsWith('Due 2')) return 'Due ' + dmy(v[l + '_due']);
-    if (st === 'Due now') return 'Due now';
-    if (st === 'Missed') return 'Missed';
-    if (st === 'No public link') return 'No link';
-    if (st.startsWith('Captured')) return 'No count';
-    return '—';
-  };
-  const host = (v) => ({ Facebook: 'Facebook', Instagram: 'Instagram', YouTube: 'YouTube' }[v.platform] || 'Google Drive');
+  const failed = (el) => { el.textContent = ''; const f = document.createElement('div'); f.className = 'pv-fail'; f.textContent = 'Failed to load'; el.appendChild(f); };
+  const ready = (el, d) => { if (d.status === 'ok' || d.status === 'error' || d.status === 'declined') el.classList.remove('dash-skeleton'); };
 
   function tipFor(card) {
     let t = card.querySelector('.pv-tip');
     if (!t) { t = document.createElement('div'); t.className = 'pv-tip'; t.hidden = true; card.appendChild(t); }
     return t;
   }
-  let THUMBS = new Map(); // small inline thumbnails for the Claude dashboard, which cannot load images from the web
-  function thumb(v) {
-    if (!EMBED) return THUMBS.get(v.video) || null;
-    if (v.thumb) return v.thumb;
-    const y = ytId(v.post_url || v.url || '');
-    return y ? 'https://i.ytimg.com/vi/' + y + '/hqdefault.jpg' : null;
-  }
-  function paintThumb(node, v) {
-    const t = thumb(v);
-    node.style.backgroundColor = TINT[v.platform] || '#E6E8EC';
-    if (t) { node.style.backgroundImage = 'url("' + t + '")'; node.classList.add('has'); } else node.style.backgroundImage = '';
-  }
-
-  const S = { snap: 'd7', plat: 'All', src: 'All', sel: null, playing: false, wallN: 12, sortKey: null, sortDir: -1, auto: true, accAll: false, cmpA: null, cmpB: null };
-  let rows = [], byId = new Map();
-
-  function filtered() { return rows.filter(v => (S.plat === 'All' || v.platform === S.plat) && (S.src === 'All' || v.source === S.src)); }
-  function prev(l) { return { d7: 'd2', d30: 'd7', all: 'd7' }[l]; }
-  function watch(id, scroll) { S.sel = id; S.playing = true; drawWall(); drawDeep(); if (scroll) $('deep').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
-
-  // ---- controls
-  document.querySelectorAll('#seg button').forEach(b => b.addEventListener('click', () => { S.snap = b.dataset.s; S.auto = false; S.wallN = 12; drawAll(); }));
-  $('more').addEventListener('click', () => { S.wallN += 12; drawWall(); });
-  $('d-play').addEventListener('click', () => { S.playing = true; drawDeep(); });
-  $('d-cmp').addEventListener('click', () => { S.cmpA = S.sel; $('cmp-a').value = S.sel; drawCompare(); $('compare').scrollIntoView({ behavior: 'smooth', block: 'start' }); $('cmp-b').focus(); });
-  $('a-more').addEventListener('click', () => { S.accAll = !S.accAll; drawAccounts(); });
-
-  function drawSeg() { document.querySelectorAll('#seg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.s === S.snap))); }
-  function drawTabs() {
-    const nav = $('tabs'); nav.textContent = '';
-    const plats = [...new Set(rows.map(v => v.platform))].sort((a, b) => rows.filter(v => v.platform === b).length - rows.filter(v => v.platform === a).length);
-    ['All', ...plats].forEach(p => {
-      const b = el('button', 'vd-tab'); b.type = 'button'; b.setAttribute('aria-pressed', String(p === S.plat));
-      if (p !== 'All') { const i = el('i'); i.style.background = PCOL[p] || '#667085'; b.appendChild(i); }
-      b.append(p, el('span', null, String(p === 'All' ? rows.length : rows.filter(v => v.platform === p).length)));
-      b.addEventListener('click', () => { S.plat = p; S.wallN = 12; drawAll(); });
-      nav.appendChild(b);
-    });
-    const sel = el('select', 'vd-sel'); sel.id = 'f-source'; sel.setAttribute('aria-label', 'Source');
-    ['All', ...new Set(rows.map(v => v.source))].forEach(s => { const o = el('option', null, s === 'All' ? 'All sources' : s); o.value = s; o.selected = s === S.src; sel.appendChild(o); });
-    sel.addEventListener('change', () => { S.src = sel.value; S.wallN = 12; drawAll(); });
-    nav.appendChild(sel);
-  }
-
-  // ---- insights (hero)
-  function drawInsights() {
-    const box = $('insights'); box.textContent = '';
-    const w = rows.filter(v => v.views != null), total = d3.sum(w, v => v.views);
-    if (!w.length) return;
-    const card = (icon, bg, fg, bigText, small) => { const c = el('div', 'vd-in1'), ic = el('span', 'ic', icon); ic.style.background = bg; ic.style.color = fg; const tx = el('div', 'tx'); tx.append(el('span', 'big', bigText), el('span', 'sm', small)); c.append(ic, tx); box.appendChild(c); };
-    const src = d3.rollups(w, g => d3.sum(g, v => v.views), v => v.source).sort((a, b) => b[1] - a[1])[0];
-    const srcN = rows.filter(v => v.source === src[0]).length;
-    card('★', '#FDE7D6', '#9A3B0B', pct0(src[1] / total) + ' of views', src[0] + ' drive this from ' + pct0(srcN / rows.length) + ' of the videos (' + srcN + ' of ' + rows.length + ').');
-    const hit = w.filter(v => v.views >= 1000).length, huge = w.filter(v => v.views >= 100000).length;
-    card('↑', '#E7F4EC', '#1F6F43', pct0(hit / w.length) + ' crossed 1K', hit + ' of ' + w.length + ' videos passed 1,000 views; ' + huge + ' passed 1 lakh.');
-    const acc = d3.rollups(w, g => [d3.sum(g, v => v.views), g.length], v => v.account || '—').sort((a, b) => b[1][0] - a[1][0])[0];
-    card('◆', '#DCE7FB', '#142B66', big(acc[1][0]) + ' views', 'Top account: ' + acc[0] + ', across ' + acc[1][1] + ' videos.');
-    const pl = d3.rollups(w, g => [d3.mean(g, v => v.views), g.length], v => v.platform).filter(p => p[1][1] >= 5).sort((a, b) => b[1][0] - a[1][0]);
-    if (pl.length >= 2) card('▶', '#FBE3E8', '#8E1B4A', pl[0][0], 'Highest average views per video: ' + big(pl[0][1][0]) + ', ' + (pl[0][1][0] / Math.max(1, pl[1][1][0])).toFixed(1) + '× ' + pl[1][0] + '.');
-  }
-
-  // ---- KPIs
-  function drawKpis() {
-    const k = dash.data('kpis'), key = S.snap + '|' + S.plat + '|' + S.src;
-    const r = k.status === 'ok' ? k.data.find(x => x.key === key) : null;
-    $('k-l-views').textContent = S.snap === 'all' ? 'All-time views' : 'Views at ' + LBL[S.snap];
-    document.querySelectorAll('.vd-kpi [data-source="kpis"]').forEach(e => {
-      e.dataset.where = 'key=' + key; e.classList.remove('dash-skeleton');
-      const f = e.dataset.field;
-      if (!r) { e.textContent = '—'; return; }
-      if (f.endsWith('_delta')) {
-        const x = r[f], n = r[f.replace('_delta', '_pairs')];
-        const pending = (f === 'comments_delta' || f === 'shares_delta') && r[f.replace('_delta', '')] == null;
-        e.className = 'd' + (x == null ? ' n' : '');
-        e.textContent = pending ? 'Arrives with the next refresh' : S.snap === 'd2' ? 'First snapshot' : x == null ? (S.snap === 'all' ? 'Growth since Day 7 shows after the weekly re-check' : 'No video has both ' + LBL[prev(S.snap)] + ' and ' + LBL[S.snap] + ' yet') : (S.snap === 'all' ? sgn(x) + ' since Day 7 · ' : sgn(x) + ' vs ' + LBL[prev(S.snap)] + ' · ') + n + ' videos';
-      } else if (f === 'captured') { e.className = 'd n'; e.textContent = r.captured + ' of ' + r.videos + ' videos captured'; }
-      else if (f === 'hit1k') { e.className = 'd n'; e.textContent = r.hit1k == null ? '—' : pct0(r.hit1k) + ' of videos past 1K views'; }
-      else if (f === 'eng') e.textContent = pct(r.eng);
-      else if (f === 'median') e.textContent = r.median == null ? '—' : big(r.median);
-      else e.textContent = r.captured && r[f] != null ? big(r[f]) : '—';
-    });
-  }
-
-  // ---- wall + deep dive
-  function ranked() {
-    const l = S.snap;
-    return filtered().slice().sort((a, b) => (b[l + '_views'] ?? -1) - (a[l + '_views'] ?? -1) || (b.views ?? -1) - (a.views ?? -1));
-  }
-  function drawWall() {
-    const list = ranked(), l = S.snap, wall = $('wall'); wall.textContent = '';
-    if (!S.sel || !list.find(v => v.video === S.sel)) { S.sel = list[0] && list[0].video; S.playing = false; }
-    list.slice(0, S.wallN).forEach((v, idx) => {
-      const b = el('button', 'vd-vc'); b.type = 'button'; b.setAttribute('aria-pressed', String(v.video === S.sel));
-      const val = v[l + '_views'];
-      b.setAttribute('aria-label', 'Play ' + title(v) + ', ' + v.platform + ', ' + (val != null ? full(val) + ' views at ' + LBL[l] : statusText(v, l) + ' at ' + LBL[l]));
-      const th = el('span', 'vd-th'); paintThumb(th, v);
-      const pl = el('span', 'vd-pl'); pl.innerHTML = PLAY;
-      const bd = el('span', 'vd-badge'); const dot = el('i', 'vd-dot'); dot.style.background = PCOL[v.platform] || '#667085'; bd.append(dot, v.platform);
-      th.append(pl, bd, el('span', 'vd-id', v.video));
-      if (idx < 3 && val != null) th.append(el('span', 'vd-rank', '#' + (idx + 1)));
-      const vn = el('span', 'vd-vn'); vn.append(el('b', null, val != null ? big(val) : '—'), el('span', null, val != null ? (l === 'all' ? 'views · all time' : 'views · ' + LBL[l]) : statusText(v, l)));
-      const p = prev(l), a = p && v[p + '_views'], later = l !== 'all' || (v.alltime_age ?? -1) > (v[p + '_age'] ?? 99), gr = val != null && a && later ? val / a - 1 : null;
-      const g = el('span', 'vd-gr' + (gr == null ? ' n' : ''), l === 'all' ? (gr != null ? sgn(gr) + ' since Day 7' : v.alltime_at ? 'As of ' + dmy(v.alltime_at) : 'Posted ' + dmy(v.published)) : l === 'd2' ? (v.d7_views != null && v.d2_views ? sgn(v.d7_views / v.d2_views - 1) + ' by Day 7' : 'Posted ' + dmy(v.published)) : gr != null ? sgn(gr) + ' vs ' + LBL[p] : 'Posted ' + dmy(v.published));
-      b.append(th, el('span', 'vd-vt', title(v)), vn, g);
-      b.addEventListener('click', () => { S.sel = v.video; S.playing = true; drawWall(); drawDeep(); if (window.innerWidth < 1000) $('deep').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
-      wall.appendChild(b);
-    });
-    $('wall-note').textContent = list.length + ' videos · sorted by ' + LBL[l] + ' views · click one to ' + (EMBED ? 'play it' : 'open its breakdown');
-    $('more').hidden = S.wallN >= list.length;
-    $('more').textContent = 'Show more videos (' + (list.length - Math.min(S.wallN, list.length)) + ' left)';
-  }
-  function drawDeep() {
-    const v = byId.get(S.sel); if (!v) return;
-    const pl = $('d-player'), e = embed(v);
-    pl.querySelectorAll('iframe').forEach(f => f.remove());
-    pl.classList.toggle('wide', !!(e && e.wide));
-    paintThumb(pl, v);
-    const bd = $('d-badge'); bd.textContent = ''; const dot = el('i', 'vd-dot'); dot.style.background = PCOL[v.platform] || '#667085'; bd.append(dot, v.platform);
-    $('d-id').textContent = v.video + ' · ' + v.source;
-    $('d-watch').href = v.url; $('d-watch').textContent = 'Watch on ' + host(v) + ' ↗';
-    $('d-open').href = v.url; $('d-open').textContent = 'Open original post on ' + host(v);
-    const note = $('d-pnote');
-    if (S.playing && e && EMBED) {
-      const f = el('iframe'); f.src = e.src; f.title = 'Video ' + v.video; f.loading = 'lazy';
-      f.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen'; f.allowFullscreen = true; f.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
-      pl.appendChild(f); $('d-play').hidden = true; pl.querySelector('.vd-plink').hidden = true; pl.querySelector('.vd-ptag').hidden = true;
-      note.hidden = false; note.textContent = 'Not playing? Some posts block embedding. ';
-      const a = el('a', null, 'Watch on ' + host(v) + ' ↗'); a.href = v.url; a.target = '_blank'; a.rel = 'noopener'; note.appendChild(a);
-    } else {
-      $('d-play').hidden = !(EMBED && e); pl.querySelector('.vd-plink').hidden = false; pl.querySelector('.vd-ptag').hidden = false;
-      note.hidden = EMBED; note.textContent = EMBED ? '' : 'Videos play inline on the public dashboard. Here, the play button opens the post on ' + host(v) + '.';
-    }
-    $('d-title').textContent = title(v);
-    const chips = $('d-chips'); chips.textContent = '';
-    chips.append(el('span', 'vd-chip', (v.account || v.source)), el('span', 'vd-chip', 'Posted ' + dmy(v.published)));
-    const caps = L.filter(l => v[l + '_views'] != null);
-    if (v.all_views != null) chips.append(el('span', 'vd-chip o', big(v.all_views) + ' views all time'));
-    if (caps.length >= 2) chips.append(el('span', 'vd-chip g', (v[caps[caps.length - 1] + '_views'] / Math.max(1, v[caps[0] + '_views'])).toFixed(1) + '× from ' + LBL[caps[0]] + ' to ' + LBL[caps[caps.length - 1]]));
-    const rk = ranked().findIndex(x => x.video === v.video);
-    if (rk >= 0 && v[S.snap + '_views'] != null) chips.append(el('span', 'vd-chip o', '#' + (rk + 1) + ' of ' + filtered().length + ' at ' + LBL[S.snap]));
-    const bars = $('d-bars'); bars.textContent = '';
-    const mx = Math.max(1, ...L4.map(l => v[l + '_views'] || 0));
-    L4.forEach(l => {
-      const val = v[l + '_views'], d = el('div', 'vd-bar');
-      if (l === S.snap) d.append(el('span', 'on', '● Showing'));
-      d.append(el('span', 'bv' + (val == null ? ' n' : ''), val != null ? big(val) : statusText(v, l)));
-      const f = el('span', 'bf' + (val == null ? ' e' : ''));
-      f.style.height = (val != null ? Math.max(8, Math.round(val / mx * 110)) : 36) + 'px';
-      if (val != null) f.style.background = BLUES[l];
-      const age = v[l + '_age'], late = (v[l + '_status'] || '').startsWith('Captured late');
-      d.append(f, el('span', 'bl', LBL[l]), el('span', 'vd-small', l === 'all' ? (v.alltime_at ? 'As of ' + dmy(v.alltime_at) : '—') : val != null ? (late ? 'Captured late, day ' + age : 'Captured ' + dmy(v.published, OFF[l])) : 'Due ' + dmy(v.published, OFF[l])));
-      bars.appendChild(d);
-    });
-    const tb = $('d-rows'); tb.textContent = '';
-    const cell = (l, k) => { const x = v[l + '_' + k]; if (x != null) return el('td', l === 'all' ? 'win' : null, full(x)); const td = el('td'); td.append(el('span', 'na', v[l + '_views'] != null ? '—' : statusText(v, l))); return td; };
-    [['Views', 'views'], ['Likes', 'likes'], ['Comments', 'comments'], ['Shares', 'shares']].forEach(([lab, k]) => {
-      const tr = el('tr'); tr.append(el('td', null, lab), ...L4.map(l => cell(l, k))); tb.appendChild(tr);
-    });
-    const tr = el('tr'); tr.append(el('td', null, 'Engagement'), ...L4.map(l => {
-      const vw = v[l + '_views']; if (!vw) { const td = el('td'); td.append(el('span', 'na', '—')); return td; }
-      return el('td', null, pct(((v[l + '_likes'] || 0) + (v[l + '_comments'] || 0) + (v[l + '_shares'] || 0)) / vw));
-    })); tb.appendChild(tr);
-  }
-
-  // ---- source scorecard
-  function drawSources() {
-    const l = S.snap, sources = [...new Set(rows.map(v => v.source))], platforms = [...new Set(rows.map(v => v.platform))];
-    const head = $('src-matrix-head'), body = $('src-matrix'); head.textContent = ''; body.textContent = '';
-    const hr = el('tr'); hr.appendChild(el('th', null, 'Source'));
-    platforms.forEach(p => { const th = el('th'); const dot = el('i', 'vd-dot'); dot.style.background = PCOL[p] || '#667085'; th.append(dot, ' ' + p); hr.appendChild(th); });
-    head.appendChild(hr);
-    sources.forEach(source => {
-      const tr = el('tr'), all = rows.filter(v => v.source === source), src = el('td', 'src');
-      src.append(el('b', null, source), el('span', null, all.length + ' videos across ' + new Set(all.map(v => v.platform)).size + ' platforms')); tr.appendChild(src);
-      platforms.forEach(platform => {
-        const td = el('td'), g = all.filter(v => v.platform === platform);
-        if (!g.length) { const empty = el('span', 'vd-smc empty'); empty.append(el('span', 'l', 'No videos')); td.appendChild(empty); tr.appendChild(td); return; }
-        const got = g.filter(v => v[l + '_views'] != null), views = d3.sum(got, v => v[l + '_views'] || 0), avg = got.length ? views / got.length : null;
-        const actions = d3.sum(got, v => (v[l + '_likes'] || 0) + (v[l + '_comments'] || 0) + (v[l + '_shares'] || 0)), rate = views ? actions / views : null, coverage = got.length / g.length;
-        const b = el('button', 'vd-smc'); b.type = 'button'; b.setAttribute('aria-label', source + ', ' + platform + ': ' + got.length + ' of ' + g.length + ' responses, ' + full(views) + ' views at ' + LBL[l] + '. Filter dashboard.');
-        b.append(el('span', 'v', got.length ? big(views) : '—'), el('span', 'l', 'views at ' + LBL[l]));
-        const r1 = el('span', 'r'); r1.append(el('span', null, got.length + '/' + g.length + ' responses'), el('span', null, pct0(coverage))); b.appendChild(r1);
-        const cov = el('span', 'cov'), fill = el('i'); fill.style.width = (coverage * 100).toFixed(1) + '%'; fill.style.background = PCOL[platform] || '#667085'; cov.appendChild(fill); b.appendChild(cov);
-        const r2 = el('span', 'r'); r2.append(el('span', null, 'Avg ' + (avg == null ? '—' : big(avg))), el('span', null, 'Eng ' + pct(rate))); b.appendChild(r2);
-        b.addEventListener('click', () => { S.src = source; S.plat = platform; S.wallN = 12; drawAll(); $('wall-card').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
-        td.appendChild(b); tr.appendChild(td);
-      });
-      body.appendChild(tr);
-    });
-
-    const d = dash.data('src_score'), box = $('src-cards'); box.textContent = '';
-    if (d.status !== 'ok') return;
-    const data = d.data.slice().sort((a, b) => (b.avg ?? -1) - (a.avg ?? -1));
-    const bestOf = (k) => Math.max(...data.map(r => r[k] ?? -1));
-    data.forEach((r, i) => {
-      const c = el('div', 'vd-sc' + (i === 0 && r.avg != null ? ' best' : ''));
-      const h = el('h3'); h.append(r.source); if (i === 0 && r.avg != null) h.append(el('span', 'vd-chip o', 'Leads'));
-      c.appendChild(h);
-      const g = el('div', 'vd-sg');
-      const stat = (val, lab, k) => { const d2 = el('div'); const b = el('b', r[k] === bestOf(k) && r[k] != null ? 'w' : null, val); d2.append(b, el('span', null, lab)); g.appendChild(d2); };
-      stat(big(r.views), 'Total views', 'views'); stat(big(r.avg), 'Avg per video', 'avg'); stat(big(r.median), 'Median video', 'median');
-      stat(pct0(r.hit1k), 'Past 1K views', 'hit1k'); stat(pct(r.eng), 'Engagement rate', 'eng'); stat(r.with_views + ' / ' + r.videos, 'Videos with views', 'with_views');
-      c.appendChild(g);
-      const sh = el('div'); sh.append(el('span', 'vd-small', pct0(r.share) + ' of all views'));
-      const bar = el('div', 'vd-share'), fill = el('i'); fill.style.width = (r.share * 100).toFixed(1) + '%'; bar.appendChild(fill); sh.appendChild(bar); c.appendChild(sh);
-      const best = rows.filter(v => v.source === r.source && v.views != null).sort((a, b) => b.views - a.views)[0];
-      if (best) {
-        const bb = el('button', 'vd-ccard'); bb.type = 'button'; bb.setAttribute('aria-label', 'Play best video of ' + r.source);
-        const t = el('span', 'tb'); paintThumb(t, best); const m = el('span', 'vd-mini'); m.innerHTML = PLAYS; t.appendChild(m);
-        const tx = el('span'); tx.append(el('span', 'vd-small', 'Best video'), el('b', null, title(best)), el('span', 'vd-small', big(best.views) + ' views · ' + best.platform));
-        bb.append(t, tx); bb.addEventListener('click', () => watch(best.video, true)); c.appendChild(bb);
-      }
-      box.appendChild(c);
-    });
-  }
-
-  // ---- compare two videos
-  const findVid = (q) => { q = (q || '').trim().toLowerCase(); if (!q) return null; const id = q.match(/vid-\d{4}/); if (id) return byId.get(id[0].toUpperCase()) || null; return rows.filter(v => v.views != null).sort((a, b) => b.views - a.views).find(v => (v.account || '').toLowerCase().includes(q) || (v.title || '').toLowerCase().includes(q)) || null; };
-  ['cmp-a', 'cmp-b'].forEach(id => $(id).addEventListener('change', drawCompare));
-  function cmpCard(box, v) {
-    box.textContent = ''; if (!v) { box.appendChild(el('p', 'vd-note', 'Type a video ID or account name.')); return; }
-    const b = el('button', 'vd-ccard'); b.type = 'button'; b.setAttribute('aria-label', 'Play ' + v.video);
-    const t = el('span', 'tb'); paintThumb(t, v); const m = el('span', 'vd-mini'); m.innerHTML = PLAYS; t.appendChild(m);
-    const tx = el('span'); tx.append(el('span', 'vd-small', v.video + ' · ' + v.platform + ' · posted ' + dmy(v.published)), el('b', null, title(v)), el('span', 'vd-small', v.source));
-    b.append(t, tx); b.addEventListener('click', () => watch(v.video, true)); box.appendChild(b);
-  }
-  function drawCompare() {
-    const dl = $('cmp-list');
-    if (!dl.children.length) rows.filter(v => v.views != null).sort((a, b) => b.views - a.views).forEach(v => { const o = el('option'); o.value = v.video; o.label = v.video + ' · ' + (v.account || '') + ' · ' + big(v.views) + ' views'; dl.appendChild(o); });
-    const top = rows.filter(v => v.views != null).sort((a, b) => b.views - a.views);
-    const a = findVid($('cmp-a').value) || byId.get(S.cmpA) || top[0], b = findVid($('cmp-b').value) || byId.get(S.cmpB) || top.find(v => v !== a);
-    S.cmpA = a && a.video; S.cmpB = b && b.video;
-    if (!$('cmp-a').value && a) $('cmp-a').value = a.video; if (!$('cmp-b').value && b) $('cmp-b').value = b.video;
-    cmpCard($('cmp-a-card'), a); cmpCard($('cmp-b-card'), b);
-    const box = $('cmp-bars'); box.textContent = ''; const ver = $('cmp-verdict');
-    if (!a || !b) { ver.hidden = true; return; }
-    const metrics = [['Latest views', 'views'], ['Day 2 views', 'd2_views'], ['Day 7 views', 'd7_views'], ['Day 30 views', 'd30_views'], ['Likes', 'likes'], ['Comments', 'comments'], ['Shares', 'shares'], ['Engagement rate', 'eng']];
-    metrics.forEach(([lab, k]) => {
-      const va = k === 'eng' ? eng(a) : a[k], vb = k === 'eng' ? eng(b) : b[k];
-      if (va == null && vb == null) return;
-      const mx = Math.max(va || 0, vb || 0) || 1, fmtv = (x) => x == null ? '—' : k === 'eng' ? pct(x) : full(x);
-      const r = el('div', 'vd-cb'), lb = el('div', 'lb'); lb.append(el('span', null, fmtv(va)), el('b', null, lab), el('span', null, fmtv(vb))); r.appendChild(lb);
-      const pair = el('div', 'pair');
-      [[va, 'a', '#EA580C'], [vb, 'b', '#2D5FD3']].forEach(([x, s, c]) => { const sd = el('div', 'side ' + s), f = el('i'); f.style.width = ((x || 0) / mx * 100).toFixed(1) + '%'; f.style.background = c; f.style.opacity = x != null && x >= ((s === 'a' ? vb : va) || 0) ? '1' : '.45'; sd.append(f); pair.appendChild(sd); });
-      r.appendChild(pair); box.appendChild(r);
-    });
-    ver.hidden = false;
-    if (a.views != null && b.views != null) { const hi = a.views >= b.views ? a : b, lo = hi === a ? b : a; ver.textContent = hi.video + ' has ' + (hi.views / Math.max(1, lo.views)).toFixed(1) + '× the views of ' + lo.video + (eng(lo) > eng(hi) ? ', but ' + lo.video + ' gets more engagement per view (' + pct(eng(lo)) + ' vs ' + pct(eng(hi)) + ').' : ' and also wins on engagement per view.'); }
-    else ver.textContent = 'One of these videos has no view count yet.';
-  }
-
-  // ---- shared tooltip
-  function tip(card, ev, lines) {
-    let t = card.querySelector('.vd-tip'); if (!t) { t = el('div', 'vd-tip'); card.appendChild(t); }
-    t.textContent = ''; lines.forEach((s, i) => t.appendChild(el('div', i ? null : 'k', s))); t.hidden = false;
-    const r = card.getBoundingClientRect(); let x = ev.clientX - r.left + 12; if (x + t.offsetWidth > r.width - 8) x = ev.clientX - r.left - t.offsetWidth - 12;
+  function showTip(card, ev, lines) {
+    const t = tipFor(card); t.textContent = '';
+    lines.forEach(([k, v], i) => { const row = document.createElement('div'); if (i === 0) { row.className = 'k'; row.textContent = k; } else { row.textContent = k + ': ' + v; } t.appendChild(row); });
+    t.hidden = false;
+    const r = card.getBoundingClientRect(), tw = t.offsetWidth;
+    let x = ev.clientX - r.left + 12; if (x + tw > r.width - 8) x = ev.clientX - r.left - tw - 12;
     t.style.left = Math.max(8, x) + 'px'; t.style.top = (ev.clientY - r.top + 12) + 'px';
   }
   const hideTip = (card) => { const t = card.querySelector('.pv-tip'); if (t) t.hidden = true; };
@@ -905,24 +364,15 @@ dash.calc('status', { inputs: ['videos'], title: 'Videos to fix',
       tbody.appendChild(tr);
     });
   }
-
-  // ---- heatmap
-  function drawHeat() {
-    const box = $('h-grid'); box.textContent = '';
-    const l = S.snap, key = (v) => v[l + '_views'] != null ? v[l + '_views'] : null;
-    const timed = filtered().filter(v => v.published_at && key(v) != null);
-    $('h-note').textContent = 'Average ' + (l === 'all' ? 'all-time' : LBL[l]) + ' views by posting slot (IST)';
-    if (timed.length < 5) {
-      const byDay = filtered().filter(v => v.published && v.views != null);
-      if (byDay.length < 5) { box.appendChild(el('p', 'vd-empty', 'Posting times appear here after the next daily refresh adds each video\'s upload time.')); return; }
-      $('h-note').textContent = 'Average latest views by weekday posted · exact times arrive with the next refresh';
-      const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-      const g = DAYS.map(() => []); byDay.forEach(v => g[(new Date(v.published + 'T00:00:00').getDay() + 6) % 7].push(v.views));
-      const avg = g.map(c => c.length ? d3.mean(c) : null), mx = Math.max(...avg.filter(x => x != null));
-      const grid = el('div', 'vd-hg'); grid.style.gridTemplateColumns = 'repeat(7,minmax(0,1fr))'; grid.style.minWidth = '0';
-      DAYS.forEach(d => grid.appendChild(el('span', 'h', d)));
-      avg.forEach((a, i) => { const lv = a == null ? -1 : Math.min(4, Math.floor(a / mx * 4.999)); const c = el('span', 'c' + (a === mx ? ' best' : ''), a == null ? '' : big(a)); c.style.height = '64px'; c.style.background = lv < 0 ? '#F9FAFB' : HEAT[lv]; c.style.color = lv >= 3 ? '#fff' : '#101828'; c.title = DAYS[i] + ': ' + (a == null ? 'no videos' : full(a) + ' average views over ' + g[i].length + ' videos'); grid.appendChild(c); });
-      box.appendChild(grid); return;
+  const icon = { Instagram: 'Instagram', Facebook: 'Facebook', YouTube: 'YouTube' };
+  const link = (v, r) => { if (!r.url || v == null || v === '') return v == null ? '' : v; const a = document.createElement('a'); a.href = r.url; a.target = '_blank'; a.rel = 'noopener'; a.className = 'pv-link'; a.title = 'Open on ' + (icon[r.platform] || 'Google Drive'); a.textContent = v; return a; };
+  const nlink = (v, r) => link(n(v), r);
+  const ms = (v, r, l) => {
+    if (v != null) {
+      const a = link(n(v), r);
+      const age = r[l + '_age'], st = r[l + '_status'] || '';
+      if (st.startsWith('Captured late')) { a.title = 'Captured late, on day ' + age; const w = document.createElement('span'); w.appendChild(a); const t = document.createElement('span'); t.className = 'pv-late'; t.textContent = ' d' + age; w.appendChild(t); return w; }
+      return a;
     }
     const st = r[l + '_status'] || '', sp = document.createElement('span'); sp.className = 'pv-ms';
     sp.textContent = st.startsWith('Due 2') ? 'due ' + dayFmt(new Date(r[l + '_due'])) : st === 'Due now' ? 'due now' : st === 'Missed' ? 'missed' : st.startsWith('Captured') ? 'no count' : '';
@@ -941,82 +391,69 @@ dash.calc('status', { inputs: ['videos'], title: 'Videos to fix',
       [['f-source', 'source'], ['f-platform', 'platform'], ['f-status', 'status']].forEach(([id, k]) => {
         const sel = $(id); [...new Set(rows.map(r => r[k]))].sort().forEach(v => { const o = document.createElement('option'); o.value = v; o.textContent = v; sel.appendChild(o); });
       });
+      filled = true;
+    }
+    const q = $('f-search').value.trim().toLowerCase(), fs = $('f-source').value, fp = $('f-platform').value, fst = $('f-status').value;
+    const shown = rows.filter(r => (!fs || r.source === fs) && (!fp || r.platform === fp) && (!fst || r.status === fst) &&
+      (!q || [r.video, r.account, r.url].join(' ').toLowerCase().includes(q)))
+      .sort((a, b) => {
+        const A = a[sortKey], B = b[sortKey];
+        if (A == null && B == null) return 0; if (A == null) return 1; if (B == null) return -1;
+        return (numKeys.has(sortKey) ? A - B : String(A).localeCompare(String(B))) * sortDir;
+      });
+    $('count-shown').textContent = fmt(shown.length) + ' of ' + fmt(rows.length);
+    fillRows(tb, shown, [['video', link], ['account', link], ['source', null, 'pv-hide-narrow'], ['platform', link],
+      ['published', v => v ? dayFmt(new Date(v)) : '', 'pv-hide-narrow'],
+      ['d2_views', (v, r) => ms(v, r, 'd2'), 'num'], ['d7_views', (v, r) => ms(v, r, 'd7'), 'num'], ['d30_views', (v, r) => ms(v, r, 'd30'), 'num'],
+      ['views', nlink, 'num'], ['alltime_at', v => v ? dayFmt(new Date(v)) : '', 'pv-hide-narrow'], ['likes', nlink, 'num pv-hide-narrow'],
+      ['comments', nlink, 'num pv-hide-narrow'], ['shares', nlink, 'num pv-hide-narrow'], ['status', pill]]);
+    document.querySelectorAll('#all-videos th').forEach(th => {
+      const b = th.querySelector('button'); th.setAttribute('aria-sort', b && b.dataset.k === sortKey ? (sortDir > 0 ? 'ascending' : 'descending') : 'none');
     });
-    box.appendChild(grid);
   }
-
-  // ---- top 5
-  function drawTop() {
-    const l = S.snap, list = ranked().filter(v => v[l + '_views'] != null).slice(0, 5), box = $('t-list'); box.textContent = '';
-    $('t-title').textContent = 'Top 5 by ' + (l === 'all' ? 'all-time' : LBL[l]) + ' views';
-    if (!list.length) { box.appendChild(el('p', 'vd-empty', 'No videos captured at ' + LBL[l] + ' yet. The first ' + LBL[l] + ' captures arrive as videos reach that age.')); return; }
-    const mx = list[0][l + '_views'];
-    list.forEach((v, i) => {
-      const a = el('button', 'vd-top'); a.type = 'button'; a.setAttribute('aria-label', 'Play ' + v.video);
-      const tb = el('span', 'tb'); paintThumb(tb, v); const mi = el('span', 'vd-mini'); mi.innerHTML = PLAYS; tb.appendChild(mi);
-      const tt = el('span', 'tt'), bar = el('span'), fill = el('i'); fill.style.width = (v[l + '_views'] / mx * 100).toFixed(1) + '%'; fill.style.background = i ? '#2D5FD3' : '#EA580C'; bar.appendChild(fill);
-      tt.append(el('b', null, title(v)), bar);
-      const p = prev(l), gr = p && v[p + '_views'] ? (v[l + '_views'] / v[p + '_views']).toFixed(1) + '× vs ' + LBL[p] : v.video;
-      const tv = el('span', 'tv'); tv.append(el('b', null, big(v[l + '_views'])), el('span', 'vd-small', v.platform + ' · ' + gr));
-      a.append(el('span', 'r', String(i + 1)), tb, tt, tv); a.addEventListener('click', () => watch(v.video, true)); box.appendChild(a);
-    });
-  }
-
-  // ---- all-videos table
-  const NUM = new Set(['views', 'likes', 'comments', 'shares', ...L.flatMap(l => ['views', 'likes', 'comments', 'shares'].map(k => l + '_' + k))]);
+  ['f-search', 'f-source', 'f-platform', 'f-status'].forEach(id => $(id).addEventListener('input', drawAll));
   document.querySelectorAll('#all-videos th button').forEach(b => b.addEventListener('click', () => {
     const k = b.dataset.k; if (k === sortKey) sortDir = -sortDir; else { sortKey = k; sortDir = numKeys.has(k) ? -1 : 1; } drawAll();
   }));
-  ['f-search', 'f-status'].forEach(id => $(id).addEventListener('input', drawTable));
-  let statusFilled = false;
-  function drawTable() {
-    const tb = $('tb-all'); tb.textContent = '';
-    if (!statusFilled && rows.length) { [...new Set(rows.map(r => r.status))].sort().forEach(s => { const o = el('option', null, s); o.value = s; $('f-status').appendChild(o); }); statusFilled = true; }
-    const qq = $('f-search').value.trim().toLowerCase(), fst = $('f-status').value, key = S.sortKey || (S.snap === 'all' ? 'views' : S.snap + '_views');
-    const list = filtered().filter(r => (!fst || r.status === fst) && (!qq || [r.video, r.account, r.url, r.title].join(' ').toLowerCase().includes(qq)))
-      .sort((a, b) => { const A = a[key], B = b[key]; if (A == null && B == null) return 0; if (A == null) return 1; if (B == null) return -1; return (NUM.has(key) ? A - B : String(A).localeCompare(String(B))) * (S.sortKey ? S.sortDir : -1); });
-    $('count-shown').textContent = list.length.toLocaleString('en-IN') + ' of ' + rows.length.toLocaleString('en-IN');
-    const link = (r, text) => { const a = el('a', null, text); a.href = r.url; a.target = '_blank'; a.rel = 'noopener'; return a; };
-    const frag = document.createDocumentFragment();
-    list.forEach(r => {
-      const tr = el('tr');
-      const td = (cls, child) => { const t = el('td', cls); if (child instanceof Node) t.appendChild(child); else if (child != null) t.textContent = child; tr.appendChild(t); return t; };
-      const first = td('stk'); const pb = el('button', 'pbtn'); pb.type = 'button'; pb.innerHTML = PLAYS; pb.setAttribute('aria-label', 'Play ' + r.video); pb.addEventListener('click', () => watch(r.video, true)); first.append(pb, link(r, r.video));
-      td(null, r.account ? link(r, r.account) : ''); td(null, r.platform); td(null, r.source); td(null, r.published ? dmy(r.published) : '');
-      L.forEach(l => {
-        const g = l === 'd2' ? 'g2' : l === 'd7' ? 'g7' : 'g30', vw = r[l + '_views'];
-        const c = td('num ms ' + g);
-        if (vw != null) { c.appendChild(link(r, full(vw))); if ((r[l + '_status'] || '').startsWith('Captured late')) { const s = el('span', 'late', 'd' + r[l + '_age']); s.title = 'Captured late, on day ' + r[l + '_age']; c.appendChild(s); } }
-        else c.appendChild(el('span', 'st', statusText(r, l)));
-        ['likes', 'comments', 'shares'].forEach(k => { const x = r[l + '_' + k]; td('num ' + g, x != null ? link(r, full(x)) : ''); });
-      });
-      ['views', 'likes', 'comments', 'shares'].forEach((k, i) => td('num gall' + (i ? '' : ' ms'), r[k] != null ? link(r, full(r[k])) : (i ? '' : el('span', 'st', statusText(r, 'all')))));
-      td('gall vd-small', r.alltime_at ? dmy(r.alltime_at) : '');
-      const p = el('span', 'vd-pill ' + (r.status === 'OK' ? 'ok' : r.status === 'Fetch failed' ? 'b' : 'w'), r.status); td(null, p);
-      frag.appendChild(tr);
-    });
-    tb.appendChild(frag);
-  }
-
-  function drawFix() {
-    const d = dash.data('status'), box = $('fix'); box.textContent = '';
-    if (d.status !== 'ok') return;
-    if (!d.data.length) { box.appendChild(el('p', 'vd-empty', 'Nothing to fix.')); return; }
-    d.data.forEach(r => { const row = el('div'); row.append(el('span', 'vd-pill ' + (r.status === 'Fetch failed' ? 'b' : 'w'), r.status), el('b', null, String(r.videos)), el('span', 'vd-note', r.next_step)); box.appendChild(row); });
-  }
-
-  function drawAll() { drawSeg(); drawTabs(); drawInsights(); drawKpis(); drawWall(); drawDeep(); drawSources(); drawCompare(); drawGrowth(); drawPlats(); drawAccounts(); drawDist(); drawScatter(); drawTimeline(); drawHeat(); drawTop(); drawTable(); drawFix(); }
 
   dash.onData(() => {
-    const d = dash.data('videos');
-    if (d.status !== 'ok') { document.querySelectorAll('.vd-kpi .v').forEach(e => { e.textContent = '—'; }); return; }
-    rows = d.data.map(v => Object.assign({}, v, { all_views: v.views, all_likes: v.likes, all_comments: v.comments, all_shares: v.shares, all_age: v.alltime_age }));
-    byId = new Map(rows.map(v => [v.video, v]));
-    if (!EMBED) { const t = dash.data('thumbs'); if (t.status === 'ok') THUMBS = new Map(t.data.map(r => [r.video, r.img])); }
-    if (S.auto) {
-      const n = (l) => rows.filter(v => v[l + '_views'] != null).length;
-      S.snap = 'all';
-    }
+    // Headline tiles and takeaway
+    const k = dash.data('kpis');
+    document.querySelectorAll('[data-source="kpis"]').forEach(el => {
+      ready(el, k);
+      if (k.status !== 'ok' || !k.data.length) { el.textContent = '—'; return; }
+      const v = k.data[0][el.dataset.field];
+      el.textContent = el.dataset.field === 'eng_rate' ? (v == null ? '—' : pct(v)) : el.dataset.field === 'views' || el.dataset.field === 'likes_comments' ? big.format(v) : fmt(v);
+    });
+    const s = dash.data('by_source');
+    document.querySelectorAll('.pv-take [data-source="by_source"]').forEach(el => {
+      ready(el, s);
+      const row = s.status === 'ok' ? s.data.find(r => 'source=' + r.source === el.dataset.where) : null;
+      el.textContent = !row ? '—' : el.dataset.field === 'share' ? pct(row.share) : fmt(row.videos);
+    });
+
+    // Charts
+    const p = dash.data('by_platform'), cp = $('chart-platform'); ready(cp, p);
+    if (p.status === 'ok') hbars(cp, p.data, 'platform', dash.colors[0]); else if (p.status === 'error') failed(cp); else cp.textContent = '';
+    const cs = $('chart-source'); ready(cs, s);
+    if (s.status === 'ok') hbars(cs, s.data, 'source', dash.colors[1]); else if (s.status === 'error') failed(cs); else cs.textContent = '';
+    const dd = dash.data('by_day'), cd = $('chart-day'); ready(cd, dd);
+    if (dd.status === 'ok') dayBars(cd, dd.data); else if (dd.status === 'error') failed(cd); else cd.textContent = '';
+
+    // Tables
+    if (s.status === 'ok') fillRows($('tb-source'), s.data, [['source'], ['videos', n, 'num'], ['with_views', n, 'num'], ['views', n, 'num'], ['likes', n, 'num'],
+      ['comments', n, 'num pv-hide-narrow'], ['shares', n, 'num pv-hide-narrow'], ['eng_rate', v => v == null ? '' : pct(v), 'num']]);
+    else $('tb-source').textContent = '';
+    const t = dash.data('top10');
+    if (t.status === 'ok') fillRows($('tb-top'), t.data, [['video', link], ['account', link], ['platform', null, 'pv-hide-narrow'], ['views', nlink, 'num'], ['likes', nlink, 'num']]);
+    else $('tb-top').textContent = '';
+    const mst = dash.data('milestones');
+    if (mst.status === 'ok') fillRows($('tb-ms'), mst.data, [['milestone'], ['captured', n, 'num'], ['late', n, 'num'], ['due_now', n, 'num'],
+      ['due_later', n, 'num pv-hide-narrow'], ['missed', n, 'num pv-hide-narrow'], ['views', n, 'num']]);
+    else $('tb-ms').textContent = '';
+    const st = dash.data('status');
+    if (st.status === 'ok') fillRows($('tb-status'), st.data, [['status', pill], ['videos', n, 'num'], ['next_step']]);
+    else $('tb-status').textContent = '';
     drawAll();
   });
 
@@ -1025,6 +462,5 @@ dash.calc('status', { inputs: ['videos'], title: 'Videos to fix',
 })();
 </script>
 
-</div>
 <p class="pv-foot">Data updated 28 Oct 2026. Public counts as shown on each platform; Instagram via Apify, Facebook and YouTube via Bright Data.</p>
-</body></html>
+</div></body></html>
