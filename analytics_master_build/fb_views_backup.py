@@ -1,12 +1,17 @@
 """Backup for Facebook view counts.
 
-Bright Data stays the main source. For Facebook reels it returned *today* without a view count, this scans each
-page's Reels tab with Apify (apify/facebook-reels-scraper, only reels newer than the oldest missing one) and fills in
-the play count on that same snapshot. Likes, comments and shares from Bright Data are left untouched.
+Bright Data stays the main source. For Facebook reels with no view count, this asks Apify
+(apify/facebook-reels-scraper) for each reel by its own link and fills in the play count. Asking by reel link works for
+personal profiles too (their Reels tab cannot be scanned) and costs about $0.005 per reel.
 
-  python fb_views_backup.py start [--max-items N]   # start one Apify run per page (cost cap: N reels, ~$0.005 each)
-  python fb_views_backup.py collect                  # fill views once the runs finish (exit 2 while still running)
-Settings in .env: APIFY_FB_BACKUP=off disables it; APIFY_FB_BACKUP_MAX_ITEMS caps reels scanned per day (default 300).
+Which reels: every Facebook reel whose latest capture has no view count. A reel captured today is asked right away;
+any other is asked again once a week (fb_backup_tries.json keeps the last try), so a reel whose owner hides the count
+does not cost money every day. A count found for today's capture fills that capture; otherwise it is saved as a new
+capture taken now (so it counts as the reel's all-time views and is never written into an older Day 2 / Day 7 count).
+
+  python fb_views_backup.py start [--max-items N]   # start the Apify run (cost cap: N reels)
+  python fb_views_backup.py collect                  # fill views once the run finishes (exit 2 while still running)
+Settings in .env: APIFY_FB_BACKUP=off disables it; APIFY_FB_BACKUP_MAX_ITEMS caps reels asked per run (default 150).
 """
 import json, os, re, sys, urllib.request
 from collections import defaultdict
@@ -43,24 +48,37 @@ def ist_date(iso):
     return datetime.fromisoformat(iso.replace("Z", "+00:00")).astimezone(IST).date()
 
 
+TRIES = ROOT / "fb_backup_tries.json"
+RETRY_DAYS = 7
+
+
 def candidates(hist, today):
-    out = defaultdict(list)
-    # Only young reels: scanning a page back a month for a Day 30 or all-time count costs ~10x more.
-    max_age = int(os.environ.get("APIFY_FB_BACKUP_MAX_AGE", "10") or 10000)
-    for s in hist:
-        if (s.get("source") == "Bright Data" and s.get("fetch_status") == "OK" and s.get("views") is None
-                and s.get("page_url") and reel_id(s.get("post_url")) and s.get("published_at")
-                and ist_date(s["captured_at"]) == today and "facebook.com" in (s.get("post_url") or "")
-                and (today - ist_date(s["published_at"])).days <= max_age):
-            out[s["page_url"]].append(s)
+    """{reel id: latest capture} for Facebook reels whose latest capture has no view count and are due a try."""
+    tries = json.loads(TRIES.read_text()) if TRIES.exists() else {}
+    latest, counted = {}, {s_["master_id"] for s_ in hist if s_.get("views") is not None}
+    for s_ in hist:
+        if s_.get("fetch_status") == "OK" and "facebook.com" in (s_.get("post_url") or "") and s_["master_id"] not in counted:
+            if s_["master_id"] not in latest or s_["captured_at"] > latest[s_["master_id"]]["captured_at"]:
+                latest[s_["master_id"]] = s_
+    out = {}
+    for s_ in latest.values():
+        rid = reel_id(s_.get("post_url"))
+        if not rid or s_.get("views") is not None:
+            continue
+        last = tries.get(rid)
+        fresh = ist_date(s_["captured_at"]) == today
+        if fresh or not last or (today - date.fromisoformat(last)).days >= RETRY_DAYS:
+            out[rid] = s_
     return out
 
 
 MAX_PARALLEL = 4  # the free Apify plan allows 5 runs at once; keep one slot spare
+BATCH = 50        # reels per Apify run
 
 
 def launch(job):
-    run = api(f"acts/{ACTOR}/runs?memory=2048", {"startUrls": [{"url": job["page"]}], "onlyPostsNewerThan": job["since"], "resultsLimit": job["limit"]})["data"]
+    run = api(f"acts/{ACTOR}/runs?memory=2048", {"startUrls": [{"url": f"https://www.facebook.com/reel/{r}"} for r in job["reels"]],
+                                                 "resultsLimit": len(job["reels"])})["data"]
     job.update(run_id=run["id"], dataset=run["defaultDatasetId"])
 
 
@@ -70,27 +88,21 @@ def start(max_items, adopt=None):
         print("backup disabled"); return 0
     hist = json.loads(HISTORY.read_text(encoding="utf8"))
     today = datetime.now(IST).date()
-    pages = sorted(candidates(hist, today).items(), key=lambda kv: -len(kv[1]))
-    budget, jobs = max_items, []
-    for page, snaps in pages:
-        if budget <= 0:
-            break
-        oldest = min(ist_date(s["published_at"]) for s in snaps) - timedelta(days=1)
-        limit = min(budget, 200, (today - oldest).days * 6 + 10)  # Apify bills only reels returned
-        jobs.append({"page": page, "since": oldest.isoformat(), "limit": limit, "missing": len(snaps)})
-        budget -= limit
-    for job in jobs:  # runs already started for a page (adopt) are reused instead of started again
-        if adopt and job["page"] in adopt:
-            job.update(adopt[job["page"]])
-    running = sum(1 for j in jobs if j.get("run_id"))
+    cand = candidates(hist, today)
+    # today's captures first, then the reels that have waited longest
+    order = sorted(cand, key=lambda r: (ist_date(cand[r]["captured_at"]) != today, cand[r]["captured_at"]))[:max_items]
+    jobs = [{"reels": order[i:i + BATCH]} for i in range(0, len(order), BATCH)]
+    running = 0
     for job in jobs:
-        if not job.get("run_id") and running < MAX_PARALLEL:
+        if running < MAX_PARALLEL:
             launch(job); running += 1
+    tries = json.loads(TRIES.read_text()) if TRIES.exists() else {}
+    tries.update({r: today.isoformat() for r in order})
+    TRIES.write_text(json.dumps(tries, indent=1, sort_keys=True))
     STATE.parent.mkdir(parents=True, exist_ok=True)
     STATE.write_text(json.dumps({"date": today.isoformat(), "runs": jobs}, indent=1))
-    skipped = len(pages) - len(jobs)
-    print(f"backup queued: {len(jobs)} pages ({running} running), {sum(j['missing'] for j in jobs)} reels missing views"
-          + (f", {skipped} pages skipped (cost cap)" if skipped else ""))
+    print(f"backup queued: {len(order)} reels without a view count in {len(jobs)} runs"
+          + (f", {len(cand) - len(order)} left for the next run (cost cap)" if len(cand) > len(order) else ""))
     return len(jobs)
 
 
@@ -126,12 +138,25 @@ def collect():
                 plays[rid] = int(n)
     hist = json.loads(HISTORY.read_text(encoding="utf8"))
     day = date.fromisoformat(state["date"])
-    filled = 0
+    now = datetime.now(timezone.utc)
+    latest = {}
     for s in hist:
-        if s.get("views") is None and s.get("source") == "Bright Data" and ist_date(s["captured_at"]) == day:
-            rid = reel_id(s.get("post_url"))
-            if rid in plays:
-                s["views"] = plays[rid]; s["views_source"] = "Apify reels tab (backup)"; filled += 1
+        if s.get("fetch_status") == "OK" and reel_id(s.get("post_url")) in plays:
+            if s["master_id"] not in latest or s["captured_at"] > latest[s["master_id"]]["captured_at"]:
+                latest[s["master_id"]] = s
+    filled = 0
+    for s in latest.values():
+        n = plays[reel_id(s["post_url"])]
+        if s.get("views") is not None:
+            continue
+        if ist_date(s["captured_at"]) == day:  # captured today: fill that capture
+            s["views"] = n; s["views_source"] = "Apify reel (backup)"
+        else:  # an older capture keeps its own (missing) count; the count found now is a new capture
+            hist.append({**{k: s.get(k) for k in ("master_id", "published_at", "account", "page_url", "caption", "thumb_url", "post_url")},
+                         "snapshot_id": f"SNAP-{len(hist) + 1:05d}", "captured_at": now.isoformat(), "views": n,
+                         "likes": None, "comments": None, "shares": None, "saves": None, "source": "Apify reel (backup)",
+                         "error": None, "fetch_status": "OK"})
+        filled += 1
     HISTORY.write_text(json.dumps(hist, indent=1, ensure_ascii=False), encoding="utf8")
     STATE.write_text(json.dumps({"date": state["date"], "runs": [], "last": {"filled": filled, "cost_usd": round(cost, 3)}}, indent=1))
     print(f"backup filled {filled} view counts (Apify cost ${cost:.2f})")

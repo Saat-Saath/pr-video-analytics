@@ -134,10 +134,10 @@ def finish():
         files = [r["result"] for r in state["runs"]]
         pend.write_text("{}")  # cleared (this folder does not allow deleting files)
     print(py("merge_results.py", *files).strip())
-    if files and os.environ.get("APIFY_FB_BACKUP", "on").lower() != "off":
+    if os.environ.get("APIFY_FB_BACKUP", "on").lower() != "off":  # Facebook reels still without a view count
         out = subprocess.run([sys.executable, str(BUILD / "fb_views_backup.py"), "start"], capture_output=True, text=True)
         print(out.stdout.strip() or out.stderr.strip()[-300:])
-        if out.returncode == 0 and "queued: 0 pages" not in out.stdout and "backup queued" in out.stdout:
+        if out.returncode == 0 and "backup queued" in out.stdout and " in 0 runs" not in out.stdout:
             pend.write_text(json.dumps({"stage": "backup"}))
             print("Facebook view backup running; run finish again"); sys.exit(2)
     py("build_workbook.py")

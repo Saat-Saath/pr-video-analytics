@@ -4,7 +4,7 @@ Usage: python merge_results.py <result.json> [<result.json> ...]
 Reads  source_data.json (master list) and snapshot_history.json (all past fetches).
 Writes snapshot_history.json (appended) and analytics_data.json (master + latest metrics).
 """
-import json, re, sys
+import json, os, re, sys
 from datetime import datetime, timezone, date, timedelta
 from pathlib import Path
 
@@ -116,6 +116,10 @@ def post_key(url):
 
 def main(result_files):
     src = json.loads(SOURCE.read_text(encoding="utf8"))
+    # Day 2 / 7 / 30 counts already shown are never dropped: if a later run finds no capture for a milestone
+    # (for example after a rule change) the count from the previous run is kept.
+    prev_path = Path(os.environ.get("MERGE_PREV") or OUT)
+    prev = {pm["master_id"]: pm for pm in json.loads(prev_path.read_text(encoding="utf8"))["master"]} if prev_path.exists() else {}
     master = src["master"]
     history = json.loads(HISTORY.read_text(encoding="utf8")) if HISTORY.exists() else []
     by_key = {norm(m["canonical_url"]): m for m in master}
@@ -207,6 +211,12 @@ def main(result_files):
                 m[f"{label}_{k}"] = hit.get(k) if hit else None
             ints = sum(x or 0 for x in ((hit or {}).get("likes"), (hit or {}).get("comments"), (hit or {}).get("shares")))
             m[f"{label}_engagement_rate"] = round(ints / hit["views"], 4) if hit and hit.get("views") else None
+            pm = prev.get(m["master_id"]) or {}
+            if (not hit or hit.get("views") is None) and pm.get(f"{label}_views") is not None:
+                for k in ("views", "likes", "comments", "shares", "age", "hours", "engagement_rate"):
+                    m[f"{label}_{k}"] = pm.get(f"{label}_{k}")
+                ps = pm.get(f"{label}_status") or ""
+                m[f"{label}_status"] = ps if ps.startswith("Captured") else "Captured"
         for old_key in ("day_7_due", "day_30_due", "views_7d", "likes_7d", "comments_7d", "engagement_rate_7d",
                         "views_30d", "likes_30d", "comments_30d", "engagement_rate_30d"):
             m.pop(old_key, None)
