@@ -79,13 +79,74 @@ def amount(text):
     return sum(nums) if nums else None
 
 
+def cost_tab_gid(sid):
+    """gid of the tab named "Video Cost" (any case), or "" for the first tab."""
+    try:
+        with urllib.request.urlopen(f"https://docs.google.com/spreadsheets/d/{sid}/htmlview", timeout=60) as r:
+            html = r.read().decode("utf8", "ignore")
+        for name, gid in re.findall(r'\{name: "((?:[^"\\]|\\.)*)", pageUrl: "[^"]*", gid: "(\d+)"', html):
+            if norm(json.loads('"' + name + '"')) in ("videocost", "videocosts", "costs", "cost"):
+                return gid
+    except Exception:
+        pass
+    return ""
+
+
+def link_key(url):
+    """The account a profile / page link points to, comparable across link styles:
+    fb:<id or page name>, ig:<handle>, yt:<handle>. None for post links and anything else."""
+    u = (url or "").strip().lower()
+    if not u or u.startswith("post:"):
+        return None
+    u = re.sub(r"^https?://", "", u)
+    u = re.sub(r"^(www\.|m\.|web\.)", "", u)
+    if u.startswith("facebook.com/"):
+        m = re.search(r"profile\.php\?id=(\d+)", u) or re.search(r"/people/[^/]+/(\d+)", u)
+        if m:
+            return "fb:" + m.group(1)
+        seg = u.split("?")[0].split("/")[1]
+        return None if seg in ("share", "reel", "watch", "") else "fb:" + seg
+    if u.startswith("instagram.com/"):
+        seg = u.split("?")[0].split("/")[1]
+        return None if seg in ("p", "reel", "reels", "") else "ig:" + seg
+    if u.startswith("youtube.com/"):
+        seg = u.split("?")[0].split("/")[1]
+        return "yt:" + seg if seg.startswith("@") else None
+    return None
+
+
+def row_matcher(c):
+    """What a cost row matches on: its profile links when it has any (exact, so two rows with the same name, one per
+    platform, stay apart), otherwise its Account name."""
+    if not (c.get("account") or "").strip():  # a blank Account is the whole source, whatever links it shows
+        return {"name": "", "links": set()}
+    keys = {k for k in (link_key(u) for u in re.findall(r"https?://\S+", re.sub(r"(?i)post:\s*https?://\S+", "", c.get("links") or ""))) if k}
+    return {"name": norm(c.get("account")), "links": keys}
+
+
+def row_tag(c):
+    """A short name for the account a row's link points to: "Facebook adarshtalks", "Instagram nationalkhabardigital"."""
+    keys = sorted(row_matcher(c)["links"])
+    if not keys:
+        return f"₹{c['amount']:,.0f}"
+    kind, name = keys[0].split(":", 1)
+    plat = {"fb": "Facebook", "ig": "Instagram", "yt": "YouTube"}[kind]
+    return f"{plat} {'id ' + name if name.isdigit() else name}"
+
+
+def similar(a, b):
+    """Typos in a name still match ("Jagrti Dubey" / "Jagriti Dubey", "Numberdaar" / "Numberdar")."""
+    import difflib
+    return len(a) >= 5 and difflib.SequenceMatcher(None, a, b).ratio() >= 0.85
+
+
 def read_rows(include_blank=False):
     """Cost rows from the Costs sheet when configured, else costs.csv, else []. Rows without an amount are left out
     unless include_blank (they still count as "this account already has a row" for missing_rows)."""
     e = env()
     sid = e.get("SHEET_COSTS", "")
     if sid:
-        gid = e.get("SHEET_COSTS_GID", "").strip()  # blank = the first tab
+        gid = e.get("SHEET_COSTS_GID", "").strip() or cost_tab_gid(sid)  # the "Video Cost" tab, else the first tab
         url = f"https://docs.google.com/spreadsheets/d/{sid}/export?format=csv" + (f"&gid={gid}" if gid else "")
         try:
             with urllib.request.urlopen(url, timeout=60) as r:
@@ -110,7 +171,7 @@ def read_rows(include_blank=False):
         return None
     ix = dict(source=find("source"), account=find("account", "channel", "influencer", "name"), month=find("month"),
               amount=find("amount", "cost", "payment", "rs", "inr"), basis=find("basis", "type"), note=find("note"),
-              promised=find("videospermonth", "videos", "promised", "committed"))
+              promised=find("videospermonth", "videos", "promised", "committed"), links=find("profilelink", "link", "profile", "url"))
     if ix["source"] is None or ix["amount"] is None:
         raise SystemExit("Costs sheet needs at least a Source and an Amount column")
     out = []
@@ -123,21 +184,59 @@ def read_rows(include_blank=False):
             except ValueError:
                 if amount(mon):
                     amt, mon = amount(mon), ""
-        if not amt and not (include_blank and get("source")):
-            continue  # rows without an amount are just placeholders
+        if not amt and not (include_blank and get("source") and get("account")):
+            continue  # rows without an amount are placeholders; with no account either they cover nothing
         out.append({"row": n, "source": get("source"), "account": get("account"), "month": mon,
                     "amount": amt, "basis": "per video" if "video" in get("basis").lower() else "per month",
-                    "promised": int(amount(get("promised")) or 0) or None})
+                    "promised": int(amount(get("promised")) or 0) or None, "links": get("links")})
     return out
 
 
+def video_keys(v):
+    """Profile keys of the account that posted a video (its page link, Instagram / YouTube handle)."""
+    keys = {link_key(v.get("page_url")), link_key(v.get("profile_url"))}
+    acc = (v.get("account") or "").strip()
+    if v.get("platform") == "Instagram" and re.fullmatch(r"[\w.]+", acc):
+        keys.add("ig:" + acc.lower())
+    if v.get("platform") == "YouTube" and acc.startswith("@"):
+        keys.add("yt:" + acc.lower())
+    return keys - {None}
+
+
+def link_platforms(keys):
+    return {{"fb": "Facebook", "ig": "Instagram", "yt": "YouTube"}[k.split(":")[0]] for k in keys}
+
+
 def match_rank(want, v):
-    """How a cost row's (normalised) Account name matches a video: 0 its account, 1 its channel, 2 its influencer
-    name, 3 a blank Account (the whole source); None when it does not match."""
-    if not want:
+    """How well a cost row matches a video; lower is better, None when it does not match. `want` is row_matcher(row)
+    (a bare name string also works).
+      0      the video was posted from one of the row's profile links
+      1-2    the row's Account name is in the video's account (1), channel (1.5) or influencer name (2), or close to it;
+             +0.25 when the row's links are all on another platform
+      2.5    the name matches but the video's page is known to be a different profile than the row's links
+      3      a blank Account (the whole source)
+    Two rows with the same name (one per platform) are told apart by their links."""
+    if isinstance(want, str):
+        want = {"name": want, "links": set()}
+    name = want["name"]
+    if not name:
         return 3
-    fields = [v.get("account"), v.get("channel"), v.get("influencer")]
-    return next((k for k, f in enumerate(fields) if norm(f) and want in norm(f)), None)
+    keys = video_keys(v)
+    if want["links"] and want["links"] & keys:
+        return 0
+    fields = [norm(v.get("account")), norm(v.get("channel")), norm(v.get("influencer"))]
+    hit = next((k for k, f in enumerate(fields) if f and name in f), None)
+    if hit is None:  # a short form of the row's name ("PVF" for "PVF Art") or a close spelling ("Numberdaar")
+        hit = next((k for k, f in enumerate(fields) if f and ((len(f) >= 3 and name.startswith(f)) or similar(name, f)
+                                                              or similar(name, f[:len(name)]))), None)
+    if hit is None:
+        return None
+    if want["links"] and keys:
+        return 2.5
+    rank = 1 + hit * 0.5
+    if want["links"] and v.get("platform") not in link_platforms(want["links"]):
+        rank += 0.25
+    return rank
 
 
 DEFAULT_BASIS = {"Kalpana - Disease Channels": "per video", "Sanjay Agency": "per month", "Internal PR": "per month"}
@@ -163,7 +262,7 @@ def missing_rows(master, rows):
             mk = month_key(c["month"])
         except ValueError:
             mk = "?"
-        known.append((src, norm(c["account"]), c["account"].strip(), mk))
+        known.append((src, row_matcher(c), c["account"].strip(), mk))
     need = {}
     for v in master:
         if not counted(v):
@@ -221,28 +320,27 @@ def account_links(data, rows, missing=()):
     of the accounts its row covers, so the sheet shows whose payment it is."""
     links = profile_links(data)
     names = {}
+    matchers = defaultdict(list)  # source -> [(name key, row_matcher)]; same-name rows (one per platform) share a key
     for c in list(rows) + [{"source": m["Source"], "account": m["Account"]} for m in missing]:
         src = SOURCES.get(norm(c["source"]))
         if src:
             names.setdefault((src, norm(c["account"])), (c["source"].strip(), c["account"].strip()))
-    by_src = defaultdict(list)
-    for (src, want) in names:
-        by_src[src].append(want)
+            matchers[src].append((norm(c["account"]), row_matcher(c)))
     found = defaultdict(set)
     posts = defaultdict(set)  # when no profile link is known, show one of the account's posts instead
     for v in data["master"]:
         u = links.get(v["master_id"])
-        ranked = [(match_rank(w, v), w) for w in by_src[v["source_group"]]]
+        ranked = [(match_rank(w, v), key) for key, w in matchers[v["source_group"]]]
         ranked = [r for r in ranked if r[0] is not None]
         if not ranked:
             continue
-        best = min(r for r, _ in ranked if r < 3) if any(r < 3 for r, _ in ranked) else None
-        for r, w in ranked:
+        best = min((r for r, _ in ranked if r < 3), default=None)
+        for r, key in ranked:
             if r == 3 or r == best:
                 if u:
-                    found[(v["source_group"], w)].add(u)
+                    found[(v["source_group"], key)].add(u)
                 elif (v.get("post_url") or v.get("canonical_url") or "").startswith("http"):
-                    posts[(v["source_group"], w)].add(v.get("post_url") or v["canonical_url"])
+                    posts[(v["source_group"], key)].add(v.get("post_url") or v["canonical_url"])
     out = []
     for k in sorted(names, key=lambda k: names[k]):
         if found.get(k):
@@ -288,7 +386,7 @@ def allocate(master, rows=None):
             parsed.append(None)
             continue
         parsed.append((src, mk))
-        want = norm(c["account"])
+        want = row_matcher(c)
         for v in by_source[src]:
             if mk and (v.get("published_date") or "")[:7] != mk:
                 continue
@@ -304,8 +402,12 @@ def allocate(master, rows=None):
             b = best.get(v["master_id"])
             if b is None or rank < b[0]:
                 best[v["master_id"]] = (rank, [i])
-            elif rank == b[0]:
-                b[1].append(i)
+            elif rank == b[0] and not any(norm(rows[j]["account"]) == norm(rows[i]["account"]) for j in b[1]):
+                b[1].append(i)  # two different names both fit (a shared channel): both pay; the same name twice: the first row
+    same_name = defaultdict(int)
+    for c in rows:
+        if c["account"].strip():
+            same_name[(norm(c["source"]), norm(c["account"]))] += 1
     for i, c in enumerate(rows):
         if parsed[i] is None:
             continue
@@ -316,6 +418,8 @@ def allocate(master, rows=None):
             else:
                 share = c["amount"]
             label = c["account"].strip() or (c["source"].strip() + " (all)")
+            if same_name[(norm(c["source"]), norm(c["account"]))] > 1:  # one name, several accounts: say which one
+                label += " · " + row_tag(c)
             for v in vids:
                 cost[v["master_id"]] += share
                 if c["basis"] == "per month":
@@ -332,8 +436,20 @@ def allocate(master, rows=None):
     return ({k: round(v, 2) for k, v in cost.items()}, report, {k: " + ".join(v) for k, v in payee.items()}, terms)
 
 
+def attach_pages(data):
+    """Copies each video's page link from its latest capture onto the master row (older data files lack it)."""
+    page = {}
+    for snap in data.get("snapshots", []):
+        if snap.get("page_url"):
+            page[snap["master_id"]] = snap["page_url"]
+    for v in data["master"]:
+        if not v.get("page_url") and page.get(v["master_id"]):
+            v["page_url"] = page[v["master_id"]]
+    return data
+
+
 if __name__ == "__main__":
-    data = json.loads((ROOT / "analytics_data.json").read_text(encoding="utf8"))
+    data = attach_pages(json.loads((ROOT / "analytics_data.json").read_text(encoding="utf8")))
     costs, rep, _, _ = allocate(data["master"])
     for r in rep:
         print(f"row {r['row']}: {r['source']} / {r['account'] or '(all)'} / {r['month'] or '(all months)'} ₹{r['amount']:,.0f} "

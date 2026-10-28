@@ -10,7 +10,7 @@ import time
 from datetime import datetime
 from pathlib import Path
 
-from costs import account_links, allocate, missing_rows, read_rows, env as cost_env
+from costs import account_links, allocate, attach_pages, missing_rows, read_rows, env as cost_env
 
 ROOT = Path(__file__).resolve().parent
 DOCS = ROOT.parent / "docs"
@@ -25,6 +25,7 @@ def rows(with_costs=False):
     if with_costs:
         try:
             sheet = read_rows(include_blank=True)
+            attach_pages(d)
             cost, _, payee, terms = allocate(d["master"], sheet)
             # accounts / months the Costs sheet has no row for yet; the sheet's script adds them as new rows
             need = missing_rows(d["master"], sheet)

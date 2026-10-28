@@ -302,11 +302,6 @@
   <div class="vd-kpi"><span class="l">Median views / video</span><span class="v dash-skeleton" data-source="kpis" data-where="key=d7|All|All" data-field="median">—</span><span class="d n" data-source="kpis" data-where="key=d7|All|All" data-field="hit1k">—</span></div>
 </section>
 
-<section class="vd-card" aria-label="Cost per view" id="cost" hidden>
-  <div class="vd-ch"><div><h2 class="vd-h2">Cost per view</h2><p class="vd-note" style="margin-top:4px" id="cost-sub">What each source and account cost for the views it brought.</p></div><span class="vd-note">From the PR Video Costs sheet · lower ₹ per 1,000 views is better</span></div>
-  <div id="cost-body" data-source="videos"></div>
-</section>
-
 <section class="vd-card vd-source-main" aria-label="Source and platform response comparison" id="sources">
   <div class="vd-ch"><div><h2 class="vd-h2">Source × platform response</h2><p class="vd-note" style="margin-top:4px">Compare coverage and performance at the selected Day 2, Day 7 or Day 30 snapshot.</p></div><span class="vd-note">Click a cell to filter the dashboard</span></div>
   <div class="vd-sm-wrap"><table class="vd-sm" data-source="videos"><thead id="src-matrix-head"></thead><tbody id="src-matrix"></tbody></table></div>
@@ -388,6 +383,11 @@
   <div class="vd-ch"><h2 class="vd-h2">Best time to post</h2><span class="vd-note" id="h-note">—</span></div>
   <div class="vd-heat" id="h-grid" data-source="videos"></div>
   <div class="vd-legend" style="align-items:center"><span>Fewer views</span><i style="background:#EEF0FF;width:18px;height:12px;border-radius:3px"></i><i style="background:#C9CCFF;width:18px;height:12px;border-radius:3px"></i><i style="background:#959BFF;width:18px;height:12px;border-radius:3px"></i><i style="background:#4A50D0;width:18px;height:12px;border-radius:3px"></i><i style="background:#2E3192;width:18px;height:12px;border-radius:3px"></i><span>More views</span><span style="margin-left:auto">Ringed cell = best slot</span></div>
+</section>
+
+<section class="vd-card" aria-label="Cost per view" id="cost" hidden>
+  <div class="vd-ch"><div><h2 class="vd-h2">Cost per view</h2><p class="vd-note" style="margin-top:4px" id="cost-sub">What each source and account cost for the views it brought.</p></div><span class="vd-note">From the PR Video Costs sheet · lower ₹ per 1,000 views is better</span></div>
+  <div id="cost-body" data-source="videos"></div>
 </section>
 
 <section class="vd-card" aria-label="All videos" id="all-videos">

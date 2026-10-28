@@ -169,6 +169,7 @@ def main(result_files):
         m["published_at"] = (last or {}).get("published_at") or m.get("published_at") or ""
         m["post_url"] = next((s_.get("post_url") for s_ in reversed(good) if s_.get("post_url")), m.get("post_url") or "")
         m["thumb_url"] = next((s_.get("thumb_url") for s_ in reversed(good) if s_.get("thumb_url")), "")
+        m["page_url"] = next((s_.get("page_url") for s_ in reversed(good) if s_.get("page_url")), m.get("page_url") or "")
         # the same post submitted twice (two share links that open the same reel): both entries stay and are
         # counted; the later one only notes which entry it repeats
         pk = post_key(m["post_url"])
