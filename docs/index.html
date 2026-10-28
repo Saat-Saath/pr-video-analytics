@@ -303,6 +303,101 @@ window.dash = (function () {
 [data-dash-source-state=refreshing]{opacity:.5;transition:opacity var(--cds-dur-slow,.3s)}
 @media (max-width:720px){.vd-sel{margin-left:0}.vd-right{align-items:flex-start}.vd-kpi .v{font-size:24px}.vd-cmp{grid-template-columns:1fr}.vd-sticky{position:static}.vd-lb .bar{display:none}}
 @media (prefers-reduced-motion:reduce){.vd-vc{transition:none}.vd-vc:hover{transform:none}}
+
+.vd-tabrow{display:flex;flex-wrap:wrap;gap:8px}
+.vd-help summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--lnk);list-style:none;display:inline-flex;align-items:center;gap:6px;min-height:32px}
+.vd-help summary::-webkit-details-marker{display:none}
+.vd-help summary::before{content:"+";display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:999px;background:#EEF0FF;font-weight:700}
+.vd-help[open] summary::before{content:"–"}
+.vd-help p{margin-top:6px}
+/* phones */
+@media (max-width:640px){
+  .vd-in{gap:18px;padding:10px 12px 40px}
+  .vd-topbar{flex-wrap:nowrap;gap:6px;padding:6px;border-radius:16px}
+  .vd-brand{font-size:0;gap:0;flex:0 0 auto}
+  .vd-logo{width:34px;height:34px}
+  .vd-links{flex-wrap:nowrap;overflow-x:auto;min-width:0;flex:1 1 auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .vd-links::-webkit-scrollbar,.vd-tabrow::-webkit-scrollbar,.vd-ins::-webkit-scrollbar,.vd-src::-webkit-scrollbar{display:none}
+  .vd-links a{padding:10px 11px;font-size:13px;white-space:nowrap}
+  .vd-hero{gap:16px}
+  .vd-head{gap:14px}
+  .vd-title{font-size:34px}
+  .vd-sub{font-size:13.5px}
+  .vd-right{width:100%;align-items:stretch}
+  .vd-meta{justify-content:flex-start}
+  .vd-seg{flex-wrap:nowrap;width:100%}
+  .vd-seg button{flex:1 1 0;padding:0 4px;min-height:40px;font-size:13px}
+  .vd-ins{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:10px;margin:0 -12px;padding:2px 12px 6px;scroll-padding:0 12px;scrollbar-width:none}
+  .vd-ins>*{flex:0 0 84%;scroll-snap-align:start}
+  .vd-in1{padding:14px;border-radius:18px}
+  .vd-in1 .big{font-size:20px}
+  .vd-nav{flex-direction:column;align-items:stretch;gap:10px}
+  .vd-nav{min-width:0;width:100%}
+  .vd-tabrow{flex-wrap:nowrap;overflow-x:auto;margin:0 -12px;padding:0 12px;width:calc(100% + 24px);scrollbar-width:none}
+  .vd-tab{flex:0 0 auto;min-height:40px;font-size:13px}
+  .vd-sel{margin-left:0;width:100%}
+  .vd-kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .vd-kpi{padding:14px;min-height:0;gap:8px;border-radius:18px}
+  .vd-kpi .l{font-size:12px}
+  .vd-kpi .v{font-size:24px}
+  .vd-kpi .d{font-size:11px;padding:3px 8px}
+  .vd-card{padding:16px 14px;border-radius:20px;gap:12px}
+  .vd-h2{font-size:20px}
+  .vd-row{gap:18px}
+  /* source x platform: one block per source, a labelled row per platform */
+  .vd-sm-wrap{border:0;border-radius:0;background:transparent;overflow:visible}
+  .vd-sm{min-width:0;display:block}
+  .vd-sm thead{display:none}
+  .vd-sm tbody,.vd-sm tr{display:block}
+  .vd-sm tr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#fff;margin-bottom:10px}
+  .vd-sm td{display:block;border-right:0;min-width:0}
+  .vd-sm td[data-label]:nth-of-type(odd){border-left:1px solid var(--line2)}
+  .vd-sm .src{grid-column:1/-1}
+  .vd-smc .r{font-size:11px;gap:4px}
+  .vd-smc .l{font-size:10.5px}
+  .vd-sm td.none{display:none}
+  .vd-sm .src{position:static;min-width:0;padding:12px 14px;background:#F7F8FC}
+  .vd-sm td[data-label]::before{content:attr(data-label);display:block;padding:10px 12px 0;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--mut2)}
+  .vd-smc{min-width:0;min-height:0;padding:6px 12px 12px;gap:5px}
+  .vd-smc .v{font-size:20px}
+  .vd-src{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:10px;margin:0 -14px;padding:2px 14px 6px;scrollbar-width:none}
+  .vd-src>*{flex:0 0 86%;scroll-snap-align:start}
+  .vd-sg b{font-size:19px}
+  /* video wall: two per row */
+  .vd-wall{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .vd-vc{padding:5px 5px 10px;gap:6px;border-radius:16px}
+  .vd-th{aspect-ratio:3/4;border-radius:11px}
+  .vd-pl{width:36px;height:36px}
+  .vd-badge{left:6px;top:6px;padding:2px 7px;font-size:10px}
+  .vd-id,.vd-rank{font-size:10px;bottom:6px;padding:2px 6px}
+  .vd-id{right:6px}.vd-rank{left:6px}
+  .vd-vt{font-size:12px;min-height:31px;padding:0 3px}
+  .vd-vn{flex-direction:column;align-items:flex-start;gap:0;padding:0 3px}
+  .vd-vn b{font-size:18px}
+  .vd-vn span{font-size:10.5px}
+  .vd-gr{font-size:10.5px;padding:3px 7px;margin-left:3px}
+  .vd-mt{font-size:12.5px}
+  .vd-mt th{font-size:11px}
+  .vd-mt .na{font-size:10.5px}
+  .vd-mt td{padding:7px 2px}
+  /* cost per view */
+  .vd-cost-top{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .vd-cost-top>:first-child,.vd-cost-top>:last-child{grid-column:1/-1}
+  .vd-cst{padding:12px 14px;border-radius:16px}
+  .vd-cst .v{font-size:22px}
+  .vd-csrc .r{grid-template-columns:minmax(0,1fr);row-gap:5px}
+  .vd-csrc .t{grid-row:auto;grid-column:auto}
+  .vd-csrc .n{text-align:left}
+  .vd-ct td:first-child,.vd-ct th:first-child{position:sticky;left:0;z-index:1;background:#fff;max-width:150px;box-shadow:1px 0 0 var(--line)}
+  .vd-fix div{grid-template-columns:auto 1fr;row-gap:4px}
+  .vd-fix b{text-align:left}
+  .vd-fix .vd-note{grid-column:1/-1}
+  .vd-tools input,.vd-tools select{flex:1 1 100%}
+  .vd-tw{max-height:28rem;border-radius:14px}
+  .vd-ccard .tb{flex-basis:56px;height:70px}
+  .vd-player{max-width:300px}
+  .vd-player.wide{max-width:none}
+}
 </style>
 
 <div class="vd"><div class="vd-in">
@@ -399,7 +494,7 @@ window.dash = (function () {
 
 <section class="vd-card" aria-label="All videos" id="all-videos">
   <div class="vd-ch"><h2 class="vd-h2">All videos: Day 2, Day 7, Day 30 and all time</h2><span class="vd-note"><span id="count-shown">—</span> shown</span></div>
-  <p class="vd-note">Day 2 = views, likes, comments and shares once 48 hours have passed since upload; Day 7 = after the first 7 days; Day 30 = after the first 30 days; All time = today (re-checked every week; "As of" is its date). The refresh runs four times a day, so each count is taken within a few hours of the mark. A small "d18" means that capture was taken late, on day 18. "Added late" means the video was already past that day when it was first tracked (posted before tracking began or added to the sheet late), so that count can no longer be fetched. Press ▶ to watch, click a number to open the post, click a header to sort; scroll sideways for Day 30.</p>
+  <details class="vd-help"><summary>How to read this table</summary><p class="vd-note">Day 2 = views, likes, comments and shares once 48 hours have passed since upload; Day 7 = after the first 7 days; Day 30 = after the first 30 days; All time = today (re-checked every week; "As of" is its date). The refresh runs four times a day, so each count is taken within a few hours of the mark. A small "d18" means that capture was taken late, on day 18. "Added late" means the video was already past that day when it was first tracked (posted before tracking began or added to the sheet late), so that count can no longer be fetched. Press ▶ to watch, click a number to open the post, click a header to sort; scroll sideways for Day 30.</p></details>
   <div class="vd-tools">
     <input id="f-search" type="search" placeholder="Search account, VID-0022 or a link" aria-label="Search videos">
     <select id="f-status" aria-label="Status"><option value="">Any status</option></select>
@@ -493,7 +588,7 @@ dash.calc('status', {
   description: 'Count of videos per fetch problem, with the next step for each.',
   fn: (videos) => {
     const steps = {
-      'No view count': 'The post opens but the platform does not show its view count (mostly new Facebook reels). It is retried at Day 2, Day 7 and Day 30, and the Apify Reels-tab backup looks for it every morning.',
+      'No view count': 'The post opens but the platform does not show its view count (mostly new Facebook reels). It is retried at Day 2, Day 7 and Day 30, and the Apify backup asks for it every morning.',
       'Fetch failed': 'Link deleted, private or wrong. Open it and replace the link in the sheet row shown below.',
       'No public link': 'Internal PR sheet has a Drive file only. Add the live post link in the sheet.',
       'Not fetched': 'New in the sheet; fetched in the next daily refresh.'
@@ -595,15 +690,16 @@ dash.calc('status', {
   }
   const dmyIso = (iso, add) => { const d = new Date(iso.slice(0, 10) + 'T00:00:00'); d.setDate(d.getDate() + add); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
   function drawTabs() {
-    const nav = $('tabs'); nav.textContent = '';
+    const nav = $('tabs'); nav.textContent = ''; const tabRow = el('div', 'vd-tabrow');
     const plats = [...new Set(rows.map(v => v.platform))].sort((a, b) => rows.filter(v => v.platform === b).length - rows.filter(v => v.platform === a).length);
     ['All', ...plats].forEach(p => {
       const b = el('button', 'vd-tab'); b.type = 'button'; b.setAttribute('aria-pressed', String(p === S.plat));
       if (p !== 'All') { const i = el('i'); i.style.background = PCOL[p] || '#5F6480'; b.appendChild(i); }
       b.append(p, el('span', null, String(p === 'All' ? rows.length : rows.filter(v => v.platform === p).length)));
       b.addEventListener('click', () => { S.plat = p; S.wallN = 12; drawAll(); });
-      nav.appendChild(b);
+      tabRow.appendChild(b);
     });
+    nav.appendChild(tabRow);
     const sel = el('select', 'vd-sel'); sel.id = 'f-source'; sel.setAttribute('aria-label', 'Source');
     ['All', ...new Set(rows.map(v => v.source))].forEach(s => { const o = el('option', null, s === 'All' ? 'All sources' : s); o.value = s; o.selected = s === S.src; sel.appendChild(o); });
     sel.addEventListener('change', () => { S.src = sel.value; S.wallN = 12; drawAll(); });
@@ -741,8 +837,8 @@ dash.calc('status', {
       const tr = el('tr'), all = rows.filter(v => v.source === source), src = el('td', 'src');
       src.append(el('b', null, source), el('span', null, all.length + ' videos across ' + new Set(all.map(v => v.platform)).size + ' platforms')); tr.appendChild(src);
       platforms.forEach(platform => {
-        const td = el('td'), g = all.filter(v => v.platform === platform);
-        if (!g.length) { const empty = el('span', 'vd-smc empty'); empty.append(el('span', 'l', 'No videos')); td.appendChild(empty); tr.appendChild(td); return; }
+        const td = el('td'), g = all.filter(v => v.platform === platform); td.setAttribute('data-label', platform);
+        if (!g.length) { td.className = 'none'; const empty = el('span', 'vd-smc empty'); empty.append(el('span', 'l', 'No videos')); td.appendChild(empty); tr.appendChild(td); return; }
         const got = g.filter(v => v[l + '_views'] != null), views = d3.sum(got, v => v[l + '_views'] || 0), avg = got.length ? views / got.length : null;
         const actions = d3.sum(got, v => (v[l + '_likes'] || 0) + (v[l + '_comments'] || 0) + (v[l + '_shares'] || 0)), rate = views ? actions / views : null, coverage = got.length / g.length;
         const b = el('button', 'vd-smc'); b.type = 'button'; b.setAttribute('aria-label', source + ', ' + platform + ': ' + got.length + ' of ' + g.length + ' responses, ' + full(views) + ' views at ' + LBL[l] + '. Filter dashboard.');
@@ -876,7 +972,7 @@ dash.calc('status', {
     ['Video', 'Problem', 'Sheet row', 'Account', 'Link', 'Tries', 'Last error'].forEach(x => hr.appendChild(el('th', null, x)));
     const th = el('thead'); th.appendChild(hr); t.appendChild(th);
     const tb = el('tbody');
-    list.forEach(v => {
+    list.slice(0, S.fixAll ? list.length : 10).forEach(v => {
       const tr = el('tr'), a = el('a', null, v.sheet_link || v.url); a.href = v.sheet_link || v.url; a.target = '_blank'; a.rel = 'noopener';
       const lk = el('td'); lk.appendChild(a); lk.style.maxWidth = '320px'; lk.style.overflow = 'hidden'; lk.style.textOverflow = 'ellipsis';
       tr.append(el('td', null, v.video), el('td', null, v.status === 'Fetch failed' ? 'Link not working' : 'No view count'), el('td', null, v.sheet_row || ''),
@@ -884,6 +980,11 @@ dash.calc('status', {
       tb.appendChild(tr);
     });
     t.appendChild(tb); tw.appendChild(t);
+    if (list.length > 10) {
+      const more = el('button', 'vd-more', S.fixAll ? 'Show first 10' : 'Show all ' + list.length + ' links'); more.type = 'button'; more.style.marginTop = '12px';
+      more.addEventListener('click', () => { S.fixAll = !S.fixAll; drawFix(); });
+      const wrap = el('div'); wrap.style.textAlign = 'center'; wrap.appendChild(more); tw.appendChild(wrap);
+    }
   }
 
 
