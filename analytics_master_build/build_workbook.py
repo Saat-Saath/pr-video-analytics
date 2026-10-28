@@ -229,7 +229,7 @@ cost_ws["A1"] = "Cost per view"; cost_ws["A1"].font = Font(name=F, size=14, bold
 cost_ws["A2"] = ("From the PR Video Costs sheet. A monthly amount is shared equally by that account's videos posted that month. "
                  "₹ per 1,000 views uses all-time views and counts only videos that have a view count.")
 cost_ws["A2"].font = Font(name=F, size=10, italic=True, color="5F6368")
-for col, w in zip("ABCDEFG", (30, 22, 10, 14, 14, 14, 16)): cost_ws.column_dimensions[col].width = w
+for col, w in zip("ABCDEFGH", (30, 22, 10, 14, 14, 14, 16, 14)): cost_ws.column_dimensions[col].width = w
 
 
 def cost_groups(key):
@@ -262,11 +262,11 @@ for title, key in (("By source", lambda m: m["source_group"]),
         cost_ws.cell(row=r, column=5).number_format = "#,##0"; cost_ws.cell(row=r, column=7).number_format = '"₹"#,##0.00'
     row_i += 2 + max(1, len(data_rows)) + 1
 cost_ws.cell(row=row_i, column=1, value="Rows read from the PR Video Costs sheet").font = Font(name=F, size=11, bold=True, color=NAVY)
-for i, h in enumerate(["Sheet row", "Source", "Account", "Month", "Amount (₹)", "Basis", "Videos matched / problem"], 1):
+for i, h in enumerate(["Sheet row", "Source", "Account", "Month", "Amount (₹)", "Basis", "Videos matched / problem", "Promised / month"], 1):
     cost_ws.cell(row=row_i + 1, column=i, value=h)
-style_header(cost_ws, row_i + 1, 1, 7)
+style_header(cost_ws, row_i + 1, 1, 8)
 for r, c in enumerate(COST_REPORT, start=row_i + 2):
-    vals = [c["row"], c["source"], c["account"] or "(all)", c["month"] or "(all months)", c["amount"], c["basis"], c["problem"] or c["videos"]]
+    vals = [c["row"], c["source"], c["account"] or "(all)", c["month"] or "(all months)", c["amount"], c["basis"], c["problem"] or c["videos"], c.get("promised")]
     for k, v in enumerate(vals, 1):
         cost_ws.cell(row=r, column=k, value=v).font = Font(name=F, size=10, color="B3261E" if c["problem"] and k == 7 else DARK)
     cost_ws.cell(row=r, column=5).number_format = '"₹"#,##0'

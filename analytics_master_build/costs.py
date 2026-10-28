@@ -70,8 +70,13 @@ def month_key(text):
 
 
 def amount(text):
-    t = re.sub(r"[^\d.]", "", (text or "").replace(",", ""))
-    return float(t) if t else None
+    """'4000', '₹4,000', '5500(Insta)+5000(facebook) = 10500' -> rupees. After an '=' the total is used,
+    otherwise numbers joined by '+' are added up."""
+    t = (text or "").replace(",", "")
+    if "=" in t:
+        t = t.rsplit("=", 1)[1]
+    nums = [float(n) for n in re.findall(r"\d+(?:\.\d+)?", t)]
+    return sum(nums) if nums else None
 
 
 def read_rows(include_blank=False):
@@ -80,7 +85,8 @@ def read_rows(include_blank=False):
     e = env()
     sid = e.get("SHEET_COSTS", "")
     if sid:
-        url = f"https://docs.google.com/spreadsheets/d/{sid}/export?format=csv&gid={e.get('SHEET_COSTS_GID', '0')}"
+        gid = e.get("SHEET_COSTS_GID", "").strip()  # blank = the first tab
+        url = f"https://docs.google.com/spreadsheets/d/{sid}/export?format=csv" + (f"&gid={gid}" if gid else "")
         try:
             with urllib.request.urlopen(url, timeout=60) as r:
                 text = r.read().decode("utf8")
@@ -103,7 +109,8 @@ def read_rows(include_blank=False):
                 return i
         return None
     ix = dict(source=find("source"), account=find("account", "channel", "influencer", "name"), month=find("month"),
-              amount=find("amount", "cost", "payment", "rs", "inr"), basis=find("basis", "type", "per"), note=find("note"))
+              amount=find("amount", "cost", "payment", "rs", "inr"), basis=find("basis", "type"), note=find("note"),
+              promised=find("videospermonth", "videos", "promised", "committed"))
     if ix["source"] is None or ix["amount"] is None:
         raise SystemExit("Costs sheet needs at least a Source and an Amount column")
     out = []
@@ -113,7 +120,8 @@ def read_rows(include_blank=False):
         if not amt and not (include_blank and get("source")):
             continue  # rows without an amount are just placeholders
         out.append({"row": n, "source": get("source"), "account": get("account"), "month": get("month"),
-                    "amount": amt, "basis": "per video" if "video" in get("basis").lower() else "per month"})
+                    "amount": amt, "basis": "per video" if "video" in get("basis").lower() else "per month",
+                    "promised": int(amount(get("promised")) or 0) or None})
     return out
 
 
