@@ -276,7 +276,7 @@ window.dash = (function () {
 .vd-csrc .n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 .vd-csrc .n strong{font-family:var(--disp);font-size:16px}
 .vd-ctw{overflow-x:auto}
-.vd-ct{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums;min-width:640px}
+.vd-ct{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums;min-width:960px}
 .vd-ct th{font-size:12px;font-weight:600;color:var(--mut2);text-align:right;padding:0 8px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
 .vd-ct th:first-child,.vd-ct td:first-child,.vd-ct th:nth-child(2),.vd-ct td:nth-child(2){text-align:left}
 .vd-ct td{padding:9px 8px;border-bottom:1px solid var(--line2);text-align:right;white-space:nowrap}
@@ -331,7 +331,7 @@ window.dash = (function () {
 </section>
 
 <section class="vd-card" aria-label="Cost per view" id="cost" hidden>
-  <div class="vd-ch"><div><h2 class="vd-h2">Cost per view</h2><p class="vd-note" style="margin-top:4px" id="cost-sub">What each source and account cost for the views it brought.</p></div><span class="vd-note">Amounts from the PR Video Costs sheet · lower ₹ per 1,000 views is better</span></div>
+  <div class="vd-ch"><div><h2 class="vd-h2">Cost per view</h2><p class="vd-note" style="margin-top:4px" id="cost-sub">What each source and account cost for the views it brought.</p></div><span class="vd-note">From the PR Video Costs sheet · lower ₹ per 1,000 views is better</span></div>
   <div id="cost-body" data-source="videos"></div>
 </section>
 
@@ -1103,9 +1103,10 @@ dash.calc('status', {
     const hasField = rows.some(v => 'cost' in v);
     sec.hidden = !hasField; if (!hasField) return;
     body.textContent = '';
-    const l = S.snap, vk = l === 'all' ? 'views' : l + '_views';
+    const l = S.snap, f = (k) => l === 'all' ? k : l + '_' + k, vk = f('views');
     const w = filtered(), paid = w.filter(v => v.cost > 0);
-    $('cost-sub').textContent = 'What each source and account cost for the views it brought, using ' + (l === 'all' ? 'all-time' : LBL[l]) + ' views.';
+    $('cost-sub').textContent = 'Rate per video = the month\'s amount ÷ videos promised, so it stays fair while more videos are still coming. Views use '
+      + (l === 'all' ? 'all-time' : LBL[l]) + ' counts.';
     if (!paid.length) {
       body.appendChild(el('p', 'vd-empty', 'No amounts yet. Fill in the Amount column of the PR Video Costs sheet; cost per view shows here after the next refresh.'));
       return;
@@ -1113,63 +1114,82 @@ dash.calc('status', {
     const rs = (n) => '₹' + Math.round(n).toLocaleString('en-IN');
     const per1k = (spend, views) => views > 0 ? spend / views * 1000 : null;
     const r1k = (x) => x == null ? '—' : '₹' + (x < 10 ? x.toFixed(2) : x < 100 ? x.toFixed(1) : Math.round(x).toLocaleString('en-IN'));
+    // one group per payee (or source): videos posted, contract terms per month, spend so far, views and engagement
     const group = (key) => {
       const m = new Map();
       paid.forEach(v => {
-        const k = key(v); if (!m.has(k)) m.set(k, { name: k, source: v.source, n: 0, spend: 0, counted: 0, cspend: 0, views: 0, months: new Map() });
+        const k = key(v);
+        if (!m.has(k)) m.set(k, { name: k, source: v.source, n: 0, spend: 0, counted: 0, cspend: 0, views: 0, eng: 0, months: new Map() });
         const g = m.get(k); g.n++; g.spend += v.cost;
-        if (v.promised) g.months.set((v.published || '').slice(0, 7), v.promised);
-        if (v[vk] != null) { g.counted++; g.cspend += v.cost; g.views += v[vk]; }
+        const mo = (v.published || '').slice(0, 7);
+        if (v.committed) g.months.set(mo, { promised: v.promised || 0, committed: v.committed });
+        if (v[vk] != null) { g.counted++; g.cspend += v.cost; g.views += v[vk]; g.eng += (v[f('likes')] || 0) + (v[f('comments')] || 0) + (v[f('shares')] || 0); }
       });
-      return [...m.values()].map(g => Object.assign(g, { cpk: per1k(g.cspend, g.views), per: g.spend / g.n, promised: [...g.months.values()].reduce((a, b) => a + b, 0) }));
+      return [...m.values()].map(g => {
+        const terms = [...g.months.values()];
+        const promised = terms.reduce((a, t) => a + t.promised, 0);
+        const committed = terms.length ? terms.reduce((a, t) => a + t.committed, 0) : g.spend;
+        const avgViews = g.counted ? g.views / g.counted : null;
+        return Object.assign(g, {
+          promised, committed, rate: g.spend / g.n, avgViews, cpk: per1k(g.cspend, g.views),
+          er: g.views ? g.eng / g.views : null, left: Math.max(0, promised - g.n),
+          projected: avgViews == null ? null : avgViews * Math.max(promised, g.n)
+        });
+      });
     };
-    const spend = paid.reduce((a, v) => a + v.cost, 0), cnt = paid.filter(v => v[vk] != null);
-    const cspend = cnt.reduce((a, v) => a + v.cost, 0), views = cnt.reduce((a, v) => a + v[vk], 0);
-    const accs = group(v => v.payee || v.account || v.source).filter(g => g.views > 0).sort((a, b) => a.cpk - b.cpk);
+    const all = group(v => v.payee || v.account || v.source).sort((a, b) => (a.cpk ?? 1e12) - (b.cpk ?? 1e12));
+    const spend = all.reduce((a, g) => a + g.spend, 0), committed = all.reduce((a, g) => a + g.committed, 0);
+    const posted = all.reduce((a, g) => a + g.n, 0), counted = all.reduce((a, g) => a + g.counted, 0);
+    const views = all.reduce((a, g) => a + g.views, 0), cspend = all.reduce((a, g) => a + g.cspend, 0);
+    const prom = all.filter(g => g.promised), pr = prom.reduce((a, g) => a + g.promised, 0), dl = prom.reduce((a, g) => a + Math.min(g.n, g.promised), 0);
+    const left = all.reduce((a, g) => a + g.left, 0);
+    const ranked = all.filter(g => g.cpk != null);
+
     const top = el('div', 'vd-cost-top');
     const stat = (cls, lab, val, sub) => { const d = el('div', 'vd-cst ' + cls); d.append(el('span', 'l', lab), el('span', 'v', val), el('span', 's', sub)); top.appendChild(d); };
-    stat('hi', 'Spend', rs(spend), paid.length + ' of ' + w.length + ' videos have a cost');
-    stat('', '₹ per 1,000 views', r1k(per1k(cspend, views)), big(views) + ' views' + (cnt.length < paid.length ? ' · ' + (paid.length - cnt.length) + ' paid videos have no count yet' : ''));
-    stat('', 'Cost per video', rs(spend / paid.length), 'average across paid videos');
-    const allPay = group(v => v.payee || v.account || v.source), prom = allPay.filter(g => g.promised);
-    if (prom.length) {
-      const pr = prom.reduce((a, g) => a + g.promised, 0), dl = prom.reduce((a, g) => a + Math.min(g.n, g.promised), 0);
-      stat('', 'Delivered vs promised', pct0(dl / pr), dl.toLocaleString('en-IN') + ' of ' + pr.toLocaleString('en-IN') + ' promised videos posted (current month counts so far)');
-    }
-    if (accs.length) stat('best', 'Best value', accs[0].name, r1k(accs[0].cpk) + ' per 1,000 views · ' + accs[0].source);
+    stat('hi', 'Committed', rs(committed), rs(spend) + ' covered by ' + posted + ' videos so far' + (left ? ' · ' + rs(committed - spend) + ' for ' + left + ' still to come' : ''));
+    stat('', 'Rate per video', rs(spend / posted), 'amount ÷ videos promised, averaged over ' + posted + ' paid videos');
+    stat('', 'Views per video', counted ? big(views / counted) : '—', counted + ' paid videos with a count' + (counted < posted ? ' · ' + (posted - counted) + ' not counted yet' : ''));
+    stat('', '₹ per 1,000 views', r1k(per1k(cspend, views)), rs(cspend) + ' for ' + big(views) + ' views');
+    if (pr) stat('', 'Delivered vs promised', pct0(dl / pr), dl.toLocaleString('en-IN') + ' of ' + pr.toLocaleString('en-IN') + ' promised videos posted (this month so far)');
+    if (ranked.length) stat('best', 'Best value', ranked[0].name, r1k(ranked[0].cpk) + ' per 1,000 views · ' + big(ranked[0].avgViews) + ' views per video');
     body.appendChild(top);
 
     const srcs = group(v => v.source).sort((a, b) => (a.cpk ?? 1e12) - (b.cpk ?? 1e12));
-    if (srcs.length > 1 || S.src === 'All') {
-      const h = el('h3', 'vd-h3', '₹ per 1,000 views by source'); h.style.marginTop = '18px'; body.appendChild(h);
-      const box = el('div', 'vd-csrc'); box.style.marginTop = '10px';
-      const mx = Math.max(...srcs.map(g => g.cpk || 0)) || 1;
-      srcs.forEach((g, i) => {
-        const r = el('div', 'r'), t = el('span', 't'), f = el('i');
-        f.style.width = ((g.cpk || 0) / mx * 100).toFixed(1) + '%'; f.style.background = i === 0 ? 'var(--acc)' : 'var(--b2)'; t.appendChild(f);
-        const n = el('span', 'n'); const st = el('strong', null, r1k(g.cpk)); n.append(st, ' · ' + rs(g.spend) + ' for ' + big(g.views) + ' views');
-        r.append(el('b', null, g.name), t, n); box.appendChild(r);
-      });
-      body.appendChild(box);
-    }
+    const h = el('h3', 'vd-h3', '₹ per 1,000 views by source'); h.style.marginTop = '18px'; body.appendChild(h);
+    const box = el('div', 'vd-csrc'); box.style.marginTop = '10px';
+    const mx = Math.max(...srcs.map(g => g.cpk || 0)) || 1;
+    srcs.forEach((g, i) => {
+      const r = el('div', 'r'), t = el('span', 't'), fl = el('i');
+      fl.style.width = ((g.cpk || 0) / mx * 100).toFixed(1) + '%'; fl.style.background = i === 0 ? 'var(--acc)' : 'var(--b2)'; t.appendChild(fl);
+      const n = el('span', 'n'); n.append(el('strong', null, r1k(g.cpk)), ' · ' + rs(g.rate) + ' per video · ' + (g.avgViews == null ? '—' : big(g.avgViews)) + ' views per video');
+      r.append(el('b', null, g.name), t, n); box.appendChild(r);
+    });
+    body.appendChild(box);
+
     const h2 = el('h3', 'vd-h3', 'By account, cheapest views first'); h2.style.marginTop = '18px'; body.appendChild(h2);
     const tw = el('div', 'vd-ctw'), t = el('table', 'vd-ct'); tw.style.marginTop = '8px';
-    const hr = el('tr'); ['Paid to', 'Source', 'Videos posted', 'Spend', 'Views', 'Per video', '₹ per 1,000 views'].forEach(x => hr.appendChild(el('th', null, x)));
+    const heads = [['Paid to', ''], ['Source', ''], ['Posted / promised', 'Videos posted so far and videos promised for the month'],
+      ['Rate / video', 'Month\'s amount ÷ videos promised'], ['Spent so far', 'Rate × videos posted, out of the month\'s amount'],
+      ['Views / video', 'Average views of the posted videos'], ['₹ / 1,000 views', 'Spent so far ÷ views × 1,000'],
+      ['Eng. rate', 'Likes, comments and shares ÷ views'], ['Views at full delivery', 'Views per video × videos promised']];
+    const hr = el('tr'); heads.forEach(([x, tip]) => { const th = el('th', null, x); if (tip) th.title = tip; hr.appendChild(th); });
     const th = el('thead'); th.appendChild(hr); t.appendChild(th);
     const tb = el('tbody');
     const delivered = (g) => {
       const td = el('td');
       if (!g.promised) { td.textContent = String(g.n); return td; }
       const b = el('b', null, String(g.n)); td.append(b, ' / ' + g.promised);
-      td.title = g.n + ' videos posted, ' + g.promised + ' promised';
       if (g.n < g.promised * 0.5) b.style.color = 'var(--accd)';
       return td;
     };
-    const all = group(v => v.payee || v.account || v.source).sort((a, b) => (a.cpk ?? 1e12) - (b.cpk ?? 1e12));
     (S.costAll ? all : all.slice(0, 10)).forEach((g, i) => {
       const tr = el('tr', i === 0 && g.cpk != null ? 'top1' : '');
+      const spent = el('td', null, rs(g.spend)); if (g.committed > g.spend + 1) spent.append(el('span', 'na', ' / ' + rs(g.committed)));
       const c = el('td'); c.appendChild(el('b', g.cpk == null ? 'na' : null, g.cpk == null ? 'no counts yet' : r1k(g.cpk)));
-      tr.append(el('td', null, g.name), el('td', null, g.source), delivered(g), el('td', null, rs(g.spend)), el('td', null, g.views ? full(g.views) : '—'), el('td', null, rs(g.per)), c);
+      tr.append(el('td', null, g.name), el('td', null, g.source), delivered(g), el('td', null, rs(g.rate)), spent,
+        el('td', null, g.avgViews == null ? '—' : full(g.avgViews)), c, el('td', null, pct(g.er)),
+        el('td', null, g.projected == null ? '—' : big(g.projected)));
       tb.appendChild(tr);
     });
     t.appendChild(tb); tw.appendChild(t); body.appendChild(tw);

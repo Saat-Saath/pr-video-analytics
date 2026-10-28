@@ -240,13 +240,19 @@ def account_links(data, rows, missing=()):
 
 
 def allocate(master, rows=None):
-    """Return ({master_id: rupees}, report, {master_id: payee}, {master_id: videos promised that month}).
+    """Return ({master_id: rupees}, report, {master_id: payee}, {master_id: terms}).
+
+    A "per month" amount is a contract for the month: when the row says how many videos were promised
+    ("Videos per month"), every video costs amount / promised (the contract rate), so the cost does not jump around
+    while the rest of the month's videos are still coming; if more videos than promised arrive, amount / posted.
+    Without a promised number the amount is shared by the videos posted so far. A "per video" amount is the rate.
+    terms[master_id] = {"promised": videos promised that month, "committed": the month's amount} for contract rows.
     report lists each cost row with the videos it matched; payee is the sheet's Account name the video's cost came
     from (the source name for whole-source rows)."""
     rows = read_rows() if rows is None else [c for c in rows if c.get("amount")]
     cost = defaultdict(float)
     payee = defaultdict(list)
-    promised = {}  # master_id -> videos promised per month by the row that pays for it
+    terms = {}  # master_id -> {"promised", "committed"} of the monthly contract that pays for it
     report = []
     by_source = defaultdict(list)
     for v in master:
@@ -291,16 +297,25 @@ def allocate(master, rows=None):
             continue
         vids = [v for v, rank in matches.get(i, []) if rank == 3 or i in best.get(v["master_id"], (0, []))[1]]
         if vids:
-            share = c["amount"] / len(vids) if c["basis"] == "per month" else c["amount"]
+            if c["basis"] == "per month":
+                share = c["amount"] / max(c.get("promised") or 0, len(vids))
+            else:
+                share = c["amount"]
             label = c["account"].strip() or (c["source"].strip() + " (all)")
             for v in vids:
                 cost[v["master_id"]] += share
-                if c.get("promised"):
-                    promised[v["master_id"]] = promised.get(v["master_id"], 0) + c["promised"]
+                if c["basis"] == "per month":
+                    t = terms.setdefault(v["master_id"], {"promised": 0, "committed": 0.0})
+                    t["promised"] += c.get("promised") or 0
+                    t["committed"] += c["amount"]
                 if label not in payee[v["master_id"]]:
                     payee[v["master_id"]].append(label)
-        report.append({**c, "videos": len(vids), "problem": "" if vids else "no videos match this account and month"})
-    return ({k: round(v, 2) for k, v in cost.items()}, report, {k: " + ".join(v) for k, v in payee.items()}, promised)
+            rate = round(share, 2)
+        else:
+            rate = None
+        report.append({**c, "videos": len(vids), "rate": rate,
+                       "problem": "" if vids else "no videos match this account and month"})
+    return ({k: round(v, 2) for k, v in cost.items()}, report, {k: " + ".join(v) for k, v in payee.items()}, terms)
 
 
 if __name__ == "__main__":
@@ -308,7 +323,8 @@ if __name__ == "__main__":
     costs, rep, _, _ = allocate(data["master"])
     for r in rep:
         print(f"row {r['row']}: {r['source']} / {r['account'] or '(all)'} / {r['month'] or '(all months)'} ₹{r['amount']:,.0f} "
-              f"{r['basis']} -> {r['videos']} videos {r['problem']}")
+              f"{r['basis']} -> {r['videos']} videos{' of ' + str(r['promised']) if r.get('promised') else ''}"
+              f"{', ₹' + format(r['rate'], ',.0f') + ' per video' if r.get('rate') else ''} {r['problem']}")
     spent = sum(costs.values())
     views = sum((m.get("latest_views") or 0) for m in data["master"] if m["master_id"] in costs)
     print(f"{len(costs)} videos have a cost, ₹{spent:,.0f} in all, ₹{spent / views * 1000 if views else 0:,.2f} per 1,000 views")

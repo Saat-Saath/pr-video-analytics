@@ -21,11 +21,11 @@ PLAT = {"Google Drive Asset": "Drive file"}
 
 def rows(with_costs=False):
     d = json.loads((ROOT / "analytics_data.json").read_text(encoding="utf8"))
-    cost, payee, promised = {}, {}, {}
+    cost, payee, terms = {}, {}, {}
     if with_costs:
         try:
             sheet = read_rows(include_blank=True)
-            cost, _, payee, promised = allocate(d["master"], sheet)
+            cost, _, payee, terms = allocate(d["master"], sheet)
             # accounts / months the Costs sheet has no row for yet; the sheet's script adds them as new rows
             need = missing_rows(d["master"], sheet)
             if cost_env().get("SHEET_COSTS"):  # only when the real sheet was read, so the list reflects it
@@ -59,7 +59,9 @@ def rows(with_costs=False):
         if with_costs:
             out[-1]["cost"] = cost.get(m["master_id"])
             out[-1]["payee"] = payee.get(m["master_id"])
-            out[-1]["promised"] = promised.get(m["master_id"])
+            t = terms.get(m["master_id"]) or {}
+            out[-1]["promised"] = t.get("promised") or None   # videos promised that month by its contract
+            out[-1]["committed"] = t.get("committed")          # that month's contract amount (₹)
     return out, d["generated_at"]
 
 
@@ -173,7 +175,7 @@ def main():
     # Cost per video is always in the private copy (outputs/ is never published; the Claude dashboard uses it)
     # and on the public page only when COSTS_PUBLIC=on.
     private, generated = rows(with_costs=True)
-    data = private if costs_public() else [{k: v for k, v in r.items() if k not in ("cost", "payee", "promised")} for r in private]
+    data = private if costs_public() else [{k: v for k, v in r.items() if k not in ("cost", "payee", "promised", "committed")} for r in private]
     out = ROOT.parent / "outputs"
     out.mkdir(exist_ok=True)
     (out / "dashboard_data_private.json").write_text(json.dumps(private, ensure_ascii=False), encoding="utf8")

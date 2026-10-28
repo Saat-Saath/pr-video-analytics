@@ -14,10 +14,10 @@ ROOT = Path(__file__).resolve().parent
 DATA = json.loads((ROOT / "analytics_data.json").read_text(encoding="utf8"))
 try:  # cost per video from the PR Video Costs sheet (empty when no amounts are filled in yet)
     from costs import allocate
-    COST, COST_REPORT, PAYEE, _ = allocate(DATA["master"])
+    COST, COST_REPORT, PAYEE, TERMS = allocate(DATA["master"])
 except (SystemExit, Exception) as _e:
     print("costs skipped:", _e)
-    COST, COST_REPORT, PAYEE = {}, [], {}
+    COST, COST_REPORT, PAYEE, TERMS = {}, [], {}, {}
 OUT = ROOT.parent / "outputs" / "PR_Video_Analytics_Master.xlsx"
 
 # Names shown in the workbook (the internal key stays the same so videos keep matching across refreshes).
@@ -226,10 +226,10 @@ nxt = block(t, "To fix", ["Issue", "Count", "Next step"], fix)
 cost_ws = wb.create_sheet("Cost per view", index=1)
 cost_ws.sheet_view.showGridLines = False
 cost_ws["A1"] = "Cost per view"; cost_ws["A1"].font = Font(name=F, size=14, bold=True, color=NAVY)
-cost_ws["A2"] = ("From the PR Video Costs sheet. A monthly amount is shared equally by that account's videos posted that month. "
-                 "₹ per 1,000 views uses all-time views and counts only videos that have a view count.")
+cost_ws["A2"] = ("From the PR Video Costs sheet. Rate per video = the month's amount ÷ videos promised (÷ videos posted when "
+                 "no number is promised or more arrive). Spent so far = rate × videos posted. Views are all-time counts.")
 cost_ws["A2"].font = Font(name=F, size=10, italic=True, color="5F6368")
-for col, w in zip("ABCDEFGH", (30, 22, 10, 14, 14, 14, 16, 14)): cost_ws.column_dimensions[col].width = w
+for col, w in zip("ABCDEFGHIJKL", (30, 20, 9, 10, 12, 13, 13, 12, 12, 14, 11, 16)): cost_ws.column_dimensions[col].width = w
 
 
 def cost_groups(key):
@@ -237,15 +237,27 @@ def cost_groups(key):
     for m in master:
         c = COST.get(m["master_id"])
         if not c: continue
-        k = key(m); e = g.setdefault(k, {"source": m["source_group"], "n": 0, "spend": 0.0, "cspend": 0.0, "views": 0})
+        k = key(m)
+        e = g.setdefault(k, {"source": m["source_group"], "n": 0, "spend": 0.0, "cspend": 0.0, "views": 0, "counted": 0, "eng": 0, "months": {}})
         e["n"] += 1; e["spend"] += c
-        if m.get("latest_views") is not None: e["cspend"] += c; e["views"] += m["latest_views"]
-    out = [[k, e["source"], e["n"], round(e["spend"]), e["views"], round(e["spend"] / e["n"]),
-            (e["cspend"] / e["views"] * 1000) if e["views"] else None] for k, e in g.items()]
-    return sorted(out, key=lambda r: (r[6] is None, r[6] or 0))
+        t = TERMS.get(m["master_id"])
+        if t: e["months"][(m.get("published_date") or "")[:7]] = t
+        if m.get("latest_views") is not None:
+            e["cspend"] += c; e["views"] += m["latest_views"]; e["counted"] += 1
+            e["eng"] += (m.get("latest_likes") or 0) + (m.get("latest_comments") or 0) + (m.get("latest_shares") or 0)
+    out = []
+    for k, e in g.items():
+        promised = sum(t["promised"] for t in e["months"].values())
+        committed = sum(t["committed"] for t in e["months"].values()) if e["months"] else e["spend"]
+        avg = e["views"] / e["counted"] if e["counted"] else None
+        out.append([k, e["source"], e["n"], promised or None, round(e["spend"] / e["n"]), round(e["spend"]), round(committed),
+                    e["views"], round(avg) if avg is not None else None, (e["cspend"] / e["views"] * 1000) if e["views"] else None,
+                    (e["eng"] / e["views"]) if e["views"] else None, round(avg * max(promised, e["n"])) if avg is not None else None])
+    return sorted(out, key=lambda r: (r[9] is None, r[9] or 0))
 
 
-hdr_c = ["Paid to", "Source", "Videos", "Spend (₹)", "Views", "Per video (₹)", "₹ per 1,000 views"]
+hdr_c = ["Paid to", "Source", "Posted", "Promised", "Rate / video (₹)", "Spent so far (₹)", "Committed (₹)", "Views",
+         "Views / video", "₹ per 1,000 views", "Eng. rate", "Views at full delivery"]
 row_i = 4
 for title, key in (("By source", lambda m: m["source_group"]),
                    ("By account (cheapest views first)", lambda m: PAYEE.get(m["master_id"]) or m["source_group"])):
@@ -258,18 +270,21 @@ for title, key in (("By source", lambda m: m["source_group"]),
     for r, vals in enumerate(data_rows, start=row_i + 2):
         for c, v in enumerate(vals, 1):
             cell = cost_ws.cell(row=r, column=c, value=v); cell.font = Font(name=F, size=10); cell.border = Border(bottom=thin)
-        for c in (4, 6): cost_ws.cell(row=r, column=c).number_format = '"₹"#,##0'
-        cost_ws.cell(row=r, column=5).number_format = "#,##0"; cost_ws.cell(row=r, column=7).number_format = '"₹"#,##0.00'
+        for c in (5, 6, 7): cost_ws.cell(row=r, column=c).number_format = '"₹"#,##0'
+        for c in (8, 9, 12): cost_ws.cell(row=r, column=c).number_format = "#,##0"
+        cost_ws.cell(row=r, column=10).number_format = '"₹"#,##0.00'; cost_ws.cell(row=r, column=11).number_format = "0.0%"
     row_i += 2 + max(1, len(data_rows)) + 1
 cost_ws.cell(row=row_i, column=1, value="Rows read from the PR Video Costs sheet").font = Font(name=F, size=11, bold=True, color=NAVY)
-for i, h in enumerate(["Sheet row", "Source", "Account", "Month", "Amount (₹)", "Basis", "Videos matched / problem", "Promised / month"], 1):
+for i, h in enumerate(["Sheet row", "Source", "Account", "Month", "Amount (₹)", "Basis", "Videos matched / problem",
+                       "Promised / month", "Rate / video (₹)"], 1):
     cost_ws.cell(row=row_i + 1, column=i, value=h)
-style_header(cost_ws, row_i + 1, 1, 8)
+style_header(cost_ws, row_i + 1, 1, 9)
 for r, c in enumerate(COST_REPORT, start=row_i + 2):
-    vals = [c["row"], c["source"], c["account"] or "(all)", c["month"] or "(all months)", c["amount"], c["basis"], c["problem"] or c["videos"], c.get("promised")]
+    vals = [c["row"], c["source"], c["account"] or "(all)", c["month"] or "(all months)", c["amount"], c["basis"],
+            c["problem"] or c["videos"], c.get("promised"), c.get("rate")]
     for k, v in enumerate(vals, 1):
         cost_ws.cell(row=r, column=k, value=v).font = Font(name=F, size=10, color="B3261E" if c["problem"] and k == 7 else DARK)
-    cost_ws.cell(row=r, column=5).number_format = '"₹"#,##0'
+    cost_ws.cell(row=r, column=5).number_format = '"₹"#,##0'; cost_ws.cell(row=r, column=9).number_format = '"₹"#,##0'
 
 # ---------- Setup ----------
 setup.column_dimensions["A"].width = 26; setup.column_dimensions["B"].width = 36
