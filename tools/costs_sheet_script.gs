@@ -87,7 +87,7 @@ function addNewAccounts() {
   if (add.length) {
     const start = sh.getLastRow() + 1;
     sh.getRange(start, 1, add.length, add[0].length).setValues(add);
-    sh.getRange(start, c.month + 1, add.length, 1).setNumberFormat('mmm yyyy');
+    try { sh.getRange(start, c.month + 1, add.length, 1).setNumberFormat('mmm yyyy'); } catch (e) {}  // a typed (table) column keeps its own format
   }
   fillLinks_();
 }
@@ -110,10 +110,10 @@ function month_(v) {
   return isNaN(d) ? s.toLowerCase() : Utilities.formatDate(d, 'Asia/Kolkata', 'yyyy-MM');
 }
 
-/** "Nov 2026" -> 1 Nov 2026 as a date (the Month column holds dates); blank stays blank. */
+/** "Nov 2026" stays text: the sheet turns it into 1 Nov 2026 in its own time zone (a date made here would use the
+ * script's time zone and could land on 31 Oct). Blank stays blank. */
 function monthDate_(s) {
-  const d = new Date('1 ' + String(s).trim());
-  return String(s).trim() && !isNaN(d) ? new Date(d.getFullYear(), d.getMonth(), 1) : '';
+  return String(s || '').trim();
 }
 
 function key_(src, acc, mon) { return norm_(src) + '|' + norm_(acc) + '|' + month_(mon); }
