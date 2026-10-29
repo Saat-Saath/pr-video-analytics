@@ -15,6 +15,7 @@ the last 30 hours (fb_backup_tries.json keeps the last try), so a post that hide
 
   python fb_views_backup.py start [--max-items N]   # start the Apify runs (cost cap: N reels and N posts)
   python fb_views_backup.py collect                  # fill the numbers once the runs finish (exit 2 while running)
+It runs once a day, in the first refresh after APIFY_FB_BACKUP_FROM (default 10:00 India time).
 Settings in .env: APIFY_FB_BACKUP=off disables it; APIFY_FB_BACKUP_MAX_ITEMS caps reels asked per run (default 150);
 APIFY_FB_DETAILS_MAX_ITEMS caps posts asked for likes / comments / shares per run (default 30, 0 turns it off).
 """
@@ -147,7 +148,14 @@ def start(max_items, adopt=None):
     if os.environ.get("APIFY_FB_BACKUP", "on").lower() == "off":
         print("backup disabled"); return 0
     hist = json.loads(HISTORY.read_text(encoding="utf8"))
-    today = datetime.now(IST).date()
+    now_ist = datetime.now(IST)
+    today = now_ist.date()
+    tries = json.loads(TRIES.read_text()) if TRIES.exists() else {}
+    if tries.get("_last_run") == today.isoformat():
+        print("backup already ran today"); return 0
+    h, m = (int(x) for x in os.environ.get("APIFY_FB_BACKUP_FROM", "10:00").split(":"))
+    if (now_ist.hour, now_ist.minute) < (h, m):
+        print(f"backup waits for the first run after {h:02d}:{m:02d}"); return 0
     cand = candidates(hist, today)
     # today's captures first, then the reels that have waited longest
     order = sorted(cand, key=lambda r: (ist_date(cand[r]["captured_at"]) != today, cand[r]["captured_at"]))[:max_items]
@@ -162,7 +170,7 @@ def start(max_items, adopt=None):
     for job in jobs:
         if running < MAX_PARALLEL:
             launch(job); running += 1
-    tries = json.loads(TRIES.read_text()) if TRIES.exists() else {}
+    tries["_last_run"] = today.isoformat()
     tries.update({r: today.isoformat() for r in order})
     tries.update({f"post:{dcand[u][0]}" + (f":{dcand[u][1]}" if dcand[u][1] else ""): today.isoformat() for u in links})
     TRIES.write_text(json.dumps(tries, indent=1, sort_keys=True))

@@ -14,7 +14,7 @@ const MISSING_URL = BASE + 'costs_missing.csv';
 const LINKS_URL = BASE + 'costs_links.csv';
 
 function setup() {
-  ScriptApp.getProjectTriggers().forEach(t => ScriptApp.deleteTrigger(t));
+  ScriptApp.getProjectTriggers().filter(t => t.getHandlerFunction() === 'addNewAccounts').forEach(t => ScriptApp.deleteTrigger(t));
   ScriptApp.newTrigger('addNewAccounts').timeBased().everyDays(1).atHour(11).inTimezone('Asia/Kolkata').create();
   linksColumn_();
   inhousePerVideo_();
@@ -169,4 +169,31 @@ function fillVideoCostLinks() {
   SpreadsheetApp.flush();
   Logger.log('links set: ' + n + '\n' + out.join('\n'));
   return n;
+}
+
+/* ---- Starting the dashboard refresh on time ----------------------------------------------------------------------
+ * GitHub often starts its scheduled runs hours late or skips them, so this script starts the refresh itself at
+ * 10:05, 16:05, 22:05 and 04:05 India time (Google runs it within about 15 minutes of that).
+ * Install once: Project Settings (gear icon) > Script properties > Add property: GITHUB_TOKEN = a GitHub token that
+ * can run workflows on pr-video-analytics-data (classic token with "repo" and "workflow", or a fine-grained token with
+ * Actions: Read and write). Then choose "setupRefreshTimes" in the toolbar and click Run.
+ */
+const REFRESH_REPO = 'sagarchauhan7792-bot/pr-video-analytics-data';
+
+function startRefresh() {
+  const token = PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
+  if (!token) throw new Error('Add GITHUB_TOKEN under Project Settings > Script properties');
+  const res = UrlFetchApp.fetch('https://api.github.com/repos/' + REFRESH_REPO + '/actions/workflows/daily-refresh.yml/dispatches', {
+    method: 'post', contentType: 'application/json', muteHttpExceptions: true,
+    headers: { Authorization: 'Bearer ' + token, Accept: 'application/vnd.github+json' },
+    payload: JSON.stringify({ ref: 'main' })
+  });
+  if (res.getResponseCode() !== 204) throw new Error('GitHub answered ' + res.getResponseCode() + ': ' + res.getContentText().slice(0, 300));
+  Logger.log('refresh started');
+}
+
+function setupRefreshTimes() {
+  ScriptApp.getProjectTriggers().filter(t => t.getHandlerFunction() === 'startRefresh').forEach(t => ScriptApp.deleteTrigger(t));
+  [10, 16, 22, 4].forEach(h => ScriptApp.newTrigger('startRefresh').timeBased().everyDays(1).atHour(h).nearMinute(5).inTimezone('Asia/Kolkata').create());
+  startRefresh();  // one run now, which also checks the token
 }
