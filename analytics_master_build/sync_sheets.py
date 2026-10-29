@@ -225,6 +225,14 @@ def occurrences():
                                     source_row=r, source_cell=cellref, source_date_text="", published_date="",
                                     influencer=name, channel=name, profile_url="", profile_label="", declared_platform=plat,
                                     telegram_group="", posting_status="Posted", url=u, drive_url=""))
+    # link_fixes.json: a sheet link that only works when logged in is fetched by the working link it opens
+    fixes_file = Path(__file__).resolve().parent / "link_fixes.json"
+    fixes = {canonical(k): v["url"] for k, v in (json.loads(fixes_file.read_text(encoding="utf8")).items() if fixes_file.exists() else [])
+             if isinstance(v, dict) and v.get("url")}
+    for o in out:
+        fx = fixes.get(canonical(o["url"]))
+        if fx:
+            o["sheet_url"], o["url"] = o["url"], fx
     for o in out:
         o["canonical_url"] = canonical(o["url"])
         o["key"] = key_of(o["canonical_url"])
