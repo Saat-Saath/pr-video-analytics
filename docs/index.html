@@ -448,6 +448,11 @@ window.dash = (function () {
   <nav class="vd-links" aria-label="Sections"><a href="#overview" aria-current="page">Overview</a><a href="#/sources">Sources</a><a href="#wall-card">Videos</a><a href="#compare">Compare</a><a href="#all-videos">All videos</a></nav>
 </div>
 <div class="vd-browse" id="browse" hidden></div>
+
+<section class="vd-card" aria-label="Sources" id="src-home">
+  <div class="vd-ch"><div><h2 class="vd-h2">Sources</h2><p class="vd-note" style="margin-top:4px">Click a source to see its channels, then a channel to watch its videos with their costing.</p></div></div>
+  <div class="vd-sbx" id="src-boxes"></div>
+</section>
 <section class="vd-hero" id="overview" data-source="videos">
   <header class="vd-head">
     <div style="display:flex;flex-direction:column;gap:8px;min-width:0">
@@ -478,11 +483,6 @@ window.dash = (function () {
   <div class="vd-kpi"><span class="l">Shares</span><span class="v dash-skeleton" data-source="kpis" data-where="key=d7|All|All" data-field="shares">—</span><span class="d n" data-source="kpis" data-where="key=d7|All|All" data-field="shares_delta">—</span></div>
   <div class="vd-kpi"><span class="l">Engagement rate</span><span class="v dash-skeleton" data-source="kpis" data-where="key=d7|All|All" data-field="eng">—</span><span class="d n" data-source="kpis" data-where="key=d7|All|All" data-field="captured">—</span></div>
   <div class="vd-kpi"><span class="l">Median views / video</span><span class="v dash-skeleton" data-source="kpis" data-where="key=d7|All|All" data-field="median">—</span><span class="d n" data-source="kpis" data-where="key=d7|All|All" data-field="hit1k">—</span></div>
-</section>
-
-<section class="vd-card" aria-label="Sources" id="src-home">
-  <div class="vd-ch"><div><h2 class="vd-h2">Sources</h2><p class="vd-note" style="margin-top:4px">Open a source to see its channels, and a channel to watch its videos with their costing.</p></div></div>
-  <div class="vd-sbx" id="src-boxes"></div>
 </section>
 
 <section class="vd-card vd-source-main" aria-label="Source and platform response comparison" id="sources">
