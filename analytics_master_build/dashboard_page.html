@@ -357,14 +357,56 @@
   .vd-player{max-width:300px}
   .vd-player.wide{max-width:none}
 }
+
+/* sources > channels > videos pages */
+.vd-off{display:none!important}
+.vd-browse{display:flex;flex-direction:column;gap:18px}
+.vd-browse[hidden]{display:none}
+.vd-btitle{font-family:var(--disp);font-size:clamp(26px,3.4vw,38px);font-weight:800;letter-spacing:-.02em;line-height:1.1}
+.vd-crumb{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13px;font-weight:600;color:var(--mut2)}
+.vd-crumb a{color:var(--lnk);text-decoration:none;min-height:32px;display:inline-flex;align-items:center}
+.vd-crumb a:hover{text-decoration:underline}.vd-crumb b{color:var(--ink)}
+.vd-sbx{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+.vd-sbox{display:flex;flex-direction:column;gap:12px;padding:18px;border-radius:20px;border:1px solid var(--line);background:#fff;text-decoration:none;color:inherit;box-shadow:var(--sh);transition:border-color .15s,transform .15s}
+.vd-sbox:hover,.vd-chc:hover{border-color:#C9CCFF;transform:translateY(-2px)}
+.vd-sbox:focus-visible,.vd-chl:focus-visible,.vd-chf .go:focus-visible{outline:2px solid var(--lnk);outline-offset:2px}
+.vd-sbox h3{font-family:var(--disp);font-size:20px;font-weight:700;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.vd-sbox .go,.vd-chf .go{font-family:var(--body);font-size:13px;font-weight:600;color:var(--lnk);white-space:nowrap;text-decoration:none}
+.vd-kv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 14px}
+.vd-kv.wide{grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}
+.vd-kv div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.vd-kv b{font-family:var(--disp);font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vd-kv span{font-size:11.5px;color:var(--mut2);line-height:1.3}
+.vd-chg{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.vd-chc{display:flex;flex-direction:column;border-radius:20px;background:#fff;border:1px solid var(--line);box-shadow:var(--sh);transition:border-color .15s,transform .15s;overflow:hidden;min-width:0}
+.vd-chl{display:flex;flex-direction:column;gap:14px;padding:16px 16px 14px;color:inherit;text-decoration:none;flex:1}
+.vd-chh{display:flex;gap:12px;align-items:center;min-width:0}
+.vd-chh .tx{display:flex;flex-direction:column;gap:3px;min-width:0}
+.vd-chh .tx b{font-size:16px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vd-av{flex:0 0 52px;width:52px;height:52px;border-radius:50%;background:#EEF0FF center/cover no-repeat;box-shadow:0 0 0 2px #fff,0 0 0 3px var(--line)}
+.vd-av.lg{flex-basis:72px;width:72px;height:72px}
+.vd-cline{font-size:12.5px;font-weight:600;color:var(--ink2);background:#F7F8FC;border-radius:10px;padding:8px 10px;line-height:1.4}
+.vd-chf{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 16px;border-top:1px solid var(--line2);background:#FBFBFE;min-height:44px}
+.vd-pf{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12.5px;min-width:0}
+.vd-pf a{color:var(--lnk);text-decoration:none;font-weight:600;white-space:nowrap}
+.vd-pf a:hover{text-decoration:underline}
+.vd-cbox{display:flex;flex-direction:column;gap:10px;padding:14px 16px;border-radius:16px;background:#F7F8FC}
+@media (max-width:640px){
+  .vd-chg{grid-template-columns:minmax(0,1fr)}
+  .vd-kv b{font-size:17px}
+  .vd-av.lg{width:56px;height:56px;flex-basis:56px}
+  .vd-sbox{padding:14px}
+  .vd-sbx{gap:10px}
+}
 </style>
 
 <div class="vd"><div class="vd-in">
 
 <div class="vd-topbar">
   <div class="vd-brand"><span class="vd-logo"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="#FFFFFF"></path></svg></span>PR Video Analytics</div>
-  <nav class="vd-links" aria-label="Sections"><a href="#overview" aria-current="page">Overview</a><a href="#wall-card">Videos</a><a href="#compare">Compare</a><a href="#all-videos">All videos</a></nav>
+  <nav class="vd-links" aria-label="Sections"><a href="#overview" aria-current="page">Overview</a><a href="#/sources">Sources</a><a href="#wall-card">Videos</a><a href="#compare">Compare</a><a href="#all-videos">All videos</a></nav>
 </div>
+<div class="vd-browse" id="browse" hidden></div>
 <section class="vd-hero" id="overview" data-source="videos">
   <header class="vd-head">
     <div style="display:flex;flex-direction:column;gap:8px;min-width:0">
@@ -395,6 +437,11 @@
   <div class="vd-kpi"><span class="l">Shares</span><span class="v dash-skeleton" data-source="kpis" data-where="key=d7|All|All" data-field="shares">—</span><span class="d n" data-source="kpis" data-where="key=d7|All|All" data-field="shares_delta">—</span></div>
   <div class="vd-kpi"><span class="l">Engagement rate</span><span class="v dash-skeleton" data-source="kpis" data-where="key=d7|All|All" data-field="eng">—</span><span class="d n" data-source="kpis" data-where="key=d7|All|All" data-field="captured">—</span></div>
   <div class="vd-kpi"><span class="l">Median views / video</span><span class="v dash-skeleton" data-source="kpis" data-where="key=d7|All|All" data-field="median">—</span><span class="d n" data-source="kpis" data-where="key=d7|All|All" data-field="hit1k">—</span></div>
+</section>
+
+<section class="vd-card" aria-label="Sources" id="src-home">
+  <div class="vd-ch"><div><h2 class="vd-h2">Sources</h2><p class="vd-note" style="margin-top:4px">Open a source to see its channels, and a channel to watch its videos with their costing.</p></div></div>
+  <div class="vd-sbx" id="src-boxes"></div>
 </section>
 
 <section class="vd-card vd-source-main" aria-label="Source and platform response comparison" id="sources">
@@ -709,25 +756,29 @@ dash.calc('status', {
     const l = S.snap;
     return filtered().slice().sort((a, b) => (b[l + '_views'] ?? -1) - (a[l + '_views'] ?? -1) || (b.views ?? -1) - (a.views ?? -1));
   }
+  function tile(v, l, idx, active, onClick) {
+    const b = el('button', 'vd-vc'); b.type = 'button'; b.dataset.v = v.video; b.setAttribute('aria-pressed', String(active));
+    const val = v[l + '_views'];
+    b.setAttribute('aria-label', 'Play ' + title(v) + ', ' + v.platform + ', ' + (val != null ? full(val) + ' views at ' + LBL[l] : statusText(v, l) + ' at ' + LBL[l]));
+    const th = el('span', 'vd-th'); paintThumb(th, v);
+    const pl = el('span', 'vd-pl'); pl.innerHTML = PLAY;
+    const bd = el('span', 'vd-badge'); const dot = el('i', 'vd-dot'); dot.style.background = PCOL[v.platform] || '#5F6480'; bd.append(dot, v.platform);
+    th.append(pl, bd, el('span', 'vd-id', v.video));
+    if (idx < 3 && val != null) th.append(el('span', 'vd-rank', '#' + (idx + 1)));
+    const vn = el('span', 'vd-vn'); vn.append(el('b', null, val != null ? big(val) : '—'), el('span', null, val != null ? (l === 'all' ? 'views · all time' : 'views · ' + LBL[l]) : statusText(v, l)));
+    const p = prev(l), a = p && v[p + '_views'], later = l !== 'all' || (v.alltime_age ?? -1) > (v[p + '_age'] ?? 99), gr = val != null && a && later ? val / a - 1 : null;
+    const g = el('span', 'vd-gr' + (gr == null ? ' n' : ''), l === 'all' ? (gr != null ? sgn(gr) + ' since Day 7' : v.alltime_at ? 'As of ' + dmy(v.alltime_at) : 'Posted ' + dmy(v.published)) : l === 'd2' ? (v.d7_views != null && v.d2_views ? sgn(v.d7_views / v.d2_views - 1) + ' by Day 7' : 'Posted ' + dmy(v.published)) : gr != null ? sgn(gr) + ' vs ' + LBL[p] : 'Posted ' + dmy(v.published));
+    b.append(th, el('span', 'vd-vt', title(v)), vn, g);
+    b.addEventListener('click', onClick);
+    return b;
+  }
+
   function drawWall() {
     const list = ranked(), l = S.snap, wall = $('wall'); wall.textContent = '';
     if (!S.sel || !list.find(v => v.video === S.sel)) { S.sel = list[0] && list[0].video; S.playing = false; }
-    list.slice(0, S.wallN).forEach((v, idx) => {
-      const b = el('button', 'vd-vc'); b.type = 'button'; b.setAttribute('aria-pressed', String(v.video === S.sel));
-      const val = v[l + '_views'];
-      b.setAttribute('aria-label', 'Play ' + title(v) + ', ' + v.platform + ', ' + (val != null ? full(val) + ' views at ' + LBL[l] : statusText(v, l) + ' at ' + LBL[l]));
-      const th = el('span', 'vd-th'); paintThumb(th, v);
-      const pl = el('span', 'vd-pl'); pl.innerHTML = PLAY;
-      const bd = el('span', 'vd-badge'); const dot = el('i', 'vd-dot'); dot.style.background = PCOL[v.platform] || '#5F6480'; bd.append(dot, v.platform);
-      th.append(pl, bd, el('span', 'vd-id', v.video));
-      if (idx < 3 && val != null) th.append(el('span', 'vd-rank', '#' + (idx + 1)));
-      const vn = el('span', 'vd-vn'); vn.append(el('b', null, val != null ? big(val) : '—'), el('span', null, val != null ? (l === 'all' ? 'views · all time' : 'views · ' + LBL[l]) : statusText(v, l)));
-      const p = prev(l), a = p && v[p + '_views'], later = l !== 'all' || (v.alltime_age ?? -1) > (v[p + '_age'] ?? 99), gr = val != null && a && later ? val / a - 1 : null;
-      const g = el('span', 'vd-gr' + (gr == null ? ' n' : ''), l === 'all' ? (gr != null ? sgn(gr) + ' since Day 7' : v.alltime_at ? 'As of ' + dmy(v.alltime_at) : 'Posted ' + dmy(v.published)) : l === 'd2' ? (v.d7_views != null && v.d2_views ? sgn(v.d7_views / v.d2_views - 1) + ' by Day 7' : 'Posted ' + dmy(v.published)) : gr != null ? sgn(gr) + ' vs ' + LBL[p] : 'Posted ' + dmy(v.published));
-      b.append(th, el('span', 'vd-vt', title(v)), vn, g);
-      b.addEventListener('click', () => { S.sel = v.video; S.playing = true; drawWall(); drawDeep(); if (window.innerWidth < 1000) $('deep').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
-      wall.appendChild(b);
-    });
+    list.slice(0, S.wallN).forEach((v, idx) => wall.appendChild(tile(v, l, idx, v.video === S.sel, () => {
+      S.sel = v.video; S.playing = true; drawWall(); drawDeep(); if (window.innerWidth < 1000) $('deep').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    })));
     $('wall-note').textContent = list.length + ' videos · sorted by ' + LBL[l] + ' views · click one to ' + (EMBED ? 'play it' : 'open its breakdown');
     $('more').hidden = S.wallN >= list.length;
     $('more').textContent = 'Show more videos (' + (list.length - Math.min(S.wallN, list.length)) + ' left)';
@@ -1049,7 +1100,163 @@ dash.calc('status', {
     }
   }
 
-  function drawAll() { drawSeg(); drawTabs(); drawInsights(); drawKpis(); drawCost(); drawWall(); drawDeep(); drawSources(); drawCompare(); drawTable(); drawFix(); }
+  // ---- Sources > channels > videos: pages opened from the source boxes (the address keeps the page, so the
+  // browser's back button and shared links work)
+  const chanOf = (v) => v.channel || v.account || 'Unknown';
+  const median = (a) => { if (!a.length) return null; const s = a.slice().sort((x, y) => x - y), h = s.length >> 1; return s.length % 2 ? s[h] : (s[h - 1] + s[h]) / 2; };
+  const inr = (n) => n == null ? '—' : '₹' + Math.round(n).toLocaleString('en-IN');
+  const inr1 = (n) => n == null ? '—' : '₹' + (n >= 100 ? Math.round(n).toLocaleString('en-IN') : n.toFixed(n >= 10 ? 1 : 2));
+  const sum = (a, f) => a.reduce((t, x) => t + (f(x) || 0), 0);
+  const groupBy = (a, f) => { const m = new Map(); a.forEach(x => { const k = f(x); if (!m.has(k)) m.set(k, []); m.get(k).push(x); }); return m; };
+  function stats(list) {
+    const got = list.filter(v => v.views != null), views = sum(got, v => v.views);
+    const acts = sum(got, v => (v.likes || 0) + (v.comments || 0) + (v.shares || 0));
+    const paid = list.filter(v => v.cost != null), spent = paid.length ? sum(paid, v => v.cost) : null;
+    const pv = paid.filter(v => v.views != null), pViews = sum(pv, v => v.views), pCost = sum(pv, v => v.cost);
+    // a monthly contract: its amount and videos promised, counted once per month (each video of the month carries them)
+    const months = new Map();
+    list.forEach(v => { if (v.committed != null) { const k = (v.published || '').slice(0, 7) + '|' + v.payee; if (!months.has(k)) months.set(k, { c: v.committed, p: v.promised || 0 }); } });
+    const ms = [...months.values()];
+    const best = got.slice().sort((a, b) => b.views - a.views)[0] || null;
+    return { n: list.length, got: got.length, views, avg: got.length ? views / got.length : null, med: median(got.map(v => v.views)),
+      eng: views ? acts / views : null, hit1k: got.length ? got.filter(v => v.views >= 1000).length / got.length : null,
+      spent, rate: paid.length ? spent / paid.length : null, cpk: pViews ? pCost / pViews * 1000 : null,
+      committed: ms.length ? sum(ms, x => x.c) : null, promised: ms.length ? sum(ms, x => x.p) : null, perVideo: paid.length > 0 && !ms.length,
+      best, pages: [...new Set(list.map(v => v.page).filter(Boolean))], plats: [...new Set(list.map(v => v.platform))],
+      last: list.map(v => v.published).filter(Boolean).sort().pop() };
+  }
+  function kv(box, items, wide) {
+    const g = el('div', 'vd-kv' + (wide ? ' wide' : ''));
+    items.forEach(([val, lab]) => { const d = el('div'); d.append(el('b', null, val), el('span', null, lab)); g.appendChild(d); });
+    box.appendChild(g); return g;
+  }
+  const avatar = (v, cls) => { const a = el('span', cls || 'vd-av'); a.setAttribute('aria-hidden', 'true'); if (v) paintThumb(a, v); return a; };
+  const pageLabel = (u) => { try { const x = new URL(u); return ({ 'facebook.com': 'Facebook', 'instagram.com': 'Instagram', 'youtube.com': 'YouTube' }[x.hostname.replace(/^(www|web|m)\./, '')] || x.hostname) + ' profile'; } catch (e) { return 'Profile'; } };
+  function pageLinks(pages) {
+    const d = el('div', 'vd-pf'), seen = new Set();
+    pages.forEach(u => { const k = u.replace(/^https?:\/\/(www|web|m)\./, '').replace(/\/$/, '').toLowerCase(); if (seen.has(k) || seen.size >= 4) return; seen.add(k);
+      const a = el('a', null, pageLabel(u) + ' ↗'); a.href = u; a.target = '_blank'; a.rel = 'noopener'; a.title = u; d.appendChild(a); });
+    return d;
+  }
+  const href = (...parts) => '#/' + parts.map(encodeURIComponent).join('/');
+  const sourcesList = () => [...new Set(['Inhouse ai videos', 'Sanjay Agency', 'Internal PR', ...rows.map(v => v.source)])].filter(x => rows.some(v => v.source === x));
+  function costLine(st) {
+    if (st.perVideo) return inr(st.rate) + ' per video · ' + inr(st.spent) + ' spent so far';
+    if (st.committed != null) return inr(st.committed) + ' a month' + (st.promised ? ' for ' + st.promised + ' videos' : '') + ' · ' + inr(st.rate) + ' per video · ' + inr(st.spent) + ' so far';
+    return 'No amount in the PR Video Costs sheet yet';
+  }
+  function sourceBox(src) {
+    const list = rows.filter(v => v.source === src), st = stats(list), chans = groupBy(list, chanOf).size;
+    const a = el('a', 'vd-sbox'); a.href = href('source', src);
+    const h = el('h3'); h.append(src, el('span', 'go', 'See channels →')); a.appendChild(h);
+    a.appendChild(el('span', 'vd-note', chans + ' channels · ' + st.n + ' videos · ' + st.got + ' with views'));
+    kv(a, [[big(st.views), 'Total views'], [big(st.avg), 'Avg per video'], [st.cpk != null ? inr1(st.cpk) : '—', '₹ per 1,000 views']]);
+    return a;
+  }
+  function drawSrcBoxes() { const box = $('src-boxes'); box.textContent = ''; sourcesList().forEach(x => box.appendChild(sourceBox(x))); }
+  function crumb(parts) {
+    const c = el('nav', 'vd-crumb'); c.setAttribute('aria-label', 'Breadcrumb');
+    const home = el('a', null, '← Dashboard'); home.href = '#overview'; c.appendChild(home);
+    parts.forEach(([t, h]) => { c.append(el('span', null, '›')); if (h) { const a = el('a', null, t); a.href = h; c.appendChild(a); } else c.append(el('b', null, t)); });
+    return c;
+  }
+  function pageSources(box) {
+    box.appendChild(crumb([['Sources']]));
+    const card = el('section', 'vd-card');
+    card.append(el('h1', 'vd-btitle', 'Sources'), el('p', 'vd-note', 'Open a source to see its channels, and a channel to watch its videos.'));
+    const g = el('div', 'vd-sbx'); sourcesList().forEach(x => g.appendChild(sourceBox(x))); card.appendChild(g); box.appendChild(card);
+  }
+  function pageSource(box, src) {
+    const list = rows.filter(v => v.source === src);
+    box.appendChild(crumb([['Sources', '#/sources'], [src]]));
+    if (!list.length) { box.appendChild(el('p', 'vd-empty', 'No videos for this source.')); return; }
+    const st = stats(list), groups = groupBy(list, chanOf), head = el('section', 'vd-card');
+    head.append(el('h1', 'vd-btitle', src), el('p', 'vd-note', groups.size + ' channels · ' + st.n + ' videos sent · ' + st.got + ' with views · latest post ' + dmy(st.last)));
+    kv(head, [[big(st.views), 'Total views'], [big(st.avg), 'Avg per video'], [big(st.med), 'Median video'], [pct(st.eng), 'Engagement rate'],
+      [pct0(st.hit1k), 'Past 1K views'], [st.spent != null ? inr(st.spent) : '—', 'Spent so far'], [st.cpk != null ? inr1(st.cpk) : '—', '₹ per 1,000 views']], true);
+    box.appendChild(head);
+    const card = el('section', 'vd-card'), top = el('div', 'vd-ch');
+    top.append(el('h2', 'vd-h2', 'Channels'));
+    const sel = el('select', 'vd-sel'); sel.setAttribute('aria-label', 'Sort channels');
+    [['views', 'Most views'], ['cpk', 'Cheapest views'], ['avg', 'Best average'], ['n', 'Most videos'], ['name', 'Name']].forEach(([k, t]) => { const o = el('option', null, t); o.value = k; o.selected = k === (S.chSort || 'views'); sel.appendChild(o); });
+    sel.addEventListener('change', () => { S.chSort = sel.value; route(); });
+    top.appendChild(sel); card.appendChild(top);
+    const k = S.chSort || 'views';
+    const items = [...groups].map(([name, vs]) => ({ name, vs, st: stats(vs) }))
+      .sort((a, b) => k === 'name' ? a.name.localeCompare(b.name) : k === 'cpk' ? (a.st.cpk ?? 1e12) - (b.st.cpk ?? 1e12) : (b.st[k] ?? -1) - (a.st[k] ?? -1));
+    const g = el('div', 'vd-chg');
+    items.forEach(({ name, vs, st: c }) => {
+      const art = el('article', 'vd-chc'), a = el('a', 'vd-chl'); a.href = href('channel', src, name);
+      const hh = el('div', 'vd-chh'), t = el('div', 'tx');
+      t.append(el('b', null, name), el('span', 'vd-small', c.plats.join(' · ') + ' · ' + c.n + (c.promised ? ' of ' + c.promised + ' promised' : ' videos')));
+      hh.append(avatar(c.best || vs[0]), t); a.appendChild(hh);
+      kv(a, [[big(c.views), 'Total views'], [big(c.avg), 'Avg / video'], [pct(c.eng), 'Engagement'],
+        [c.got + ' / ' + c.n, 'With views'], [c.rate != null ? inr(c.rate) : '—', 'Rate / video'], [c.cpk != null ? inr1(c.cpk) : '—', '₹ / 1K views']]);
+      a.appendChild(el('span', 'vd-cline', costLine(c)));
+      art.appendChild(a);
+      const foot = el('div', 'vd-chf'), go = el('a', 'go', 'Videos →'); go.href = a.href;
+      foot.append(c.pages.length ? pageLinks(c.pages) : el('span', 'vd-small', 'No profile link yet'), go);
+      art.appendChild(foot); g.appendChild(art);
+    });
+    card.appendChild(g); box.appendChild(card);
+  }
+  function pageChannel(box, src, name) {
+    const list = rows.filter(v => v.source === src && chanOf(v) === name);
+    box.appendChild(crumb([['Sources', '#/sources'], [src, href('source', src)], [name]]));
+    if (!list.length) { box.appendChild(el('p', 'vd-empty', 'No videos for this channel.')); return; }
+    const st = stats(list), head = el('section', 'vd-card'), hh = el('div', 'vd-chh'), t = el('div', 'tx');
+    t.append(el('h1', 'vd-btitle', name), el('span', 'vd-note', src + ' · ' + st.plats.join(' · ') + ' · ' + st.n + ' videos sent · latest post ' + dmy(st.last)));
+    hh.append(avatar(st.best || list[0], 'vd-av lg'), t); head.appendChild(hh);
+    if (st.pages.length) head.appendChild(pageLinks(st.pages));
+    kv(head, [[big(st.views), 'Total views'], [big(st.avg), 'Avg per video'], [big(st.med), 'Median video'], [pct(st.eng), 'Engagement rate'],
+      [pct0(st.hit1k), 'Past 1K views'], [st.got + ' / ' + st.n, 'Videos with views']], true);
+    const cb = el('div', 'vd-cbox'); cb.appendChild(el('h3', 'vd-h3', 'Costing'));
+    if (st.perVideo) kv(cb, [[inr(st.rate), 'Per video'], [inr(st.spent), 'Spent so far (' + st.n + ' videos)'], [st.cpk != null ? inr1(st.cpk) : '—', '₹ per 1,000 views']], true);
+    else if (st.committed != null) kv(cb, [[inr(st.committed), 'Monthly amount'], [st.promised ? String(st.promised) : '—', 'Videos promised'], [st.n + (st.promised ? ' / ' + st.promised : ''), 'Posted so far'],
+      [inr(st.rate), 'Rate per video'], [inr(st.spent), 'Spent so far'], [st.cpk != null ? inr1(st.cpk) : '—', '₹ per 1,000 views']], true);
+    else cb.appendChild(el('p', 'vd-note', 'No amount in the PR Video Costs sheet yet. Add it there and the costing shows here after the next refresh.'));
+    head.appendChild(cb); box.appendChild(head);
+    const row = el('div', 'vd-row'), card = el('section', 'vd-card vd-w3'), top = el('div', 'vd-ch');
+    top.append(el('h2', 'vd-h2', 'Videos'), el('span', 'vd-note', st.n + ' videos · sorted by all-time views · click one to ' + (EMBED ? 'play it' : 'open its breakdown')));
+    card.appendChild(top);
+    const sorted = list.slice().sort((a, b) => (b.views ?? -1) - (a.views ?? -1) || String(b.published).localeCompare(String(a.published)));
+    if (!sorted.some(v => v.video === S.sel)) { S.sel = sorted[0].video; S.playing = false; }
+    const wall = el('div', 'vd-wall');
+    sorted.forEach((v, i) => wall.appendChild(tile(v, 'all', i, v.video === S.sel, () => {
+      S.sel = v.video; S.playing = true;
+      wall.querySelectorAll('.vd-vc').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === v.video)));
+      drawDeep(); if (window.innerWidth < 1000) $('deep').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    })));
+    card.appendChild(wall); row.append(card, $('deep')); box.appendChild(row);
+    drawDeep();
+  }
+  let deepHome = null;
+  function route() {
+    const raw = location.hash.slice(1), parts = raw.split('/').map(x => { try { return decodeURIComponent(x); } catch (e) { return x; } });
+    const box = $('browse'), deep = $('deep');
+    deepHome = deepHome || deep.parentElement;
+    const kids = [...box.parentElement.children].filter(n => n !== box && !n.classList.contains('vd-topbar'));
+    const page = parts[0] === '' && ['sources', 'source', 'channel'].includes(parts[1]) ? parts[1] : null;
+    document.querySelectorAll('.vd-links a').forEach(a => { if (a.getAttribute('href') === (page ? '#/sources' : '#' + (raw || 'overview'))) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+    if (!page || !rows.length) {
+      const back = deep.parentElement !== deepHome;
+      if (back) deepHome.appendChild(deep);
+      box.hidden = true; box.textContent = ''; kids.forEach(n => n.classList.remove('vd-off'));
+      if (back) { drawWall(); drawDeep(); }
+      const target = raw && !raw.startsWith('/') && document.getElementById(raw);
+      if (target) target.scrollIntoView({ block: 'start' });
+      return;
+    }
+    if (deep.parentElement !== deepHome) deepHome.appendChild(deep);
+    kids.forEach(n => n.classList.add('vd-off'));
+    box.textContent = ''; box.hidden = false;
+    if (page === 'sources') pageSources(box);
+    else if (page === 'source') pageSource(box, parts[2] || '');
+    else pageChannel(box, parts[2] || '', parts.slice(3).join('/'));
+  }
+  window.addEventListener('hashchange', () => { route(); if (location.hash.startsWith('#/')) window.scrollTo(0, 0); });
+
+  function drawAll() { drawSeg(); drawTabs(); drawInsights(); drawKpis(); drawSrcBoxes(); drawCost(); drawWall(); drawDeep(); drawSources(); drawCompare(); drawTable(); drawFix(); }
 
   dash.onData(() => {
     const d = dash.data('videos');
@@ -1062,6 +1269,7 @@ dash.calc('status', {
       S.snap = 'all';
     }
     drawAll();
+    route();
   });
 })();
 </script>

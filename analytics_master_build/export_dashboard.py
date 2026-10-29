@@ -64,6 +64,17 @@ def rows(with_costs=False):
                     "tries": m.get("fetch_tries"), "last_error": m.get("last_error") or "",
                     **{f"{l}_{k}": m.get(f"{l}_{k}") for l in ("d2", "d7", "d30")
                        for k in ("views", "likes", "comments", "shares", "status", "due", "age", "hours")}})
+        # the channel a video belongs to on the Sources pages: the Costs sheet's name for the account that is paid
+        # for it, else the influencer (Internal PR) or the page that posted it
+        src = out[-1]["source"]
+        sheet_name = (m.get("influencer") if src == "Internal PR" else m.get("channel")) or m.get("influencer") or ""
+        if src == "Inhouse ai videos":
+            ch = m.get("channel") or m.get("account") or ""  # the sheet's channel column: one name for its FB + IG pages
+        else:
+            ch = (payee.get(m["master_id"]) if with_costs else None) or (sheet_name if src == "Internal PR" else "") \
+                 or m.get("account") or sheet_name
+        out[-1]["channel"] = (ch or "Unknown").strip()
+        out[-1]["page"] = m.get("page_url") or None
         if with_costs:
             out[-1]["cost"] = cost.get(m["master_id"])
             out[-1]["payee"] = payee.get(m["master_id"])

@@ -231,8 +231,9 @@ def match_rank(want, v):
                                                               or similar(name, f[:len(name)]))), None)
     if hit is None:
         return None
-    if want["links"] and keys:
-        return 2.5
+    if want["links"] and keys:  # its page is known and is none of the row's links (maybe the same page written
+        # another way, e.g. a page name instead of its number): weak, and weaker still on another platform
+        return 2.5 if v.get("platform") in link_platforms(want["links"]) else 2.75
     rank = 1 + hit * 0.5
     if want["links"] and v.get("platform") not in link_platforms(want["links"]):
         rank += 0.25
@@ -395,6 +396,7 @@ def allocate(master, rows=None):
                 continue
             matches[i].append((v, rank))
     # keep only the best-ranked named rows per video; whole-source rows always apply
+    exact = {i: sum(1 for _, r in vs if r == 0) for i, vs in matches.items()}  # videos each row matched by its link
     for i, vs in matches.items():
         for v, rank in vs:
             if rank == 3:
@@ -402,8 +404,13 @@ def allocate(master, rows=None):
             b = best.get(v["master_id"])
             if b is None or rank < b[0]:
                 best[v["master_id"]] = (rank, [i])
-            elif rank == b[0] and not any(norm(rows[j]["account"]) == norm(rows[i]["account"]) for j in b[1]):
-                b[1].append(i)  # two different names both fit (a shared channel): both pay; the same name twice: the first row
+            elif rank == b[0]:
+                same = [j for j in b[1] if norm(rows[j]["account"]) == norm(rows[i]["account"])]
+                if not same:
+                    b[1].append(i)  # two different names both fit (a shared channel): both pay
+                elif exact.get(i, 0) < exact.get(same[0], 0):
+                    # the same name twice (one row per account): the row whose own link found no videos takes it
+                    b[1][b[1].index(same[0])] = i
     same_name = defaultdict(int)
     for c in rows:
         if c["account"].strip():
