@@ -81,6 +81,16 @@ def rows(with_costs=False):
             t = terms.get(m["master_id"]) or {}
             out[-1]["promised"] = t.get("promised") or None   # videos promised that month by its contract
             out[-1]["committed"] = t.get("committed")          # that month's contract amount (₹)
+    # same content across channels, and the topic of each video (content.py)
+    try:
+        import content
+        shown = [m for m in d["master"] if m["master_id"] in {r["video"] for r in out}]
+        info = content.analyse(shown, content.thumb_texts([m["master_id"] for m in shown], os.environ.get("TESSDATA_DIR")))
+        for r in out:
+            r["content"] = info[r["video"]]["content"]
+            r["topic"] = info[r["video"]]["topic"] or (content.topic_of(r.get("channel")) if r["source"] == "Inhouse ai videos" else None)
+    except Exception as e:  # never stop the dashboard over this
+        print("content / topics skipped:", e)
     return out, d["generated_at"]
 
 

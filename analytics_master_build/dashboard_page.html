@@ -398,6 +398,47 @@
   .vd-sbox{padding:14px}
   .vd-sbx{gap:10px}
 }
+
+/* channel performance */
+.vd-pace{position:relative;display:block;width:140px;height:10px;border-radius:999px;background:var(--line2)}
+.vd-pace i{position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:var(--ok)}
+.vd-pace i.b{background:var(--acc)}
+.vd-pace b{position:absolute;top:-3px;width:2px;height:16px;margin-left:-1px;background:var(--ink);border-radius:2px}
+.vd-dl td a,.vd-sct td a{color:var(--ink);font-weight:600;text-decoration:none}
+.vd-dl td a:hover,.vd-sct td a:hover{color:var(--lnk);text-decoration:underline}
+.vd-alg{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
+.vd-al{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:18px;border:1px solid var(--line);background:#fff;text-decoration:none;color:inherit;transition:border-color .15s}
+.vd-al:hover{border-color:#C9CCFF}
+.vd-why{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+.vd-why .vd-pill{font-size:12px;padding:4px 10px;border-radius:10px;white-space:normal;line-height:1.35}
+.vd-scg{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:12px}
+.vd-scc{display:flex;flex-direction:column;gap:6px;padding:14px;border-radius:18px;border:1px solid var(--line);background:#fff;min-width:0}
+.vd-scc .vd-chh{margin-bottom:6px}
+.vd-scc .tx b{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:14px}
+.vd-av.sq{border-radius:12px;width:54px;height:68px;flex:0 0 54px;border:0;cursor:pointer;box-shadow:none}
+.vd-scr{all:unset;box-sizing:border-box;display:grid;grid-template-columns:minmax(0,9rem) minmax(0,1fr) auto;gap:10px;align-items:center;font-size:12.5px;cursor:pointer;padding:3px 4px;border-radius:8px}
+.vd-scr:hover{background:#F7F8FC}.vd-scr:focus-visible{outline:2px solid var(--lnk)}
+.vd-scr .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink2)}
+.vd-scr .bar{height:8px;background:var(--line2);border-radius:999px;overflow:hidden}
+.vd-scr .bar i{display:block;height:100%;background:var(--b2);border-radius:999px}
+.vd-scr b{font-variant-numeric:tabular-nums;font-size:12.5px}
+.vd-calw{overflow-x:auto;border:1px solid var(--line);border-radius:16px}
+.vd-cal{border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums}
+.vd-cal th{font-weight:600;color:var(--mut2);padding:8px 0;min-width:26px;text-align:center;border-bottom:1px solid var(--line)}
+.vd-cal th.sun{color:var(--accd)}
+.vd-cal .nm{position:sticky;left:0;background:#fff;text-align:left;padding:6px 12px;white-space:nowrap;z-index:1}
+.vd-cal tr .nm:last-child{position:static;color:var(--mut2)}
+.vd-cal td{text-align:center;height:30px;border-bottom:1px solid var(--line2)}
+.vd-cal td.on{color:var(--ok);font-weight:700;cursor:pointer;background:#EAF7F0}
+.vd-cal td.on:hover{background:#D3F0E0}
+.vd-cal td.off{background:#FFF6F2}
+.vd-cal td.pre{background:#F7F8FC}
+.vd-cal a{color:var(--ink);font-weight:600;text-decoration:none}
+@media (max-width:640px){
+  .vd-alg,.vd-scg{grid-template-columns:minmax(0,1fr)}
+  .vd-pace{width:90px}
+  .vd-scr{grid-template-columns:minmax(0,7rem) minmax(0,1fr) auto}
+}
 </style>
 
 <div class="vd"><div class="vd-in">
@@ -496,6 +537,33 @@
 <section class="vd-card" aria-label="Cost per view" id="cost" hidden>
   <div class="vd-ch"><div><h2 class="vd-h2">Cost per view</h2><p class="vd-note" style="margin-top:4px" id="cost-sub">What each source and account cost for the views it brought.</p></div><span class="vd-note">From the PR Video Costs sheet · lower ₹ per 1,000 views is better</span></div>
   <div id="cost-body" data-source="videos"></div>
+</section>
+
+<h2 class="vd-sec">Channel performance</h2>
+
+<section class="vd-card" aria-label="Delivery and payments" id="delivery">
+  <div class="vd-ch"><div><h2 class="vd-h2">Delivery &amp; payments</h2><p class="vd-note" style="margin-top:4px">Each monthly contract: videos promised vs posted, whether the channel is on pace, and what it has earned so far.</p></div><select class="vd-sel" id="dl-month" aria-label="Month"></select></div>
+  <div id="dl-body" style="display:flex;flex-direction:column;gap:14px"></div>
+</section>
+
+<section class="vd-card" aria-label="Channel alerts" id="alerts">
+  <div class="vd-ch"><div><h2 class="vd-h2">Channels to look at</h2><p class="vd-note" style="margin-top:4px">Too expensive per view, low reach, view counts hidden, or behind on delivery. Click one to open the channel.</p></div><span class="vd-note" id="al-note">—</span></div>
+  <div id="al-body" style="display:flex;flex-direction:column;gap:12px"></div>
+</section>
+
+<section class="vd-card" aria-label="Same video on different channels" id="same-content">
+  <div class="vd-ch"><div><h2 class="vd-h2">Same video, different channels</h2><p class="vd-note" style="margin-top:4px">The same video sent to several channels is the fairest test of a channel: the content is identical, only the channel differs.</p></div><span class="vd-note" id="sc-note">—</span></div>
+  <div id="sc-body" style="display:flex;flex-direction:column;gap:12px"></div>
+</section>
+
+<section class="vd-card" aria-label="Topics" id="topics">
+  <div class="vd-ch"><div><h2 class="vd-h2">Topics that work</h2><p class="vd-note" style="margin-top:4px">Average views by what the video is about, best first. Use it to choose the next videos to send.</p></div><span class="vd-note" id="tp-note">—</span></div>
+  <div id="tp-body"></div>
+</section>
+
+<section class="vd-card" aria-label="Internal PR posting calendar" id="calendar">
+  <div class="vd-ch"><div><h2 class="vd-h2">Internal PR posting calendar</h2><p class="vd-note" style="margin-top:4px">Which influencer posted on which day, last 30 days.</p></div></div>
+  <div id="cal-body" style="display:flex;flex-direction:column;gap:10px"></div>
 </section>
 
 <section class="vd-card" aria-label="All videos" id="all-videos">
@@ -674,6 +742,7 @@ dash.calc('status', {
   // ---- controls
   document.querySelectorAll('#seg button').forEach(b => b.addEventListener('click', () => { S.snap = b.dataset.s; S.auto = false; S.wallN = 12; drawAll(); }));
   $('more').addEventListener('click', () => { S.wallN += 12; drawWall(); });
+  $('dl-month').addEventListener('change', (e) => { S.dlMonth = e.target.value; drawDelivery(); });
   $('d-play').addEventListener('click', () => { S.playing = true; drawDeep(); });
   $('d-cmp').addEventListener('click', () => { S.cmpA = S.sel; $('cmp-a').value = S.sel; drawCompare(); $('compare').scrollIntoView({ behavior: 'smooth', block: 'start' }); $('cmp-b').focus(); });
 
@@ -1256,7 +1325,203 @@ dash.calc('status', {
   }
   window.addEventListener('hashchange', () => { route(); if (location.hash.startsWith('#/')) window.scrollTo(0, 0); });
 
-  function drawAll() { drawSeg(); drawTabs(); drawInsights(); drawKpis(); drawSrcBoxes(); drawCost(); drawWall(); drawDeep(); drawSources(); drawCompare(); drawTable(); drawFix(); }
+  // ---- Channel performance: delivery & payments, alerts, same video on different channels, topics, posting calendar
+  const todayIso = () => new Date(Date.now() + 5.5 * 3600e3).toISOString().slice(0, 10);  // India date
+  const monLabel = (ym) => { const [y, m] = ym.split('-'); return MON[+m - 1] + ' ' + y; };
+  const daysIn = (ym) => { const [y, m] = ym.split('-').map(Number); return new Date(y, m, 0).getDate(); };
+  // one line per paid monthly contract (Costs sheet row) and month: what it promised, what has been posted, the pace.
+  // The pace runs over 30 days from the channel's first post that month (channels joined on different dates).
+  const daysBetween = (a, b) => Math.round((new Date(b + 'T00:00:00') - new Date(a + 'T00:00:00')) / 864e5);
+  function contracts(ym) {
+    const t = todayIso(), days = 30;
+    const g = groupBy(rows.filter(v => v.committed != null && v.payee && (v.published || '').slice(0, 7) === ym), v => v.payee);
+    return [...g].map(([payee, vs]) => {
+      const promised = vs[0].promised || 0, amount = vs[0].committed, rate = promised ? amount / Math.max(promised, vs.length) : amount / vs.length;
+      const start = vs.map(v => v.published).sort()[0], day = Math.max(1, Math.min(days, daysBetween(start, t) + 1));
+      const posted = vs.length, expected = promised ? Math.min(promised, Math.ceil(promised * day / days)) : null;
+      const projected = promised && day ? Math.min(promised, Math.round(posted / day * days)) : posted;
+      const status = !promised ? 'No target' : posted >= promised ? 'Done' : posted >= expected * 0.9 || expected - posted <= 2 ? 'On track' : 'Behind';
+      return { payee, source: vs[0].source, channel: chanOf(vs[0]), promised, amount, rate, posted, expected, projected, status, start,
+        earned: Math.min(amount, posted * rate), projEarned: Math.min(amount, projected * rate), day, days };
+    });
+  }
+  function drawDelivery() {
+    const months = [...new Set(rows.filter(v => v.committed != null).map(v => (v.published || '').slice(0, 7)).filter(Boolean))].sort();
+    const box = $('dl-body'); box.textContent = '';
+    if (!months.length) { box.appendChild(el('p', 'vd-empty', 'Add amounts in the PR Video Costs sheet to track delivery.')); return; }
+    if (!months.includes(S.dlMonth)) S.dlMonth = months.includes(todayIso().slice(0, 7)) ? todayIso().slice(0, 7) : months[months.length - 1];
+    const sel = $('dl-month'); sel.textContent = '';
+    months.forEach(m => { const o = el('option', null, monLabel(m)); o.value = m; o.selected = m === S.dlMonth; sel.appendChild(o); });
+    const list = contracts(S.dlMonth), ord = { Behind: 0, 'On track': 1, 'No target': 2, Done: 3 };
+    list.sort((a, b) => ord[a.status] - ord[b.status] || (a.posted / (a.expected || 1)) - (b.posted / (b.expected || 1)));
+    const tot = (k) => sum(list, x => x[k]);
+    const top = el('div', 'vd-cost-top');
+    [['Committed this month', inr(tot('amount')), list.length + ' contracts'], ['Earned so far', inr(tot('earned')), tot('posted') + ' videos posted × their rate'],
+     ['At the current pace', inr(tot('projEarned')), 'if every channel keeps posting as now'], ['Behind schedule', String(list.filter(x => x.status === 'Behind').length), 'of ' + list.length + ' contracts, at their pace so far']]
+      .forEach(([l, v, n], i) => { const d = el('div', 'vd-cst' + (i === 0 ? ' hi' : '')); d.append(el('span', 'l', l), el('span', 'v', v), el('span', 's', n)); top.appendChild(d); });
+    box.appendChild(top);
+    const tw = el('div', 'vd-ctw'), t = el('table', 'vd-ct vd-dl'), hr = el('tr');
+    ['Channel', 'Source', 'Started', 'Posted / promised', 'Pace', 'Status', 'Earned so far', 'Monthly amount', 'Rate / video', 'By day 30 at this pace'].forEach(x => hr.appendChild(el('th', null, x)));
+    const th = el('thead'); th.appendChild(hr); t.appendChild(th);
+    const tb = el('tbody');
+    list.forEach(x => {
+      const tr = el('tr'), name = el('td'), a = el('a', null, x.payee); a.href = href('channel', x.source, x.channel); name.appendChild(a);
+      const pace = el('td'), bar = el('span', 'vd-pace'), fill = el('i'), mark = el('b');
+      fill.style.width = Math.min(100, x.posted / Math.max(1, x.promised) * 100) + '%';
+      if (x.expected != null) { mark.style.left = Math.min(100, x.expected / Math.max(1, x.promised) * 100) + '%'; bar.title = 'Expected by today: ' + x.expected; }
+      fill.className = x.status === 'Behind' ? 'b' : ''; bar.append(fill, mark); pace.appendChild(bar);
+      const st = el('td'); st.appendChild(el('span', 'vd-pill ' + (x.status === 'Behind' ? 'b' : x.status === 'Done' ? 'ok' : 'w'),
+        x.status === 'Behind' ? 'Behind by ' + (x.expected - x.posted) : x.status));
+      tr.append(name, el('td', null, x.source), el('td', null, dmy(x.start) + ' · day ' + x.day), el('td', null, x.posted + ' / ' + (x.promised || '—')), pace, st,
+        el('td', null, inr(x.earned)), el('td', null, inr(x.amount)), el('td', null, inr(x.rate)), el('td', null, x.projected + ' videos · ' + inr(x.projEarned)));
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb); tw.appendChild(t); box.appendChild(tw);
+    const pv = rows.filter(v => v.cost != null && v.committed == null && (v.published || '').slice(0, 7) === S.dlMonth);
+    if (pv.length) box.appendChild(el('p', 'vd-note', 'Paid per video: ' + pv.length + ' videos × ' + inr(pv[0].cost) + ' = ' + inr(sum(pv, v => v.cost)) + ' (' + [...new Set(pv.map(v => v.source))].join(', ') + ').'));
+    box.appendChild(el('p', 'vd-note', 'Pace: the promised videos spread over 30 days from the channel\'s first post. The marker on each bar is where it should be by today. Earned = videos posted × the contract rate (monthly amount ÷ videos promised).'));
+  }
+
+  function channelAlerts() {
+    const out = [], bySrc = groupBy(rows, v => v.source);
+    const ym = todayIso().slice(0, 7), behind = new Map(contracts(ym).filter(x => x.status === 'Behind').map(x => [x.source + '|' + x.channel, x]));
+    bySrc.forEach((list, src) => {
+      const chans = [...groupBy(list, chanOf)].map(([name, vs]) => ({ name, vs, st: stats(vs) }));
+      const typical = median(chans.filter(c => c.st.cpk != null && c.st.got >= 5).map(c => c.st.cpk));
+      chans.forEach(c => {
+        const why = [];
+        if (typical && c.st.cpk != null && c.st.got >= 5 && c.st.cpk > typical * 2) why.push(['b', 'Expensive: ' + inr1(c.st.cpk) + ' per 1,000 views (typical for ' + src + ': ' + inr1(typical) + ')']);
+        if (c.st.got >= 5 && c.st.med != null && c.st.med < 100) why.push(['w', 'Low reach: a typical video gets ' + Math.round(c.st.med) + ' views']);
+        const hidden = c.vs.filter(v => v.views == null).length;
+        if (c.vs.length >= 4 && hidden / c.vs.length >= 0.3) why.push(['w', 'No view count on ' + hidden + ' of ' + c.vs.length + ' videos']);
+        const b = behind.get(src + '|' + c.name);
+        if (b) why.push(['b', 'Behind: ' + b.posted + ' posted, ' + b.expected + ' expected by today (' + b.promised + ' promised)']);
+        if (why.length) out.push({ src, name: c.name, st: c.st, why, best: c.st.best || c.vs[0] });
+      });
+    });
+    return out.sort((a, b) => b.why.filter(w => w[0] === 'b').length - a.why.filter(w => w[0] === 'b').length || b.why.length - a.why.length);
+  }
+  function drawAlerts() {
+    const box = $('al-body'); box.textContent = '';
+    const list = channelAlerts();
+    $('al-note').textContent = list.length ? list.length + ' channels need a look' : 'No channel needs a look right now';
+    if (!list.length) { box.appendChild(el('p', 'vd-empty', 'Every channel is within normal cost, reach and delivery.')); return; }
+    const g = el('div', 'vd-alg');
+    list.slice(0, S.alAll ? list.length : 8).forEach(x => {
+      const a = el('a', 'vd-al'); a.href = href('channel', x.src, x.name);
+      const hh = el('div', 'vd-chh'), t = el('div', 'tx'); t.append(el('b', null, x.name), el('span', 'vd-small', x.src + ' · ' + x.st.n + ' videos · ' + big(x.st.views) + ' views'));
+      hh.append(avatar(x.best), t); a.appendChild(hh);
+      const ul = el('div', 'vd-why'); x.why.forEach(([k, txt]) => ul.appendChild(el('span', 'vd-pill ' + k, txt))); a.appendChild(ul);
+      g.appendChild(a);
+    });
+    box.appendChild(g);
+    if (list.length > 8) { const m = el('button', 'vd-more', S.alAll ? 'Show fewer' : 'Show all ' + list.length); m.type = 'button'; m.addEventListener('click', () => { S.alAll = !S.alAll; drawAlerts(); }); const w = el('div'); w.style.textAlign = 'center'; w.appendChild(m); box.appendChild(w); }
+  }
+
+  // the same video given to several channels: views compared on identical content
+  function drawSame() {
+    const box = $('sc-body'); box.textContent = '';
+    const groups = [...groupBy(rows.filter(v => v.content), v => v.content)].map(([id, vs]) => ({ id, vs: vs.filter(v => v.views != null) }))
+      .filter(g => new Set(g.vs.map(chanOf)).size >= 2);
+    if (!groups.length) { box.appendChild(el('p', 'vd-empty', 'No video has been posted by two channels yet.')); return; }
+    // each channel against the typical (median) views of the same video on the other channels
+    const score = new Map();
+    groups.forEach(g => {
+      const med = median(g.vs.map(v => v.views)) || 1, topV = Math.max(...g.vs.map(v => v.views));
+      g.vs.forEach(v => { const k = v.source + '|' + chanOf(v); const s = score.get(k) || { src: v.source, name: chanOf(v), r: [], wins: 0 }; s.r.push(v.views / med); if (v.views === topV) s.wins++; score.set(k, s); });
+    });
+    const ranks = [...score.values()].filter(s => s.r.length >= 2).map(s => ({ ...s, x: median(s.r) })).sort((a, b) => b.x - a.x);
+    $('sc-note').textContent = groups.length + ' videos posted by 2 or more channels · ' + sum(groups, g => g.vs.length) + ' posts compared';
+    const tw = el('div', 'vd-ctw'), t = el('table', 'vd-ct vd-sct'), hr = el('tr');
+    ['Channel', 'Source', 'Same videos', 'Views vs the same video elsewhere', 'Top channel on'].forEach(x => hr.appendChild(el('th', null, x)));
+    const th = el('thead'); th.appendChild(hr); t.appendChild(th);
+    const tb = el('tbody'), mx = Math.max(2, ...ranks.map(r => r.x));
+    ranks.forEach(r => {
+      const tr = el('tr'), name = el('td'), a = el('a', null, r.name); a.href = href('channel', r.src, r.name); name.appendChild(a);
+      const sc = el('td'), cpk = el('span', 'cpk'), bar = el('span'), fill = el('i'); fill.style.width = Math.min(100, r.x / mx * 100) + '%'; fill.style.background = r.x >= 1 ? 'var(--ok)' : 'var(--acc)';
+      bar.appendChild(fill); cpk.append(bar, el('b', null, r.x.toFixed(1) + '×')); sc.appendChild(cpk);
+      tr.append(name, el('td', null, r.src), el('td', null, String(r.r.length)), sc, el('td', null, r.wins + ' of ' + r.r.length));
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb); tw.appendChild(t); box.append(el('h3', 'vd-h3', 'Which channel does more with the same video'), tw,
+      el('p', 'vd-note', '1.0× = the typical views the same video got on the other channels. Above 1.0× the channel gets more out of identical content. Channels with 2+ shared videos.'));
+    // the videos themselves
+    box.appendChild(el('h3', 'vd-h3', 'The shared videos'));
+    const g = el('div', 'vd-scg');
+    groups.sort((a, b) => new Set(b.vs.map(chanOf)).size - new Set(a.vs.map(chanOf)).size || sum(b.vs, v => v.views) - sum(a.vs, v => v.views));
+    groups.slice(0, S.scAll ? groups.length : 6).forEach(gr => {
+      const vs = gr.vs.slice().sort((a, b) => b.views - a.views), c = el('div', 'vd-scc');
+      const hh = el('div', 'vd-chh'), th2 = el('button', 'vd-av sq'); th2.type = 'button'; th2.setAttribute('aria-label', 'Play ' + vs[0].video); paintThumb(th2, vs[0]); th2.addEventListener('click', () => watch(vs[0].video, true));
+      const t2 = el('div', 'tx'); t2.append(el('b', null, (vs.find(v => v.title) || {}).title || 'Video ' + gr.id), el('span', 'vd-small', (vs[0].topic || 'Topic not detected') + ' · ' + new Set(vs.map(chanOf)).size + ' channels · ' + big(sum(vs, v => v.views)) + ' views'));
+      hh.append(th2, t2); c.appendChild(hh);
+      const mx2 = vs[0].views || 1;
+      vs.slice(0, 8).forEach(v => {
+        const r = el('button', 'vd-scr'); r.type = 'button'; r.addEventListener('click', () => watch(v.video, true));
+        const b = el('span', 'bar'), f = el('i'); f.style.width = Math.max(2, v.views / mx2 * 100) + '%'; b.appendChild(f);
+        r.append(el('span', 'n', chanOf(v)), b, el('b', null, big(v.views)));
+        c.appendChild(r);
+      });
+      g.appendChild(c);
+    });
+    box.appendChild(g);
+    if (groups.length > 6) { const m = el('button', 'vd-more', S.scAll ? 'Show fewer' : 'Show all ' + groups.length + ' shared videos'); m.type = 'button'; m.addEventListener('click', () => { S.scAll = !S.scAll; drawSame(); }); const w = el('div'); w.style.textAlign = 'center'; w.appendChild(m); box.appendChild(w); }
+  }
+
+  function drawTopics() {
+    const box = $('tp-body'); box.textContent = '';
+    const pool = rows.filter(v => !S.tpSrc || v.source === S.tpSrc), known = pool.filter(v => v.topic), list = [...groupBy(known, v => v.topic)].map(([name, vs]) => ({ name, st: stats(vs) }))
+      .sort((a, b) => (b.st.avg ?? -1) - (a.st.avg ?? -1));
+    $('tp-note').textContent = 'Topic found for ' + known.length + ' of ' + pool.length + ' videos (from captions and the text on thumbnails)';
+    const nav = el('div', 'vd-tabrow'); nav.style.marginBottom = '10px';
+    [['', 'All sources'], ...sourcesList().map(x => [x, x])].forEach(([k, t]) => { const b = el('button', 'vd-tab', t); b.type = 'button'; b.setAttribute('aria-pressed', String((S.tpSrc || '') === k)); b.addEventListener('click', () => { S.tpSrc = k; drawTopics(); }); nav.appendChild(b); });
+    box.appendChild(nav);
+    const tw = el('div', 'vd-ctw'), t = el('table', 'vd-ct'), hr = el('tr');
+    ['Topic', 'Videos', 'Avg views / video', '', 'Median', 'Engagement', 'Total views', '₹ per 1,000 views'].forEach(x => hr.appendChild(el('th', null, x)));
+    const th = el('thead'); th.appendChild(hr); t.appendChild(th);
+    const tb = el('tbody'), mx = Math.max(1, ...list.map(x => x.st.avg || 0));
+    list.forEach((x, i) => {
+      const tr = el('tr', i === 0 ? 'top1' : null), bar = el('td'), cpk = el('span', 'cpk'), b = el('span'), f = el('i');
+      f.style.width = ((x.st.avg || 0) / mx * 100) + '%'; b.appendChild(f); cpk.appendChild(b); bar.appendChild(cpk);
+      tr.append(el('td', null, x.name), el('td', null, String(x.st.n)), el('td', null, big(x.st.avg)), bar, el('td', null, big(x.st.med)),
+        el('td', null, pct(x.st.eng)), el('td', null, big(x.st.views)), el('td', null, x.st.cpk != null ? inr1(x.st.cpk) : '—'));
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb); tw.appendChild(t); box.appendChild(tw);
+  }
+
+  // Internal PR: who posted on which day
+  function drawCalendar() {
+    const box = $('cal-body'); box.textContent = '';
+    const list = rows.filter(v => v.source === 'Internal PR' && v.published);
+    if (!list.length) { box.appendChild(el('p', 'vd-empty', 'No Internal PR posts yet.')); return; }
+    const end = todayIso(), first = list.map(v => v.published).sort()[0];
+    const start = dmyIso(end, -29) > first ? dmyIso(end, -29) : first, days = [];
+    for (let d = start; d <= end; d = dmyIso(d, 1)) days.push(d);
+    const people = [...groupBy(list, chanOf)].sort((a, b) => a[0].localeCompare(b[0]));
+    const tw = el('div', 'vd-calw'), t = el('table', 'vd-cal'), hr = el('tr');
+    hr.appendChild(el('th', 'nm', 'Influencer'));
+    days.forEach(d => { const h = el('th', null, String(+d.slice(8))); h.title = dmy(d); if (new Date(d + 'T00:00:00').getDay() === 0) h.className = 'sun'; hr.appendChild(h); });
+    hr.appendChild(el('th', 'nm', 'Posted'));
+    const th = el('thead'); th.appendChild(hr); t.appendChild(th);
+    const tb = el('tbody');
+    people.forEach(([name, vs]) => {
+      const tr = el('tr'), nm = el('td', 'nm'), a = el('a', null, name); a.href = href('channel', 'Internal PR', name); nm.appendChild(a); tr.appendChild(nm);
+      const by = groupBy(vs, v => v.published), since = vs.map(v => v.published).sort()[0];
+      let active = 0, missed = 0;
+      days.forEach(d => {
+        const n = (by.get(d) || []).length, c = el('td', n ? 'on' : d < since ? 'pre' : 'off');
+        if (n) { active++; c.textContent = n > 1 ? String(n) : '●'; c.title = name + ', ' + dmy(d) + ': ' + n + ' post' + (n > 1 ? 's' : ''); c.addEventListener('click', () => watch(by.get(d)[0].video, true)); }
+        else if (d >= since) { missed++; c.title = name + ', ' + dmy(d) + ': no post'; }
+        tr.appendChild(c);
+      });
+      tr.appendChild(el('td', 'nm', active + ' of ' + (active + missed) + ' days'));
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb); tw.appendChild(t); box.appendChild(tw);
+    box.appendChild(el('p', 'vd-note', '● = posted that day (a number = more than one post) · empty = no post · grey = before the influencer started. Click a dot to play that video. Days follow the post date in the sheet.'));
+  }
+
+  function drawAll() { drawSeg(); drawTabs(); drawInsights(); drawKpis(); drawSrcBoxes(); drawCost(); drawWall(); drawDeep(); drawSources(); drawCompare(); drawDelivery(); drawAlerts(); drawSame(); drawTopics(); drawCalendar(); drawTable(); drawFix(); }
 
   dash.onData(() => {
     const d = dash.data('videos');
