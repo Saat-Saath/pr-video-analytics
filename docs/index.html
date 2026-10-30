@@ -286,220 +286,25 @@ window.dash = (function () {
 .vd-ct .cpk i{display:block;height:100%;border-radius:999px;background:var(--b2)}
 .vd-ct tr.top1 td:first-child{color:var(--accd)}
 .vd-ct .na{color:var(--mut2);font-weight:500}
-#fix-list .vd-ct th,#fix-list .vd-ct td{text-align:left}
-#fix-list .vd-ct{min-width:1000px}
-.vd-snapnote{max-width:360px;font-size:12px;line-height:1.45;color:var(--ink2);text-align:right;margin:0}
-@media (max-width:720px){.vd-snapnote{text-align:left;max-width:none}}
-.vd-gt{min-width:640px}.vd-gt th,.vd-gt td{text-align:left!important}
-.vd-gmore summary{cursor:pointer;font-size:14px;font-weight:600;color:var(--lnk);padding:6px 0}
-.vd-gsum{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
-.vd-gchip{border-radius:16px;padding:12px 16px;background:#F7F8FC;display:flex;flex-direction:column;gap:2px}
-.vd-gchip .l{font-size:13px;font-weight:600;color:var(--ink2)}
-.vd-gchip .s{line-height:1.45}
-.vd-gchip b{font-family:var(--disp);font-size:26px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
-.vd-gchip .s{font-size:12px;color:var(--mut2)}
 @media (max-width:720px){.vd-csrc .r{grid-template-columns:minmax(0,1fr) auto;row-gap:6px}.vd-csrc .t{grid-column:1/-1;grid-row:2}.vd-csrc .n{white-space:normal}.vd-cst .v{font-size:26px}}
 .dash-skeleton{color:transparent!important}
 [data-dash-source-state=refreshing]{opacity:.5;transition:opacity var(--cds-dur-slow,.3s)}
 @media (max-width:720px){.vd-sel{margin-left:0}.vd-right{align-items:flex-start}.vd-kpi .v{font-size:24px}.vd-cmp{grid-template-columns:1fr}.vd-sticky{position:static}.vd-lb .bar{display:none}}
 @media (prefers-reduced-motion:reduce){.vd-vc{transition:none}.vd-vc:hover{transform:none}}
-
-.vd-tabrow{display:flex;flex-wrap:wrap;gap:8px}
-.vd-help summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--lnk);list-style:none;display:inline-flex;align-items:center;gap:6px;min-height:32px}
-.vd-help summary::-webkit-details-marker{display:none}
-.vd-help summary::before{content:"+";display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:999px;background:#EEF0FF;font-weight:700}
-.vd-help[open] summary::before{content:"–"}
-.vd-help p{margin-top:6px}
-/* phones */
-@media (max-width:640px){
-  .vd-in{gap:18px;padding:10px 12px 40px}
-  .vd-topbar{flex-wrap:nowrap;gap:6px;padding:6px;border-radius:16px}
-  .vd-brand{font-size:0;gap:0;flex:0 0 auto}
-  .vd-logo{width:34px;height:34px}
-  .vd-links{flex-wrap:nowrap;overflow-x:auto;min-width:0;flex:1 1 auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
-  .vd-links::-webkit-scrollbar,.vd-tabrow::-webkit-scrollbar,.vd-ins::-webkit-scrollbar,.vd-src::-webkit-scrollbar{display:none}
-  .vd-links a{padding:10px 11px;font-size:13px;white-space:nowrap}
-  .vd-hero{gap:16px}
-  .vd-head{gap:14px}
-  .vd-title{font-size:34px}
-  .vd-sub{font-size:13.5px}
-  .vd-right{width:100%;align-items:stretch}
-  .vd-meta{justify-content:flex-start}
-  .vd-seg{flex-wrap:nowrap;width:100%}
-  .vd-seg button{flex:1 1 0;padding:0 4px;min-height:40px;font-size:13px}
-  .vd-ins{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:10px;margin:0 -12px;padding:2px 12px 6px;scroll-padding:0 12px;scrollbar-width:none}
-  .vd-ins>*{flex:0 0 84%;scroll-snap-align:start}
-  .vd-in1{padding:14px;border-radius:18px}
-  .vd-in1 .big{font-size:20px}
-  .vd-nav{flex-direction:column;align-items:stretch;gap:10px}
-  .vd-nav{min-width:0;width:100%}
-  .vd-tabrow{flex-wrap:nowrap;overflow-x:auto;margin:0 -12px;padding:0 12px;width:calc(100% + 24px);scrollbar-width:none}
-  .vd-tab{flex:0 0 auto;min-height:40px;font-size:13px}
-  .vd-sel{margin-left:0;width:100%}
-  .vd-kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-  .vd-kpi{padding:14px;min-height:0;gap:8px;border-radius:18px}
-  .vd-kpi .l{font-size:12px}
-  .vd-kpi .v{font-size:24px}
-  .vd-kpi .d{font-size:11px;padding:3px 8px}
-  .vd-card{padding:16px 14px;border-radius:20px;gap:12px}
-  .vd-h2{font-size:20px}
-  .vd-row{gap:18px}
-  /* source x platform: one block per source, a labelled row per platform */
-  .vd-sm-wrap{border:0;border-radius:0;background:transparent;overflow:visible}
-  .vd-sm{min-width:0;display:block}
-  .vd-sm thead{display:none}
-  .vd-sm tbody,.vd-sm tr{display:block}
-  .vd-sm tr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#fff;margin-bottom:10px}
-  .vd-sm td{display:block;border-right:0;min-width:0}
-  .vd-sm td[data-label]:nth-of-type(odd){border-left:1px solid var(--line2)}
-  .vd-sm .src{grid-column:1/-1}
-  .vd-smc .r{font-size:11px;gap:4px}
-  .vd-smc .l{font-size:10.5px}
-  .vd-sm td.none{display:none}
-  .vd-sm .src{position:static;min-width:0;padding:12px 14px;background:#F7F8FC}
-  .vd-sm td[data-label]::before{content:attr(data-label);display:block;padding:10px 12px 0;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--mut2)}
-  .vd-smc{min-width:0;min-height:0;padding:6px 12px 12px;gap:5px}
-  .vd-smc .v{font-size:20px}
-  .vd-src{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:10px;margin:0 -14px;padding:2px 14px 6px;scrollbar-width:none}
-  .vd-src>*{flex:0 0 86%;scroll-snap-align:start}
-  .vd-sg b{font-size:19px}
-  /* video wall: two per row */
-  .vd-wall{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-  .vd-vc{padding:5px 5px 10px;gap:6px;border-radius:16px}
-  .vd-th{aspect-ratio:3/4;border-radius:11px}
-  .vd-pl{width:36px;height:36px}
-  .vd-badge{left:6px;top:6px;padding:2px 7px;font-size:10px}
-  .vd-id,.vd-rank{font-size:10px;bottom:6px;padding:2px 6px}
-  .vd-id{right:6px}.vd-rank{left:6px}
-  .vd-vt{font-size:12px;min-height:31px;padding:0 3px}
-  .vd-vn{flex-direction:column;align-items:flex-start;gap:0;padding:0 3px}
-  .vd-vn b{font-size:18px}
-  .vd-vn span{font-size:10.5px}
-  .vd-gr{font-size:10.5px;padding:3px 7px;margin-left:3px}
-  .vd-mt{font-size:12.5px}
-  .vd-mt th{font-size:11px}
-  .vd-mt .na{font-size:10.5px}
-  .vd-mt td{padding:7px 2px}
-  /* cost per view */
-  .vd-cost-top{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-  .vd-cost-top>:first-child,.vd-cost-top>:last-child{grid-column:1/-1}
-  .vd-cst{padding:12px 14px;border-radius:16px}
-  .vd-cst .v{font-size:22px}
-  .vd-csrc .r{grid-template-columns:minmax(0,1fr);row-gap:5px}
-  .vd-csrc .t{grid-row:auto;grid-column:auto}
-  .vd-csrc .n{text-align:left}
-  .vd-ct td:first-child,.vd-ct th:first-child{position:sticky;left:0;z-index:1;background:#fff;max-width:150px;box-shadow:1px 0 0 var(--line)}
-  .vd-fix div{grid-template-columns:auto 1fr;row-gap:4px}
-  .vd-fix b{text-align:left}
-  .vd-fix .vd-note{grid-column:1/-1}
-  .vd-tools input,.vd-tools select{flex:1 1 100%}
-  .vd-tw{max-height:28rem;border-radius:14px}
-  .vd-ccard .tb{flex-basis:56px;height:70px}
-  .vd-player{max-width:300px}
-  .vd-player.wide{max-width:none}
-}
-
-/* sources > channels > videos pages */
-.vd-off{display:none!important}
-.vd-browse{display:flex;flex-direction:column;gap:18px}
-.vd-browse[hidden]{display:none}
-.vd-btitle{font-family:var(--disp);font-size:clamp(26px,3.4vw,38px);font-weight:800;letter-spacing:-.02em;line-height:1.1}
-.vd-crumb{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13px;font-weight:600;color:var(--mut2)}
-.vd-crumb a{color:var(--lnk);text-decoration:none;min-height:32px;display:inline-flex;align-items:center}
-.vd-crumb a:hover{text-decoration:underline}.vd-crumb b{color:var(--ink)}
-.vd-sbx{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
-.vd-sbox{display:flex;flex-direction:column;gap:12px;padding:18px;border-radius:20px;border:1px solid var(--line);background:#fff;text-decoration:none;color:inherit;box-shadow:var(--sh);transition:border-color .15s,transform .15s}
-.vd-sbox:hover,.vd-chc:hover{border-color:#C9CCFF;transform:translateY(-2px)}
-.vd-sbox:focus-visible,.vd-chl:focus-visible,.vd-chf .go:focus-visible{outline:2px solid var(--lnk);outline-offset:2px}
-.vd-sbox h3{font-family:var(--disp);font-size:20px;font-weight:700;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
-.vd-sbox .go,.vd-chf .go{font-family:var(--body);font-size:13px;font-weight:600;color:var(--lnk);white-space:nowrap;text-decoration:none}
-.vd-kv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 14px}
-.vd-kv.wide{grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}
-.vd-kv div{display:flex;flex-direction:column;gap:2px;min-width:0}
-.vd-kv b{font-family:var(--disp);font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.vd-kv span{font-size:11.5px;color:var(--mut2);line-height:1.3}
-.vd-chg{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
-.vd-chc{display:flex;flex-direction:column;border-radius:20px;background:#fff;border:1px solid var(--line);box-shadow:var(--sh);transition:border-color .15s,transform .15s;overflow:hidden;min-width:0}
-.vd-chl{display:flex;flex-direction:column;gap:14px;padding:16px 16px 14px;color:inherit;text-decoration:none;flex:1}
-.vd-chh{display:flex;gap:12px;align-items:center;min-width:0}
-.vd-chh .tx{display:flex;flex-direction:column;gap:3px;min-width:0}
-.vd-chh .tx b{font-size:16px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.vd-av{flex:0 0 52px;width:52px;height:52px;border-radius:50%;background:#EEF0FF center/cover no-repeat;box-shadow:0 0 0 2px #fff,0 0 0 3px var(--line)}
-.vd-av.lg{flex-basis:72px;width:72px;height:72px}
-.vd-cline{font-size:12.5px;font-weight:600;color:var(--ink2);background:#F7F8FC;border-radius:10px;padding:8px 10px;line-height:1.4}
-.vd-chf{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 16px;border-top:1px solid var(--line2);background:#FBFBFE;min-height:44px}
-.vd-pf{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12.5px;min-width:0}
-.vd-pf a{color:var(--lnk);text-decoration:none;font-weight:600;white-space:nowrap}
-.vd-pf a:hover{text-decoration:underline}
-.vd-cbox{display:flex;flex-direction:column;gap:10px;padding:14px 16px;border-radius:16px;background:#F7F8FC}
-@media (max-width:640px){
-  .vd-chg{grid-template-columns:minmax(0,1fr)}
-  .vd-kv b{font-size:17px}
-  .vd-av.lg{width:56px;height:56px;flex-basis:56px}
-  .vd-sbox{padding:14px}
-  .vd-sbx{gap:10px}
-}
-
-/* channel performance */
-.vd-pace{position:relative;display:block;width:140px;height:10px;border-radius:999px;background:var(--line2)}
-.vd-pace i{position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:var(--ok)}
-.vd-pace i.b{background:var(--acc)}
-.vd-pace b{position:absolute;top:-3px;width:2px;height:16px;margin-left:-1px;background:var(--ink);border-radius:2px}
-.vd-dl td a,.vd-sct td a{color:var(--ink);font-weight:600;text-decoration:none}
-.vd-dl td a:hover,.vd-sct td a:hover{color:var(--lnk);text-decoration:underline}
-.vd-alg{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
-.vd-al{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:18px;border:1px solid var(--line);background:#fff;text-decoration:none;color:inherit;transition:border-color .15s}
-.vd-al:hover{border-color:#C9CCFF}
-.vd-why{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
-.vd-why .vd-pill{font-size:12px;padding:4px 10px;border-radius:10px;white-space:normal;line-height:1.35}
-.vd-scg{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:12px}
-.vd-scc{display:flex;flex-direction:column;gap:6px;padding:14px;border-radius:18px;border:1px solid var(--line);background:#fff;min-width:0}
-.vd-scc .vd-chh{margin-bottom:6px}
-.vd-scc .tx b{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:14px}
-.vd-av.sq{border-radius:12px;width:54px;height:68px;flex:0 0 54px;border:0;cursor:pointer;box-shadow:none}
-.vd-scr{all:unset;box-sizing:border-box;display:grid;grid-template-columns:minmax(0,9rem) minmax(0,1fr) auto;gap:10px;align-items:center;font-size:12.5px;cursor:pointer;padding:3px 4px;border-radius:8px}
-.vd-scr:hover{background:#F7F8FC}.vd-scr:focus-visible{outline:2px solid var(--lnk)}
-.vd-scr .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink2)}
-.vd-scr .bar{height:8px;background:var(--line2);border-radius:999px;overflow:hidden}
-.vd-scr .bar i{display:block;height:100%;background:var(--b2);border-radius:999px}
-.vd-scr b{font-variant-numeric:tabular-nums;font-size:12.5px}
-.vd-calw{overflow-x:auto;border:1px solid var(--line);border-radius:16px}
-.vd-cal{border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums}
-.vd-cal th{font-weight:600;color:var(--mut2);padding:8px 0;min-width:26px;text-align:center;border-bottom:1px solid var(--line)}
-.vd-cal th.sun{color:var(--accd)}
-.vd-cal .nm{position:sticky;left:0;background:#fff;text-align:left;padding:6px 12px;white-space:nowrap;z-index:1}
-.vd-cal tr .nm:last-child{position:static;color:var(--mut2)}
-.vd-cal td{text-align:center;height:30px;border-bottom:1px solid var(--line2)}
-.vd-cal td.on{color:var(--ok);font-weight:700;cursor:pointer;background:#EAF7F0}
-.vd-cal td.on:hover{background:#D3F0E0}
-.vd-cal td.off{background:#FFF6F2}
-.vd-cal td.pre{background:#F7F8FC}
-.vd-cal a{color:var(--ink);font-weight:600;text-decoration:none}
-@media (max-width:640px){
-  .vd-alg,.vd-scg{grid-template-columns:minmax(0,1fr)}
-  .vd-pace{width:90px}
-  .vd-scr{grid-template-columns:minmax(0,7rem) minmax(0,1fr) auto}
-}
 </style>
 
 <div class="vd"><div class="vd-in">
 
 <div class="vd-topbar">
   <div class="vd-brand"><span class="vd-logo"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="#FFFFFF"></path></svg></span>PR Video Analytics</div>
-  <nav class="vd-links" aria-label="Sections"><a href="#overview" aria-current="page">Overview</a><a href="#/sources">Sources</a><a href="#wall-card">Videos</a><a href="#compare">Compare</a><a href="#all-videos">All videos</a></nav>
+  <nav class="vd-links" aria-label="Sections"><a href="#overview" aria-current="page">Overview</a><a href="#wall-card">Videos</a><a href="#compare">Compare</a><a href="#all-videos">All videos</a></nav>
 </div>
-<div class="vd-browse" id="browse" hidden></div>
-
-<section class="vd-card" aria-label="Sources" id="src-home">
-  <div class="vd-ch"><div><h2 class="vd-h2">Sources</h2><p class="vd-note" style="margin-top:4px">Click a source to see its channels, then a channel to watch its videos with their costing.</p></div></div>
-  <div class="vd-sbx" id="src-boxes"></div>
-</section>
 <section class="vd-hero" id="overview" data-source="videos">
   <header class="vd-head">
     <div style="display:flex;flex-direction:column;gap:8px;min-width:0">
       <p class="vd-eye">PR video analytics · Inhouse ai videos · Sanjay Agency · Internal PR</p>
       <h1 class="vd-title">Video performance</h1>
-      <p class="vd-sub">Day 2 = counts 48 hours after upload · Day 7 = counts after the first 7 days · Day 30 = counts after the first 30 days · All time = counts today. Click any video to watch it.</p>
+      <p class="vd-sub">Every upload, captured at Day 2, Day 7 and Day 30 after posting, plus its all-time total. Click any video to watch it.</p>
     </div>
     <div class="vd-right">
       <div class="vd-meta"><span class="vd-live">Live data</span><span id="upd">Instagram via Apify · Facebook and YouTube via Bright Data</span></div>
@@ -509,7 +314,6 @@ window.dash = (function () {
         <button type="button" data-s="d30" aria-pressed="false">Day 30</button>
         <button type="button" data-s="all" aria-pressed="false">All time</button>
       </div>
-      <p class="vd-snapnote" id="snap-note" hidden></p>
     </div>
   </header>
   <div class="vd-ins" id="insights" aria-label="Key insights"></div>
@@ -524,6 +328,11 @@ window.dash = (function () {
   <div class="vd-kpi"><span class="l">Shares</span><span class="v dash-skeleton" data-source="kpis" data-where="key=d7|All|All" data-field="shares">—</span><span class="d n" data-source="kpis" data-where="key=d7|All|All" data-field="shares_delta">—</span></div>
   <div class="vd-kpi"><span class="l">Engagement rate</span><span class="v dash-skeleton" data-source="kpis" data-where="key=d7|All|All" data-field="eng">—</span><span class="d n" data-source="kpis" data-where="key=d7|All|All" data-field="captured">—</span></div>
   <div class="vd-kpi"><span class="l">Median views / video</span><span class="v dash-skeleton" data-source="kpis" data-where="key=d7|All|All" data-field="median">—</span><span class="d n" data-source="kpis" data-where="key=d7|All|All" data-field="hit1k">—</span></div>
+</section>
+
+<section class="vd-card" aria-label="Cost per view" id="cost" hidden>
+  <div class="vd-ch"><div><h2 class="vd-h2">Cost per view</h2><p class="vd-note" style="margin-top:4px" id="cost-sub">What each source and account cost for the views it brought.</p></div><span class="vd-note">From the PR Video Costs sheet · lower ₹ per 1,000 views is better</span></div>
+  <div id="cost-body" data-source="videos"></div>
 </section>
 
 <section class="vd-card vd-source-main" aria-label="Source and platform response comparison" id="sources">
@@ -575,41 +384,61 @@ window.dash = (function () {
   <p class="vd-verdict" id="cmp-verdict" hidden></p>
 </section>
 
-<section class="vd-card" aria-label="Cost per view" id="cost" hidden>
-  <div class="vd-ch"><div><h2 class="vd-h2">Cost per view</h2><p class="vd-note" style="margin-top:4px" id="cost-sub">What each source and account cost for the views it brought.</p></div><span class="vd-note">From the PR Video Costs sheet · lower ₹ per 1,000 views is better</span></div>
-  <div id="cost-body" data-source="videos"></div>
+<div class="vd-row st">
+  <section class="vd-card vd-g3" aria-label="Growth curves" id="growth">
+    <div class="vd-ch"><h2 class="vd-h2">How views grow: Day 2 → Day 7 → Day 30</h2><span class="vd-note" id="g-note">—</span></div>
+    <div class="vd-chart" id="g-chart" data-source="videos"></div>
+  </section>
+  <section class="vd-card vd-g2" aria-label="Platform comparison" id="platforms">
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <h2 class="vd-h2">Average views per video, by platform</h2>
+      <div class="vd-legend"><span><i style="background:#B9BEFF"></i>Day 2</span><span><i style="background:#6E74F0"></i>Day 7</span><span><i style="background:#2E3192"></i>Day 30</span><span><i style="background:#FF6A3D"></i>Latest</span></div>
+    </div>
+    <div id="p-list" data-source="plat_avg" style="display:flex;flex-direction:column;gap:14px"></div>
+    <p class="vd-note">Averages count only videos captured at that snapshot.</p>
+  </section>
+</div>
+
+<h2 class="vd-sec">Deeper analytics</h2>
+
+<section class="vd-card" aria-label="Account leaderboard" id="accounts">
+  <div class="vd-ch"><h2 class="vd-h2">Account leaderboard</h2><span class="vd-note" id="a-note">Latest views · click a best video to play it</span></div>
+  <div style="overflow-x:auto"><table class="vd-lb" data-source="videos"><thead><tr><th>#</th><th>Account</th><th>Source</th><th class="num">Videos</th><th class="num">Total views</th><th class="bar"></th><th class="num">Avg / video</th><th class="num">Eng. rate</th><th>Best video</th></tr></thead><tbody id="a-rows"></tbody></table></div>
+  <button type="button" class="vd-more" id="a-more">Show all accounts</button>
 </section>
 
-<h2 class="vd-sec">Channel performance</h2>
+<div class="vd-row st">
+  <section class="vd-card vd-half" aria-label="Views distribution" id="dist">
+    <div class="vd-ch"><h2 class="vd-h2">How many videos hit big?</h2><span class="vd-note">Videos by latest views</span></div>
+    <div class="vd-chart" id="dist-chart" data-source="videos" style="min-height:240px"></div>
+  </section>
+  <section class="vd-card vd-half" aria-label="Engagement vs views" id="scatter">
+    <div class="vd-ch"><h2 class="vd-h2">Reach vs engagement</h2><span class="vd-note">Each dot is a video · click to watch</span></div>
+    <div class="vd-chart" id="sc-chart" data-source="videos" style="min-height:240px"></div>
+    <div class="vd-legend" id="sc-legend"></div>
+  </section>
+</div>
 
-<section class="vd-card" aria-label="Delivery and payments" id="delivery">
-  <div class="vd-ch"><div><h2 class="vd-h2">Delivery &amp; payments</h2><p class="vd-note" style="margin-top:4px">Each monthly contract: videos promised vs posted, whether the channel is on pace, and what it has earned so far.</p></div><select class="vd-sel" id="dl-month" aria-label="Month"></select></div>
-  <div id="dl-body" style="display:flex;flex-direction:column;gap:14px"></div>
+<section class="vd-card" aria-label="Uploads and views over time" id="timeline">
+  <div class="vd-ch"><h2 class="vd-h2">Uploads and views by publish date</h2><span class="vd-note">Bars: videos posted that day · line: their latest views</span></div>
+  <div class="vd-chart" id="tl-chart" data-source="videos" style="min-height:240px"></div>
 </section>
 
-<section class="vd-card" aria-label="Channel alerts" id="alerts">
-  <div class="vd-ch"><div><h2 class="vd-h2">Channels to look at</h2><p class="vd-note" style="margin-top:4px">Too expensive per view, low reach, view counts hidden, or behind on delivery. Click one to open the channel.</p></div><span class="vd-note" id="al-note">—</span></div>
-  <div id="al-body" style="display:flex;flex-direction:column;gap:12px"></div>
-</section>
-
-<section class="vd-card" aria-label="Same video on different channels" id="same-content">
-  <div class="vd-ch"><div><h2 class="vd-h2">Same video, different channels</h2><p class="vd-note" style="margin-top:4px">The same video sent to several channels is the fairest test of a channel: the content is identical, only the channel differs.</p></div><span class="vd-note" id="sc-note">—</span></div>
-  <div id="sc-body" style="display:flex;flex-direction:column;gap:12px"></div>
-</section>
-
-<section class="vd-card" aria-label="Topics" id="topics">
-  <div class="vd-ch"><div><h2 class="vd-h2">Topics that work</h2><p class="vd-note" style="margin-top:4px">Average views by what the video is about, best first. Use it to choose the next videos to send.</p></div><span class="vd-note" id="tp-note">—</span></div>
-  <div id="tp-body"></div>
-</section>
-
-<section class="vd-card" aria-label="Internal PR posting calendar" id="calendar">
-  <div class="vd-ch"><div><h2 class="vd-h2">Internal PR posting calendar</h2><p class="vd-note" style="margin-top:4px">Which influencer posted on which day, last 30 days.</p></div></div>
-  <div id="cal-body" style="display:flex;flex-direction:column;gap:10px"></div>
-</section>
+<div class="vd-row st">
+  <section class="vd-card vd-g3" aria-label="Best time to post" id="heat">
+    <div class="vd-ch"><h2 class="vd-h2">Best time to post</h2><span class="vd-note" id="h-note">—</span></div>
+    <div class="vd-heat" id="h-grid" data-source="videos"></div>
+    <div class="vd-legend" style="align-items:center"><span>Fewer views</span><i style="background:#EEF0FF;width:18px;height:12px;border-radius:3px"></i><i style="background:#C9CCFF;width:18px;height:12px;border-radius:3px"></i><i style="background:#959BFF;width:18px;height:12px;border-radius:3px"></i><i style="background:#4A50D0;width:18px;height:12px;border-radius:3px"></i><i style="background:#2E3192;width:18px;height:12px;border-radius:3px"></i><span>More views</span><span style="margin-left:auto">Ringed cell = best slot</span></div>
+  </section>
+  <section class="vd-card vd-g2" aria-label="Top videos" id="top">
+    <h2 class="vd-h2" id="t-title">Top 5</h2>
+    <div id="t-list" data-source="videos"></div>
+  </section>
+</div>
 
 <section class="vd-card" aria-label="All videos" id="all-videos">
   <div class="vd-ch"><h2 class="vd-h2">All videos: Day 2, Day 7, Day 30 and all time</h2><span class="vd-note"><span id="count-shown">—</span> shown</span></div>
-  <details class="vd-help"><summary>How to read this table</summary><p class="vd-note">Day 2 = views, likes, comments and shares once 48 hours have passed since upload; Day 7 = after the first 7 days; Day 30 = after the first 30 days; All time = today (re-checked every week; "As of" is its date). The refresh runs four times a day, so each count is taken within a few hours of the mark. A small "d18" means that capture was taken late, on day 18. "Added late" means the video was already past that day when it was first tracked (posted before tracking began or added to the sheet late), so that count can no longer be fetched. Press ▶ to watch, click a number to open the post, click a header to sort; scroll sideways for Day 30.</p></details>
+  <p class="vd-note">Views, likes, comments and shares captured 2, 7 and 30 days after each upload, plus the all-time total (re-checked every week; "As of" is its date). A small "d18" means that capture was taken late, on day 18. Press ▶ to watch, click a number to open the post, click a header to sort; scroll sideways for Day 30.</p>
   <div class="vd-tools">
     <input id="f-search" type="search" placeholder="Search account, VID-0022 or a link" aria-label="Search videos">
     <select id="f-status" aria-label="Status"><option value="">Any status</option></select>
@@ -644,8 +473,6 @@ window.dash = (function () {
 <section class="vd-card" aria-label="To fix" id="to-fix">
   <div class="vd-ch"><h2 class="vd-h2">To fix</h2><span class="vd-note">Videos without numbers, and what to do</span></div>
   <div class="vd-fix" id="fix" data-source="status"></div>
-  <h3 class="vd-h3" style="margin-top:8px">Links to check</h3>
-  <div class="vd-ctw" id="fix-list" data-source="videos"></div>
 </section>
 
 </div></div>
@@ -683,6 +510,20 @@ dash.calc('kpis', {
   }
 });
 
+dash.calc('plat_avg', {
+  inputs: ['videos'], title: 'Average views per video by platform',
+  description: 'For each platform, average views per video at Day 2, Day 7, Day 30 and latest, counting only videos captured at that point.',
+  fn: (videos) => [...new Set(videos.map(v => v.platform))].map(platform => {
+    const rs = videos.filter(v => v.platform === platform), r = { platform, videos: rs.length };
+    for (const [l, k] of [['d2', 'd2_views'], ['d7', 'd7_views'], ['d30', 'd30_views'], ['latest', 'views']]) {
+      const c = rs.filter(v => v[k] != null);
+      r[l + '_avg'] = c.length ? Math.round(c.reduce((a, v) => a + v[k], 0) / c.length) : null;
+      r[l + '_n'] = c.length;
+    }
+    return r;
+  })
+});
+
 dash.calc('src_score', {
   inputs: ['videos'], title: 'Source scorecard',
   description: 'Per source sheet, using latest views: videos, videos with a view count, total and average views, median, share of videos past 1,000 views, engagement rate, and share of all views.',
@@ -703,8 +544,8 @@ dash.calc('status', {
   description: 'Count of videos per fetch problem, with the next step for each.',
   fn: (videos) => {
     const steps = {
-      'No view count': 'The post opens but the platform does not show its view count (mostly new Facebook reels). It is retried at Day 2, Day 7 and Day 30, and the Apify backup asks for it every morning.',
-      'Fetch failed': 'Link deleted, private or wrong. Open it and replace the link in the sheet row shown below.',
+      'No view count': 'Facebook hides the count on this reel; the Apify Reels-tab backup retries it on the next refresh.',
+      'Fetch failed': 'Link deleted, private or unreachable. Open it and replace the link in the sheet.',
       'No public link': 'Internal PR sheet has a Drive file only. Add the live post link in the sheet.',
       'Not fetched': 'New in the sheet; fetched in the next daily refresh.'
     };
@@ -738,7 +579,6 @@ dash.calc('status', {
     if (st.startsWith('Due 2')) return 'Due ' + dmy(v[l + '_due']);
     if (st === 'Due now') return 'Due now';
     if (st === 'Missed') return 'Missed';
-    if (st === 'Added late') return 'Added late';
     if (st === 'No public link') return 'No link';
     if (st.startsWith('Captured')) return 'No count';
     return '—';
@@ -783,39 +623,21 @@ dash.calc('status', {
   // ---- controls
   document.querySelectorAll('#seg button').forEach(b => b.addEventListener('click', () => { S.snap = b.dataset.s; S.auto = false; S.wallN = 12; drawAll(); }));
   $('more').addEventListener('click', () => { S.wallN += 12; drawWall(); });
-  $('dl-month').addEventListener('change', (e) => { S.dlMonth = e.target.value; drawDelivery(); });
   $('d-play').addEventListener('click', () => { S.playing = true; drawDeep(); });
   $('d-cmp').addEventListener('click', () => { S.cmpA = S.sel; $('cmp-a').value = S.sel; drawCompare(); $('compare').scrollIntoView({ behavior: 'smooth', block: 'start' }); $('cmp-b').focus(); });
+  $('a-more').addEventListener('click', () => { S.accAll = !S.accAll; drawAccounts(); });
 
-  function drawSeg() {
-    document.querySelectorAll('#seg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.s === S.snap)));
-    // how many videos have reached the selected mark, and when the next ones do
-    const note = $('snap-note'), l = S.snap;
-    if (l === 'all') { note.hidden = true; return; }
-    const w = filtered(), got = w.filter(v => v[l + '_views'] != null).length;
-    const next = w.filter(v => v[l + '_views'] == null && v[l + '_due'] && String(v[l + '_status'] || '').startsWith('Due'))
-      .map(v => v[l + '_due'].slice(0, 10)).sort();
-    const mark = { d2: '48 hours', d7: '7 days', d30: '30 days' }[l];
-    note.hidden = false;
-    if (got) { note.textContent = got + ' videos have their ' + LBL[l] + ' count (' + mark + ' after upload).' + (next.length ? ' ' + next.length + ' more reach it by ' + dmy(next[next.length - 1]) + '.' : ''); return; }
-    if (!next.length) { note.textContent = 'No ' + LBL[l] + ' counts for this filter.'; return; }
-    const first = next[0], sameDay = next.filter(d => d === first).length;
-    const inWeek = next.filter(d => d <= dmyIso(first, 7)).length;
-    note.textContent = 'No video has reached ' + mark + ' yet. The first ' + (sameDay === 1 ? 'one reaches' : sameDay + ' reach') + ' it on ' + dmy(first)
-      + (inWeek > sameDay ? ', and ' + inWeek + ' by ' + dmy(dmyIso(first, 7)) : '') + '. Their ' + LBL[l] + ' counts will show here then.';
-  }
-  const dmyIso = (iso, add) => { const d = new Date(iso.slice(0, 10) + 'T00:00:00'); d.setDate(d.getDate() + add); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+  function drawSeg() { document.querySelectorAll('#seg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.s === S.snap))); }
   function drawTabs() {
-    const nav = $('tabs'); nav.textContent = ''; const tabRow = el('div', 'vd-tabrow');
+    const nav = $('tabs'); nav.textContent = '';
     const plats = [...new Set(rows.map(v => v.platform))].sort((a, b) => rows.filter(v => v.platform === b).length - rows.filter(v => v.platform === a).length);
     ['All', ...plats].forEach(p => {
       const b = el('button', 'vd-tab'); b.type = 'button'; b.setAttribute('aria-pressed', String(p === S.plat));
       if (p !== 'All') { const i = el('i'); i.style.background = PCOL[p] || '#5F6480'; b.appendChild(i); }
       b.append(p, el('span', null, String(p === 'All' ? rows.length : rows.filter(v => v.platform === p).length)));
       b.addEventListener('click', () => { S.plat = p; S.wallN = 12; drawAll(); });
-      tabRow.appendChild(b);
+      nav.appendChild(b);
     });
-    nav.appendChild(tabRow);
     const sel = el('select', 'vd-sel'); sel.id = 'f-source'; sel.setAttribute('aria-label', 'Source');
     ['All', ...new Set(rows.map(v => v.source))].forEach(s => { const o = el('option', null, s === 'All' ? 'All sources' : s); o.value = s; o.selected = s === S.src; sel.appendChild(o); });
     sel.addEventListener('change', () => { S.src = sel.value; S.wallN = 12; drawAll(); });
@@ -866,29 +688,25 @@ dash.calc('status', {
     const l = S.snap;
     return filtered().slice().sort((a, b) => (b[l + '_views'] ?? -1) - (a[l + '_views'] ?? -1) || (b.views ?? -1) - (a.views ?? -1));
   }
-  function tile(v, l, idx, active, onClick) {
-    const b = el('button', 'vd-vc'); b.type = 'button'; b.dataset.v = v.video; b.setAttribute('aria-pressed', String(active));
-    const val = v[l + '_views'];
-    b.setAttribute('aria-label', 'Play ' + title(v) + ', ' + v.platform + ', ' + (val != null ? full(val) + ' views at ' + LBL[l] : statusText(v, l) + ' at ' + LBL[l]));
-    const th = el('span', 'vd-th'); paintThumb(th, v);
-    const pl = el('span', 'vd-pl'); pl.innerHTML = PLAY;
-    const bd = el('span', 'vd-badge'); const dot = el('i', 'vd-dot'); dot.style.background = PCOL[v.platform] || '#5F6480'; bd.append(dot, v.platform);
-    th.append(pl, bd, el('span', 'vd-id', v.video));
-    if (idx < 3 && val != null) th.append(el('span', 'vd-rank', '#' + (idx + 1)));
-    const vn = el('span', 'vd-vn'); vn.append(el('b', null, val != null ? big(val) : '—'), el('span', null, val != null ? (l === 'all' ? 'views · all time' : 'views · ' + LBL[l]) : statusText(v, l)));
-    const p = prev(l), a = p && v[p + '_views'], later = l !== 'all' || (v.alltime_age ?? -1) > (v[p + '_age'] ?? 99), gr = val != null && a && later ? val / a - 1 : null;
-    const g = el('span', 'vd-gr' + (gr == null ? ' n' : ''), l === 'all' ? (gr != null ? sgn(gr) + ' since Day 7' : v.alltime_at ? 'As of ' + dmy(v.alltime_at) : 'Posted ' + dmy(v.published)) : l === 'd2' ? (v.d7_views != null && v.d2_views ? sgn(v.d7_views / v.d2_views - 1) + ' by Day 7' : 'Posted ' + dmy(v.published)) : gr != null ? sgn(gr) + ' vs ' + LBL[p] : 'Posted ' + dmy(v.published));
-    b.append(th, el('span', 'vd-vt', title(v)), vn, g);
-    b.addEventListener('click', onClick);
-    return b;
-  }
-
   function drawWall() {
     const list = ranked(), l = S.snap, wall = $('wall'); wall.textContent = '';
     if (!S.sel || !list.find(v => v.video === S.sel)) { S.sel = list[0] && list[0].video; S.playing = false; }
-    list.slice(0, S.wallN).forEach((v, idx) => wall.appendChild(tile(v, l, idx, v.video === S.sel, () => {
-      S.sel = v.video; S.playing = true; drawWall(); drawDeep(); if (window.innerWidth < 1000) $('deep').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    })));
+    list.slice(0, S.wallN).forEach((v, idx) => {
+      const b = el('button', 'vd-vc'); b.type = 'button'; b.setAttribute('aria-pressed', String(v.video === S.sel));
+      const val = v[l + '_views'];
+      b.setAttribute('aria-label', 'Play ' + title(v) + ', ' + v.platform + ', ' + (val != null ? full(val) + ' views at ' + LBL[l] : statusText(v, l) + ' at ' + LBL[l]));
+      const th = el('span', 'vd-th'); paintThumb(th, v);
+      const pl = el('span', 'vd-pl'); pl.innerHTML = PLAY;
+      const bd = el('span', 'vd-badge'); const dot = el('i', 'vd-dot'); dot.style.background = PCOL[v.platform] || '#5F6480'; bd.append(dot, v.platform);
+      th.append(pl, bd, el('span', 'vd-id', v.video));
+      if (idx < 3 && val != null) th.append(el('span', 'vd-rank', '#' + (idx + 1)));
+      const vn = el('span', 'vd-vn'); vn.append(el('b', null, val != null ? big(val) : '—'), el('span', null, val != null ? (l === 'all' ? 'views · all time' : 'views · ' + LBL[l]) : statusText(v, l)));
+      const p = prev(l), a = p && v[p + '_views'], later = l !== 'all' || (v.alltime_age ?? -1) > (v[p + '_age'] ?? 99), gr = val != null && a && later ? val / a - 1 : null;
+      const g = el('span', 'vd-gr' + (gr == null ? ' n' : ''), l === 'all' ? (gr != null ? sgn(gr) + ' since Day 7' : v.alltime_at ? 'As of ' + dmy(v.alltime_at) : 'Posted ' + dmy(v.published)) : l === 'd2' ? (v.d7_views != null && v.d2_views ? sgn(v.d7_views / v.d2_views - 1) + ' by Day 7' : 'Posted ' + dmy(v.published)) : gr != null ? sgn(gr) + ' vs ' + LBL[p] : 'Posted ' + dmy(v.published));
+      b.append(th, el('span', 'vd-vt', title(v)), vn, g);
+      b.addEventListener('click', () => { S.sel = v.video; S.playing = true; drawWall(); drawDeep(); if (window.innerWidth < 1000) $('deep').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+      wall.appendChild(b);
+    });
     $('wall-note').textContent = list.length + ' videos · sorted by ' + LBL[l] + ' views · click one to ' + (EMBED ? 'play it' : 'open its breakdown');
     $('more').hidden = S.wallN >= list.length;
     $('more').textContent = 'Show more videos (' + (list.length - Math.min(S.wallN, list.length)) + ' left)';
@@ -957,8 +775,8 @@ dash.calc('status', {
       const tr = el('tr'), all = rows.filter(v => v.source === source), src = el('td', 'src');
       src.append(el('b', null, source), el('span', null, all.length + ' videos across ' + new Set(all.map(v => v.platform)).size + ' platforms')); tr.appendChild(src);
       platforms.forEach(platform => {
-        const td = el('td'), g = all.filter(v => v.platform === platform); td.setAttribute('data-label', platform);
-        if (!g.length) { td.className = 'none'; const empty = el('span', 'vd-smc empty'); empty.append(el('span', 'l', 'No videos')); td.appendChild(empty); tr.appendChild(td); return; }
+        const td = el('td'), g = all.filter(v => v.platform === platform);
+        if (!g.length) { const empty = el('span', 'vd-smc empty'); empty.append(el('span', 'l', 'No videos')); td.appendChild(empty); tr.appendChild(td); return; }
         const got = g.filter(v => v[l + '_views'] != null), views = d3.sum(got, v => v[l + '_views'] || 0), avg = got.length ? views / got.length : null;
         const actions = d3.sum(got, v => (v[l + '_likes'] || 0) + (v[l + '_comments'] || 0) + (v[l + '_shares'] || 0)), rate = views ? actions / views : null, coverage = got.length / g.length;
         const b = el('button', 'vd-smc'); b.type = 'button'; b.setAttribute('aria-label', source + ', ' + platform + ': ' + got.length + ' of ' + g.length + ' responses, ' + full(views) + ' views at ' + LBL[l] + '. Filter dashboard.');
@@ -1042,6 +860,199 @@ dash.calc('status', {
   }
   const untip = (card) => { const t = card.querySelector('.vd-tip'); if (t) t.hidden = true; };
 
+  // ---- growth curves
+  function drawGrowth() {
+    const box = $('g-chart'); box.textContent = '';
+    const lines = filtered().filter(v => L.filter(l => v[l + '_views'] > 0).length >= 2);
+    $('g-note').textContent = lines.length + ' videos with two or more captures · log scale · top 3 highlighted';
+    if (!lines.length) { const n = filtered().filter(v => v.d2_views != null && !v.d7_views).length; box.appendChild(el('p', 'vd-empty', 'Growth lines appear when a video has two captures. ' + n + ' videos already have Day 2 and get their Day 7 capture over the next few days.')); return; }
+    const W = Math.max(320, box.clientWidth), H = 280, m = { l: 52, r: Math.min(220, W * 0.32), t: 16, b: 30 };
+    const svg = d3.select(box).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', 'Views at Day 2, Day 7 and Day 30 for each video, log scale');
+    const x = d3.scalePoint(L, [m.l, W - m.r]);
+    const vmax = d3.max(lines, v => d3.max(L, l => v[l + '_views'] || 0)) || 10;
+    const y = d3.scaleLog([1, Math.max(10, vmax)], [H - m.b, m.t]).nice().clamp(true);
+    y.ticks(5).filter(t => [1, 10, 100, 1000, 1e4, 1e5, 1e6, 1e7].includes(t)).forEach(t => {
+      svg.append('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y(t)).attr('y2', y(t)).attr('stroke', '#EEF0F6');
+      svg.append('text').attr('x', m.l - 10).attr('y', y(t)).attr('text-anchor', 'end').attr('dominant-baseline', 'central').attr('font-size', 12).attr('fill', '#5F6480').text(big(t));
+    });
+    L.forEach(l => svg.append('text').attr('x', x(l)).attr('y', H - 8).attr('text-anchor', 'middle').attr('font-size', 12).attr('font-weight', 600).attr('fill', '#4A4F6A').text(LBL[l]));
+    const last = (v) => { const c = L.filter(l => v[l + '_views'] > 0); return v[c[c.length - 1] + '_views']; };
+    const top = lines.slice().sort((a, b) => last(b) - last(a)).slice(0, 3), topIds = new Set(top.map(v => v.video));
+    const COL = ['#FF6A3D', '#6E74F0', '#2E3192'];
+    const line = d3.line().x(d => x(d[0])).y(d => y(Math.max(1, d[1])));
+    const pts = (v) => L.filter(l => v[l + '_views'] > 0).map(l => [l, v[l + '_views']]);
+    const card = box.closest('.vd-card');
+    svg.append('g').selectAll('path').data(lines.filter(v => !topIds.has(v.video))).join('path')
+      .attr('d', v => line(pts(v))).attr('fill', 'none').attr('stroke', '#D5D8E6').attr('stroke-width', 1.5).attr('stroke-opacity', .7).attr('stroke-linejoin', 'round').style('cursor', 'pointer')
+      .on('mousemove', (ev, v) => tip(card, ev, [v.video + ' · ' + title(v), ...pts(v).map(p => LBL[p[0]] + ': ' + full(p[1]))])).on('mouseleave', () => untip(card)).on('click', (ev, v) => watch(v.video, true));
+    const labels = [];
+    top.slice().reverse().forEach((v) => {
+      const i = top.indexOf(v), p = pts(v);
+      svg.append('path').attr('d', line(p)).attr('fill', 'none').attr('stroke', COL[i]).attr('stroke-width', 3).attr('stroke-linejoin', 'round').attr('stroke-linecap', 'round').style('cursor', 'pointer')
+        .on('mousemove', (ev) => tip(card, ev, [v.video + ' · ' + title(v), ...p.map(q => LBL[q[0]] + ': ' + full(q[1]))])).on('mouseleave', () => untip(card)).on('click', () => watch(v.video, true));
+      const e = p[p.length - 1];
+      svg.append('circle').attr('cx', x(e[0])).attr('cy', y(e[1])).attr('r', 5).attr('fill', COL[i]);
+      labels.push({ i, x: x(e[0]) + 12, y: y(e[1]), t1: title(v).slice(0, 24) + ' · ' + big(e[1]), t2: p.length > 1 ? (e[1] / Math.max(1, p[0][1])).toFixed(1) + '× after ' + LBL[p[0][0]] : '' });
+    });
+    labels.sort((a, b) => a.y - b.y); for (let k = 1; k < labels.length; k++) if (labels[k].y - labels[k - 1].y < 34) labels[k].y = labels[k - 1].y + 34;
+    labels.forEach(lb => {
+      svg.append('text').attr('x', lb.x).attr('y', lb.y).attr('font-size', 12).attr('font-weight', 600).attr('fill', lb.i === 0 ? '#B53C14' : COL[lb.i]).text(lb.t1);
+      if (lb.t2) svg.append('text').attr('x', lb.x).attr('y', lb.y + 15).attr('font-size', 12).attr('fill', COL[lb.i]).text(lb.t2);
+    });
+  }
+
+  // ---- platforms
+  function drawPlats() {
+    const d = dash.data('plat_avg'), box = $('p-list'); box.textContent = '';
+    if (d.status !== 'ok') return;
+    const data = d.data.filter(r => r.platform !== 'Drive file').sort((a, b) => b.videos - a.videos);
+    const keys = [['d2', BLUES.d2, 'Day 2'], ['d7', BLUES.d7, 'Day 7'], ['d30', BLUES.d30, 'Day 30'], ['latest', '#FF6A3D', 'Latest']];
+    const mx = Math.max(1, ...data.flatMap(r => keys.map(([l]) => r[l + '_avg'] || 0)));
+    data.forEach(r => {
+      const g = el('div', 'vd-pc'), top = el('div', 'top'), nm = el('b'); const dot = el('i', 'vd-dot'); dot.style.background = PCOL[r.platform] || '#5F6480'; nm.append(dot, r.platform);
+      top.append(nm, el('span', 'vd-note', r.videos + ' videos')); g.appendChild(top);
+      keys.forEach(([l, c, lab]) => {
+        const row = el('div', 'vd-pb'), t = el('span', 't'), i = el('i'); i.style.width = ((r[l + '_avg'] || 0) / mx * 100).toFixed(1) + '%'; i.style.background = c; t.appendChild(i);
+        row.title = lab + ': ' + (r[l + '_avg'] != null ? full(r[l + '_avg']) + ' average over ' + r[l + '_n'] + ' videos' : 'no captures yet');
+        row.append(t, el('span', 'n', r[l + '_avg'] != null ? big(r[l + '_avg']) : '—')); g.appendChild(row);
+      });
+      box.appendChild(g);
+    });
+  }
+
+  // ---- accounts
+  function drawAccounts() {
+    const tb = $('a-rows'); tb.textContent = '';
+    const w = filtered().filter(v => v.views != null);
+    const acc = d3.rollups(w, g => { const views = d3.sum(g, v => v.views); return { n: g.length, views, avg: views / g.length, eng: views ? d3.sum(g, v => (v.likes || 0) + (v.comments || 0) + (v.shares || 0)) / views : null, best: g.slice().sort((a, b) => b.views - a.views)[0], src: g[0].source }; }, v => v.account || '—')
+      .sort((a, b) => b[1].views - a[1].views);
+    const mx = acc.length ? acc[0][1].views : 1, shown = S.accAll ? acc : acc.slice(0, 12);
+    shown.forEach(([name, r], i) => {
+      const tr = el('tr');
+      const bar = el('td', 'bar'), s = el('span'), f = el('i'); f.style.width = (r.views / mx * 100).toFixed(1) + '%'; s.appendChild(f); bar.appendChild(s);
+      const bt = el('td'), b = el('button', null, '▶ ' + r.best.video + ' · ' + big(r.best.views)); b.type = 'button'; b.addEventListener('click', () => watch(r.best.video, true)); bt.appendChild(b);
+      tr.append(el('td', 'num', String(i + 1)), el('td', 'acc', name), el('td', 'vd-small', r.src), el('td', 'num', String(r.n)), el('td', 'num', full(r.views)), bar, el('td', 'num', big(r.avg)), el('td', 'num', pct(r.eng)), bt);
+      tb.appendChild(tr);
+    });
+    $('a-note').textContent = acc.length + ' accounts · latest views · click a best video to play it';
+    $('a-more').hidden = acc.length <= 12; $('a-more').textContent = S.accAll ? 'Show top 12' : 'Show all ' + acc.length + ' accounts';
+  }
+
+  // ---- distribution
+  function drawDist() {
+    const box = $('dist-chart'); box.textContent = '';
+    const w = filtered().filter(v => v.views != null);
+    const B = [['Under 100', 0, 100], ['100–999', 100, 1000], ['1K–9.9K', 1000, 1e4], ['10K–99K', 1e4, 1e5], ['1 lakh+', 1e5, Infinity]];
+    const data = B.map(([lab, lo, hi]) => ({ lab, n: w.filter(v => v.views >= lo && v.views < hi).length }));
+    if (!w.length) { box.appendChild(el('p', 'vd-empty', 'No view counts for this filter yet.')); return; }
+    const W = Math.max(300, box.clientWidth), H = 240, m = { l: 8, r: 8, t: 28, b: 30 };
+    const svg = d3.select(box).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', 'Number of videos by view range');
+    const x = d3.scaleBand(data.map(d => d.lab), [m.l, W - m.r]).padding(.28), y = d3.scaleLinear([0, d3.max(data, d => d.n) || 1], [H - m.b, m.t]);
+    const COL = ['#C9CCFF', '#959BFF', '#4A50D0', '#2E3192', '#FF6A3D'];
+    data.forEach((d, i) => {
+      svg.append('rect').attr('x', x(d.lab)).attr('width', x.bandwidth()).attr('y', y(d.n)).attr('height', Math.max(2, y(0) - y(d.n))).attr('rx', 6).attr('fill', COL[i]);
+      svg.append('text').attr('x', x(d.lab) + x.bandwidth() / 2).attr('y', y(d.n) - 8).attr('text-anchor', 'middle').attr('font-size', 13).attr('font-weight', 700).attr('fill', '#14163A').text(d.n + ' · ' + pct0(d.n / w.length));
+      svg.append('text').attr('x', x(d.lab) + x.bandwidth() / 2).attr('y', H - 10).attr('text-anchor', 'middle').attr('font-size', 12).attr('fill', '#5F6480').text(d.lab);
+    });
+  }
+
+  // ---- scatter
+  function drawScatter() {
+    const box = $('sc-chart'); box.textContent = '';
+    const w = filtered().filter(v => v.views > 0 && eng(v) != null);
+    const lg = $('sc-legend'); lg.textContent = '';
+    [...new Set(w.map(v => v.platform))].forEach(p => { const s = el('span'), i = el('i'); i.style.background = PCOL[p] || '#5F6480'; i.style.borderRadius = '50%'; s.append(i, p); lg.appendChild(s); });
+    if (!w.length) { box.appendChild(el('p', 'vd-empty', 'No videos with views for this filter yet.')); return; }
+    const W = Math.max(300, box.clientWidth), H = 240, m = { l: 44, r: 12, t: 12, b: 30 };
+    const svg = d3.select(box).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', 'Views against engagement rate for each video');
+    const x = d3.scaleLog([1, d3.max(w, v => v.views)], [m.l, W - m.r]).nice();
+    const ymax = Math.min(.3, d3.quantile(w.map(eng).sort(d3.ascending), .98) || .1);
+    const y = d3.scaleLinear([0, ymax], [H - m.b, m.t]).nice();
+    y.ticks(4).forEach(t => { svg.append('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y(t)).attr('y2', y(t)).attr('stroke', '#EEF0F6'); svg.append('text').attr('x', m.l - 6).attr('y', y(t)).attr('text-anchor', 'end').attr('dominant-baseline', 'central').attr('font-size', 11).attr('fill', '#5F6480').text(Math.round(t * 100) + '%'); });
+    [10, 100, 1000, 1e4, 1e5, 1e6].filter(t => t <= x.domain()[1]).forEach(t => svg.append('text').attr('x', x(t)).attr('y', H - 10).attr('text-anchor', 'middle').attr('font-size', 11).attr('fill', '#5F6480').text(big(t)));
+    const card = box.closest('.vd-card');
+    svg.append('g').selectAll('circle').data(w).join('circle')
+      .attr('cx', v => x(v.views)).attr('cy', v => y(Math.min(ymax, eng(v)))).attr('r', 4.5).attr('fill', v => PCOL[v.platform] || '#5F6480').attr('fill-opacity', .65).attr('stroke', '#fff').attr('stroke-width', 1).style('cursor', 'pointer')
+      .on('mousemove', (ev, v) => tip(card, ev, [v.video + ' · ' + (v.account || ''), 'Views: ' + full(v.views), 'Engagement: ' + pct(eng(v)), 'Click to watch'])).on('mouseleave', () => untip(card)).on('click', (ev, v) => watch(v.video, true));
+  }
+
+  // ---- timeline
+  function drawTimeline() {
+    const box = $('tl-chart'); box.textContent = '';
+    const rs = filtered().filter(v => v.published);
+    if (!rs.length) return;
+    const days = d3.rollups(rs, g => ({ n: g.length, views: d3.sum(g, v => v.views || 0) }), v => v.published).sort((a, b) => d3.ascending(a[0], b[0]));
+    const W = Math.max(320, box.clientWidth), H = 240, m = { l: 40, r: 52, t: 14, b: 30 };
+    const svg = d3.select(box).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', 'Videos posted per day and their latest views');
+    const x = d3.scaleBand(days.map(d => d[0]), [m.l, W - m.r]).padding(.25);
+    const yN = d3.scaleLinear([0, d3.max(days, d => d[1].n)], [H - m.b, m.t]).nice(), yV = d3.scaleLinear([0, d3.max(days, d => d[1].views) || 1], [H - m.b, m.t]).nice();
+    yN.ticks(4).forEach(t => { svg.append('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', yN(t)).attr('y2', yN(t)).attr('stroke', '#EEF0F6'); svg.append('text').attr('x', m.l - 6).attr('y', yN(t)).attr('text-anchor', 'end').attr('dominant-baseline', 'central').attr('font-size', 11).attr('fill', '#5F6480').text(t); });
+    yV.ticks(4).forEach(t => svg.append('text').attr('x', W - m.r + 6).attr('y', yV(t)).attr('dominant-baseline', 'central').attr('font-size', 11).attr('fill', '#B53C14').text(big(t)));
+    const card = box.closest('.vd-card');
+    svg.append('g').selectAll('rect').data(days).join('rect').attr('x', d => x(d[0])).attr('width', x.bandwidth()).attr('y', d => yN(d[1].n)).attr('height', d => yN(0) - yN(d[1].n)).attr('rx', 3).attr('fill', '#C9CCFF')
+      .on('mousemove', (ev, d) => tip(card, ev, [dmy(d[0]), d[1].n + ' videos posted', full(d[1].views) + ' latest views'])).on('mouseleave', () => untip(card));
+    svg.append('path').attr('d', d3.line().x(d => x(d[0]) + x.bandwidth() / 2).y(d => yV(d[1].views))(days)).attr('fill', 'none').attr('stroke', '#FF6A3D').attr('stroke-width', 2.5).attr('stroke-linejoin', 'round');
+    svg.append('g').selectAll('circle').data(days).join('circle').attr('cx', d => x(d[0]) + x.bandwidth() / 2).attr('cy', d => yV(d[1].views)).attr('r', 3).attr('fill', '#FF6A3D');
+    const every = Math.ceil(days.length / Math.max(2, Math.floor((W - m.l - m.r) / 52)));
+    days.forEach((d, i) => { if (i % every === 0) svg.append('text').attr('x', x(d[0]) + x.bandwidth() / 2).attr('y', H - 10).attr('text-anchor', 'middle').attr('font-size', 11).attr('fill', '#5F6480').text(dmy(d[0])); });
+  }
+
+  // ---- heatmap
+  function drawHeat() {
+    const box = $('h-grid'); box.textContent = '';
+    const l = S.snap, key = (v) => v[l + '_views'] != null ? v[l + '_views'] : null;
+    const timed = filtered().filter(v => v.published_at && key(v) != null);
+    $('h-note').textContent = 'Average ' + (l === 'all' ? 'all-time' : LBL[l]) + ' views by posting slot (IST)';
+    if (timed.length < 5) {
+      const byDay = filtered().filter(v => v.published && v.views != null);
+      if (byDay.length < 5) { box.appendChild(el('p', 'vd-empty', 'Posting times appear here after the next daily refresh adds each video\'s upload time.')); return; }
+      $('h-note').textContent = 'Average latest views by weekday posted · exact times arrive with the next refresh';
+      const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      const g = DAYS.map(() => []); byDay.forEach(v => g[(new Date(v.published + 'T00:00:00').getDay() + 6) % 7].push(v.views));
+      const avg = g.map(c => c.length ? d3.mean(c) : null), mx = Math.max(...avg.filter(x => x != null));
+      const grid = el('div', 'vd-hg'); grid.style.gridTemplateColumns = 'repeat(7,minmax(0,1fr))'; grid.style.minWidth = '0';
+      DAYS.forEach(d => grid.appendChild(el('span', 'h', d)));
+      avg.forEach((a, i) => { const lv = a == null ? -1 : Math.min(4, Math.floor(a / mx * 4.999)); const c = el('span', 'c' + (a === mx ? ' best' : ''), a == null ? '' : big(a)); c.style.height = '64px'; c.style.background = lv < 0 ? '#F7F8FC' : HEAT[lv]; c.style.color = lv >= 3 ? '#fff' : '#14163A'; c.title = DAYS[i] + ': ' + (a == null ? 'no videos' : full(a) + ' average views over ' + g[i].length + ' videos'); grid.appendChild(c); });
+      box.appendChild(grid); return;
+    }
+    const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], SL = ['6 AM', '9 AM', '12 PM', '3 PM', '6 PM', '9 PM'];
+    const slot = (h) => h >= 5 && h < 8 ? 0 : h >= 8 && h < 11 ? 1 : h >= 11 && h < 14 ? 2 : h >= 14 && h < 17 ? 3 : h >= 17 && h < 20 ? 4 : 5;
+    const g = DAYS.map(() => SL.map(() => []));
+    timed.forEach(v => { const t = new Date(new Date(v.published_at).getTime() + 330 * 60000); g[(t.getUTCDay() + 6) % 7][slot(t.getUTCHours())].push(key(v)); });
+    const avg = g.map(r => r.map(c => c.length ? d3.mean(c) : null)), all = avg.flat().filter(x => x != null);
+    const q = d3.scaleQuantile(all, [0, 1, 2, 3, 4]);
+    let best = null; avg.forEach((r, i) => r.forEach((c, j) => { if (c != null && g[i][j].length >= 2 && (!best || c > best.v)) best = { i, j, v: c }; }));
+    const grid = el('div', 'vd-hg'); grid.appendChild(el('span'));
+    SL.forEach(s => grid.appendChild(el('span', 'h', s)));
+    DAYS.forEach((dname, i) => {
+      grid.appendChild(el('span', 'd', dname));
+      SL.forEach((s, j) => {
+        const c = avg[i][j], lv = c == null ? -1 : q(c), cell = el('span', 'c' + (best && best.i === i && best.j === j ? ' best' : ''), c == null ? '' : big(c));
+        cell.style.background = lv < 0 ? '#F7F8FC' : HEAT[lv]; cell.style.color = lv >= 3 ? '#fff' : '#14163A';
+        cell.title = dname + ' ' + s + ': ' + (c == null ? 'no videos' : full(c) + ' average ' + LBL[l] + ' views, ' + g[i][j].length + ' videos');
+        grid.appendChild(cell);
+      });
+    });
+    box.appendChild(grid);
+  }
+
+  // ---- top 5
+  function drawTop() {
+    const l = S.snap, list = ranked().filter(v => v[l + '_views'] != null).slice(0, 5), box = $('t-list'); box.textContent = '';
+    $('t-title').textContent = 'Top 5 by ' + (l === 'all' ? 'all-time' : LBL[l]) + ' views';
+    if (!list.length) { box.appendChild(el('p', 'vd-empty', 'No videos captured at ' + LBL[l] + ' yet. The first ' + LBL[l] + ' captures arrive as videos reach that age.')); return; }
+    const mx = list[0][l + '_views'];
+    list.forEach((v, i) => {
+      const a = el('button', 'vd-top'); a.type = 'button'; a.setAttribute('aria-label', 'Play ' + v.video);
+      const tb = el('span', 'tb'); paintThumb(tb, v); const mi = el('span', 'vd-mini'); mi.innerHTML = PLAYS; tb.appendChild(mi);
+      const tt = el('span', 'tt'), bar = el('span'), fill = el('i'); fill.style.width = (v[l + '_views'] / mx * 100).toFixed(1) + '%'; fill.style.background = i ? '#6E74F0' : '#FF6A3D'; bar.appendChild(fill);
+      tt.append(el('b', null, title(v)), bar);
+      const p = prev(l), gr = p && v[p + '_views'] ? (v[l + '_views'] / v[p + '_views']).toFixed(1) + '× vs ' + LBL[p] : v.video;
+      const tv = el('span', 'tv'); tv.append(el('b', null, big(v[l + '_views'])), el('span', 'vd-small', v.platform + ' · ' + gr));
+      a.append(el('span', 'r', String(i + 1)), tb, tt, tv); a.addEventListener('click', () => watch(v.video, true)); box.appendChild(a);
+    });
+  }
+
   // ---- all-videos table
   const NUM = new Set(['views', 'likes', 'comments', 'shares', ...L.flatMap(l => ['views', 'likes', 'comments', 'shares'].map(k => l + '_' + k))]);
   document.querySelectorAll('#all-videos th button').forEach(b => b.addEventListener('click', () => {
@@ -1083,28 +1094,6 @@ dash.calc('status', {
     if (d.status !== 'ok') return;
     if (!d.data.length) { box.appendChild(el('p', 'vd-empty', 'Nothing to fix.')); return; }
     d.data.forEach(r => { const row = el('div'); row.append(el('span', 'vd-pill ' + (r.status === 'Fetch failed' ? 'b' : 'w'), r.status), el('b', null, String(r.videos)), el('span', 'vd-note', r.next_step)); box.appendChild(row); });
-    // every link that does not work or has no view count, with the sheet row to fix it in
-    const list = rows.filter(v => v.status === 'Fetch failed' || v.status === 'No view count')
-      .sort((a, b) => (a.status === b.status ? 0 : a.status === 'Fetch failed' ? -1 : 1) || String(a.sheet_row).localeCompare(String(b.sheet_row), undefined, { numeric: true }));
-    const tw = $('fix-list'); tw.textContent = '';
-    if (!list.length) return;
-    const t = el('table', 'vd-ct'), hr = el('tr');
-    ['Video', 'Problem', 'Sheet row', 'Account', 'Link', 'Tries', 'Last error'].forEach(x => hr.appendChild(el('th', null, x)));
-    const th = el('thead'); th.appendChild(hr); t.appendChild(th);
-    const tb = el('tbody');
-    list.slice(0, S.fixAll ? list.length : 10).forEach(v => {
-      const tr = el('tr'), a = el('a', null, v.sheet_link || v.url); a.href = v.sheet_link || v.url; a.target = '_blank'; a.rel = 'noopener';
-      const lk = el('td'); lk.appendChild(a); lk.style.maxWidth = '320px'; lk.style.overflow = 'hidden'; lk.style.textOverflow = 'ellipsis';
-      tr.append(el('td', null, v.video), el('td', null, v.status === 'Fetch failed' ? 'Link not working' : 'No view count'), el('td', null, v.sheet_row || ''),
-        el('td', null, v.account || v.source), lk, el('td', null, v.tries == null ? '' : String(v.tries)), el('td', 'na', v.last_error || ''));
-      tb.appendChild(tr);
-    });
-    t.appendChild(tb); tw.appendChild(t);
-    if (list.length > 10) {
-      const more = el('button', 'vd-more', S.fixAll ? 'Show first 10' : 'Show all ' + list.length + ' links'); more.type = 'button'; more.style.marginTop = '12px';
-      more.addEventListener('click', () => { S.fixAll = !S.fixAll; drawFix(); });
-      const wrap = el('div'); wrap.style.textAlign = 'center'; wrap.appendChild(more); tw.appendChild(wrap);
-    }
   }
 
 
@@ -1210,359 +1199,7 @@ dash.calc('status', {
     }
   }
 
-  // ---- Sources > channels > videos: pages opened from the source boxes (the address keeps the page, so the
-  // browser's back button and shared links work)
-  const chanOf = (v) => v.channel || v.account || 'Unknown';
-  const median = (a) => { if (!a.length) return null; const s = a.slice().sort((x, y) => x - y), h = s.length >> 1; return s.length % 2 ? s[h] : (s[h - 1] + s[h]) / 2; };
-  const inr = (n) => n == null ? '—' : '₹' + Math.round(n).toLocaleString('en-IN');
-  const inr1 = (n) => n == null ? '—' : '₹' + (n >= 100 ? Math.round(n).toLocaleString('en-IN') : n.toFixed(n >= 10 ? 1 : 2));
-  const sum = (a, f) => a.reduce((t, x) => t + (f(x) || 0), 0);
-  const groupBy = (a, f) => { const m = new Map(); a.forEach(x => { const k = f(x); if (!m.has(k)) m.set(k, []); m.get(k).push(x); }); return m; };
-  function stats(list) {
-    const got = list.filter(v => v.views != null), views = sum(got, v => v.views);
-    const acts = sum(got, v => (v.likes || 0) + (v.comments || 0) + (v.shares || 0));
-    const paid = list.filter(v => v.cost != null), spent = paid.length ? sum(paid, v => v.cost) : null;
-    const pv = paid.filter(v => v.views != null), pViews = sum(pv, v => v.views), pCost = sum(pv, v => v.cost);
-    // a monthly contract: its amount and videos promised, counted once per month (each video of the month carries them)
-    const months = new Map();
-    list.forEach(v => { if (v.committed != null) { const k = (v.published || '').slice(0, 7) + '|' + v.payee; if (!months.has(k)) months.set(k, { c: v.committed, p: v.promised || 0 }); } });
-    const ms = [...months.values()];
-    const best = got.slice().sort((a, b) => b.views - a.views)[0] || null;
-    return { n: list.length, got: got.length, views, avg: got.length ? views / got.length : null, med: median(got.map(v => v.views)),
-      eng: views ? acts / views : null, hit1k: got.length ? got.filter(v => v.views >= 1000).length / got.length : null,
-      spent, rate: paid.length ? spent / paid.length : null, cpk: pViews ? pCost / pViews * 1000 : null,
-      committed: ms.length ? sum(ms, x => x.c) : null, promised: ms.length ? sum(ms, x => x.p) : null, perVideo: paid.length > 0 && !ms.length,
-      best, pages: [...new Set(list.map(v => v.page).filter(Boolean))], plats: [...new Set(list.map(v => v.platform))],
-      last: list.map(v => v.published).filter(Boolean).sort().pop() };
-  }
-  function kv(box, items, wide) {
-    const g = el('div', 'vd-kv' + (wide ? ' wide' : ''));
-    items.forEach(([val, lab]) => { const d = el('div'); d.append(el('b', null, val), el('span', null, lab)); g.appendChild(d); });
-    box.appendChild(g); return g;
-  }
-  const avatar = (v, cls) => { const a = el('span', cls || 'vd-av'); a.setAttribute('aria-hidden', 'true'); if (v) paintThumb(a, v); return a; };
-  const pageLabel = (u) => { try { const x = new URL(u); return ({ 'facebook.com': 'Facebook', 'instagram.com': 'Instagram', 'youtube.com': 'YouTube' }[x.hostname.replace(/^(www|web|m)\./, '')] || x.hostname) + ' profile'; } catch (e) { return 'Profile'; } };
-  function pageLinks(pages) {
-    const d = el('div', 'vd-pf'), seen = new Set();
-    pages.forEach(u => { const k = u.replace(/^https?:\/\/(www|web|m)\./, '').replace(/\/$/, '').toLowerCase(); if (seen.has(k) || seen.size >= 4) return; seen.add(k);
-      const a = el('a', null, pageLabel(u) + ' ↗'); a.href = u; a.target = '_blank'; a.rel = 'noopener'; a.title = u; d.appendChild(a); });
-    return d;
-  }
-  const href = (...parts) => '#/' + parts.map(encodeURIComponent).join('/');
-  const sourcesList = () => [...new Set(['Inhouse ai videos', 'Sanjay Agency', 'Internal PR', ...rows.map(v => v.source)])].filter(x => rows.some(v => v.source === x));
-  function costLine(st) {
-    if (st.perVideo) return inr(st.rate) + ' per video · ' + inr(st.spent) + ' spent so far';
-    if (st.committed != null) return inr(st.committed) + ' a month' + (st.promised ? ' for ' + st.promised + ' videos' : '') + ' · ' + inr(st.rate) + ' per video · ' + inr(st.spent) + ' so far';
-    return 'No amount in the PR Video Costs sheet yet';
-  }
-  function sourceBox(src) {
-    const list = rows.filter(v => v.source === src), st = stats(list), chans = groupBy(list, chanOf).size;
-    const a = el('a', 'vd-sbox'); a.href = href('source', src);
-    const h = el('h3'); h.append(src, el('span', 'go', 'See channels →')); a.appendChild(h);
-    a.appendChild(el('span', 'vd-note', chans + ' channels · ' + st.n + ' videos · ' + st.got + ' with views'));
-    kv(a, [[big(st.views), 'Total views'], [big(st.avg), 'Avg per video'], [st.cpk != null ? inr1(st.cpk) : '—', '₹ per 1,000 views']]);
-    return a;
-  }
-  function drawSrcBoxes() { const box = $('src-boxes'); box.textContent = ''; sourcesList().forEach(x => box.appendChild(sourceBox(x))); }
-  function crumb(parts) {
-    const c = el('nav', 'vd-crumb'); c.setAttribute('aria-label', 'Breadcrumb');
-    const home = el('a', null, '← Dashboard'); home.href = '#overview'; c.appendChild(home);
-    parts.forEach(([t, h]) => { c.append(el('span', null, '›')); if (h) { const a = el('a', null, t); a.href = h; c.appendChild(a); } else c.append(el('b', null, t)); });
-    return c;
-  }
-  function pageSources(box) {
-    box.appendChild(crumb([['Sources']]));
-    const card = el('section', 'vd-card');
-    card.append(el('h1', 'vd-btitle', 'Sources'), el('p', 'vd-note', 'Open a source to see its channels, and a channel to watch its videos.'));
-    const g = el('div', 'vd-sbx'); sourcesList().forEach(x => g.appendChild(sourceBox(x))); card.appendChild(g); box.appendChild(card);
-  }
-  function pageSource(box, src) {
-    const list = rows.filter(v => v.source === src);
-    box.appendChild(crumb([['Sources', '#/sources'], [src]]));
-    if (!list.length) { box.appendChild(el('p', 'vd-empty', 'No videos for this source.')); return; }
-    const st = stats(list), groups = groupBy(list, chanOf), head = el('section', 'vd-card');
-    head.append(el('h1', 'vd-btitle', src), el('p', 'vd-note', groups.size + ' channels · ' + st.n + ' videos sent · ' + st.got + ' with views · latest post ' + dmy(st.last)));
-    kv(head, [[big(st.views), 'Total views'], [big(st.avg), 'Avg per video'], [big(st.med), 'Median video'], [pct(st.eng), 'Engagement rate'],
-      [pct0(st.hit1k), 'Past 1K views'], [st.spent != null ? inr(st.spent) : '—', 'Spent so far'], [st.cpk != null ? inr1(st.cpk) : '—', '₹ per 1,000 views']], true);
-    box.appendChild(head);
-    const card = el('section', 'vd-card'), top = el('div', 'vd-ch');
-    top.append(el('h2', 'vd-h2', 'Channels'));
-    const sel = el('select', 'vd-sel'); sel.setAttribute('aria-label', 'Sort channels');
-    [['views', 'Most views'], ['cpk', 'Cheapest views'], ['avg', 'Best average'], ['n', 'Most videos'], ['name', 'Name']].forEach(([k, t]) => { const o = el('option', null, t); o.value = k; o.selected = k === (S.chSort || 'views'); sel.appendChild(o); });
-    sel.addEventListener('change', () => { S.chSort = sel.value; route(); });
-    top.appendChild(sel); card.appendChild(top);
-    const k = S.chSort || 'views';
-    const items = [...groups].map(([name, vs]) => ({ name, vs, st: stats(vs) }))
-      .sort((a, b) => k === 'name' ? a.name.localeCompare(b.name) : k === 'cpk' ? (a.st.cpk ?? 1e12) - (b.st.cpk ?? 1e12) : (b.st[k] ?? -1) - (a.st[k] ?? -1));
-    const g = el('div', 'vd-chg');
-    items.forEach(({ name, vs, st: c }) => {
-      const art = el('article', 'vd-chc'), a = el('a', 'vd-chl'); a.href = href('channel', src, name);
-      const hh = el('div', 'vd-chh'), t = el('div', 'tx');
-      t.append(el('b', null, name), el('span', 'vd-small', c.plats.join(' · ') + ' · ' + c.n + (c.promised ? ' of ' + c.promised + ' promised' : ' videos')));
-      hh.append(avatar(c.best || vs[0]), t); a.appendChild(hh);
-      kv(a, [[big(c.views), 'Total views'], [big(c.avg), 'Avg / video'], [pct(c.eng), 'Engagement'],
-        [c.got + ' / ' + c.n, 'With views'], [c.rate != null ? inr(c.rate) : '—', 'Rate / video'], [c.cpk != null ? inr1(c.cpk) : '—', '₹ / 1K views']]);
-      a.appendChild(el('span', 'vd-cline', costLine(c)));
-      art.appendChild(a);
-      const foot = el('div', 'vd-chf'), go = el('a', 'go', 'Videos →'); go.href = a.href;
-      foot.append(c.pages.length ? pageLinks(c.pages) : el('span', 'vd-small', 'No profile link yet'), go);
-      art.appendChild(foot); g.appendChild(art);
-    });
-    card.appendChild(g); box.appendChild(card);
-  }
-  function pageChannel(box, src, name) {
-    const list = rows.filter(v => v.source === src && chanOf(v) === name);
-    box.appendChild(crumb([['Sources', '#/sources'], [src, href('source', src)], [name]]));
-    if (!list.length) { box.appendChild(el('p', 'vd-empty', 'No videos for this channel.')); return; }
-    const st = stats(list), head = el('section', 'vd-card'), hh = el('div', 'vd-chh'), t = el('div', 'tx');
-    t.append(el('h1', 'vd-btitle', name), el('span', 'vd-note', src + ' · ' + st.plats.join(' · ') + ' · ' + st.n + ' videos sent · latest post ' + dmy(st.last)));
-    hh.append(avatar(st.best || list[0], 'vd-av lg'), t); head.appendChild(hh);
-    if (st.pages.length) head.appendChild(pageLinks(st.pages));
-    kv(head, [[big(st.views), 'Total views'], [big(st.avg), 'Avg per video'], [big(st.med), 'Median video'], [pct(st.eng), 'Engagement rate'],
-      [pct0(st.hit1k), 'Past 1K views'], [st.got + ' / ' + st.n, 'Videos with views']], true);
-    const cb = el('div', 'vd-cbox'); cb.appendChild(el('h3', 'vd-h3', 'Costing'));
-    if (st.perVideo) kv(cb, [[inr(st.rate), 'Per video'], [inr(st.spent), 'Spent so far (' + st.n + ' videos)'], [st.cpk != null ? inr1(st.cpk) : '—', '₹ per 1,000 views']], true);
-    else if (st.committed != null) kv(cb, [[inr(st.committed), 'Monthly amount'], [st.promised ? String(st.promised) : '—', 'Videos promised'], [st.n + (st.promised ? ' / ' + st.promised : ''), 'Posted so far'],
-      [inr(st.rate), 'Rate per video'], [inr(st.spent), 'Spent so far'], [st.cpk != null ? inr1(st.cpk) : '—', '₹ per 1,000 views']], true);
-    else cb.appendChild(el('p', 'vd-note', 'No amount in the PR Video Costs sheet yet. Add it there and the costing shows here after the next refresh.'));
-    head.appendChild(cb); box.appendChild(head);
-    const row = el('div', 'vd-row'), card = el('section', 'vd-card vd-w3'), top = el('div', 'vd-ch');
-    top.append(el('h2', 'vd-h2', 'Videos'), el('span', 'vd-note', st.n + ' videos · sorted by all-time views · click one to ' + (EMBED ? 'play it' : 'open its breakdown')));
-    card.appendChild(top);
-    const sorted = list.slice().sort((a, b) => (b.views ?? -1) - (a.views ?? -1) || String(b.published).localeCompare(String(a.published)));
-    if (!sorted.some(v => v.video === S.sel)) { S.sel = sorted[0].video; S.playing = false; }
-    const wall = el('div', 'vd-wall');
-    sorted.forEach((v, i) => wall.appendChild(tile(v, 'all', i, v.video === S.sel, () => {
-      S.sel = v.video; S.playing = true;
-      wall.querySelectorAll('.vd-vc').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === v.video)));
-      drawDeep(); if (window.innerWidth < 1000) $('deep').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    })));
-    card.appendChild(wall); row.append(card, $('deep')); box.appendChild(row);
-    drawDeep();
-  }
-  let deepHome = null;
-  function route() {
-    const raw = location.hash.slice(1), parts = raw.split('/').map(x => { try { return decodeURIComponent(x); } catch (e) { return x; } });
-    const box = $('browse'), deep = $('deep');
-    deepHome = deepHome || deep.parentElement;
-    const kids = [...box.parentElement.children].filter(n => n !== box && !n.classList.contains('vd-topbar'));
-    const page = parts[0] === '' && ['sources', 'source', 'channel'].includes(parts[1]) ? parts[1] : null;
-    document.querySelectorAll('.vd-links a').forEach(a => { if (a.getAttribute('href') === (page ? '#/sources' : '#' + (raw || 'overview'))) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
-    if (!page || !rows.length) {
-      const back = deep.parentElement !== deepHome;
-      if (back) deepHome.appendChild(deep);
-      box.hidden = true; box.textContent = ''; kids.forEach(n => n.classList.remove('vd-off'));
-      if (back) { drawWall(); drawDeep(); }
-      const target = raw && !raw.startsWith('/') && document.getElementById(raw);
-      if (target) target.scrollIntoView({ block: 'start' });
-      return;
-    }
-    if (deep.parentElement !== deepHome) deepHome.appendChild(deep);
-    kids.forEach(n => n.classList.add('vd-off'));
-    box.textContent = ''; box.hidden = false;
-    if (page === 'sources') pageSources(box);
-    else if (page === 'source') pageSource(box, parts[2] || '');
-    else pageChannel(box, parts[2] || '', parts.slice(3).join('/'));
-  }
-  window.addEventListener('hashchange', () => { route(); if (location.hash.startsWith('#/')) window.scrollTo(0, 0); });
-
-  // ---- Channel performance: delivery & payments, alerts, same video on different channels, topics, posting calendar
-  const todayIso = () => new Date(Date.now() + 5.5 * 3600e3).toISOString().slice(0, 10);  // India date
-  const monLabel = (ym) => { const [y, m] = ym.split('-'); return MON[+m - 1] + ' ' + y; };
-  const daysIn = (ym) => { const [y, m] = ym.split('-').map(Number); return new Date(y, m, 0).getDate(); };
-  // one line per paid monthly contract (Costs sheet row) and month: what it promised, what has been posted, the pace.
-  // The pace runs over 30 days from the channel's first post that month (channels joined on different dates).
-  const daysBetween = (a, b) => Math.round((new Date(b + 'T00:00:00') - new Date(a + 'T00:00:00')) / 864e5);
-  function contracts(ym) {
-    const t = todayIso(), days = 30;
-    const g = groupBy(rows.filter(v => v.committed != null && v.payee && (v.published || '').slice(0, 7) === ym), v => v.payee);
-    return [...g].map(([payee, vs]) => {
-      const promised = vs[0].promised || 0, amount = vs[0].committed, rate = promised ? amount / Math.max(promised, vs.length) : amount / vs.length;
-      const start = vs.map(v => v.published).sort()[0], day = Math.max(1, Math.min(days, daysBetween(start, t) + 1));
-      const posted = vs.length, expected = promised ? Math.min(promised, Math.ceil(promised * day / days)) : null;
-      const projected = promised && day ? Math.min(promised, Math.round(posted / day * days)) : posted;
-      const status = !promised ? 'No target' : posted >= promised ? 'Done' : posted >= expected * 0.9 || expected - posted <= 2 ? 'On track' : 'Behind';
-      return { payee, source: vs[0].source, channel: chanOf(vs[0]), promised, amount, rate, posted, expected, projected, status, start,
-        earned: Math.min(amount, posted * rate), projEarned: Math.min(amount, projected * rate), day, days };
-    });
-  }
-  function drawDelivery() {
-    const months = [...new Set(rows.filter(v => v.committed != null).map(v => (v.published || '').slice(0, 7)).filter(Boolean))].sort();
-    const box = $('dl-body'); box.textContent = '';
-    if (!months.length) { box.appendChild(el('p', 'vd-empty', 'Add amounts in the PR Video Costs sheet to track delivery.')); return; }
-    if (!months.includes(S.dlMonth)) S.dlMonth = months.includes(todayIso().slice(0, 7)) ? todayIso().slice(0, 7) : months[months.length - 1];
-    const sel = $('dl-month'); sel.textContent = '';
-    months.forEach(m => { const o = el('option', null, monLabel(m)); o.value = m; o.selected = m === S.dlMonth; sel.appendChild(o); });
-    const list = contracts(S.dlMonth), ord = { Behind: 0, 'On track': 1, 'No target': 2, Done: 3 };
-    list.sort((a, b) => ord[a.status] - ord[b.status] || (a.posted / (a.expected || 1)) - (b.posted / (b.expected || 1)));
-    const tot = (k) => sum(list, x => x[k]);
-    const top = el('div', 'vd-cost-top');
-    [['Committed this month', inr(tot('amount')), list.length + ' contracts'], ['Earned so far', inr(tot('earned')), tot('posted') + ' videos posted × their rate'],
-     ['At the current pace', inr(tot('projEarned')), 'if every channel keeps posting as now'], ['Behind schedule', String(list.filter(x => x.status === 'Behind').length), 'of ' + list.length + ' contracts, at their pace so far']]
-      .forEach(([l, v, n], i) => { const d = el('div', 'vd-cst' + (i === 0 ? ' hi' : '')); d.append(el('span', 'l', l), el('span', 'v', v), el('span', 's', n)); top.appendChild(d); });
-    box.appendChild(top);
-    const tw = el('div', 'vd-ctw'), t = el('table', 'vd-ct vd-dl'), hr = el('tr');
-    ['Channel', 'Source', 'Started', 'Posted / promised', 'Pace', 'Status', 'Earned so far', 'Monthly amount', 'Rate / video', 'By day 30 at this pace'].forEach(x => hr.appendChild(el('th', null, x)));
-    const th = el('thead'); th.appendChild(hr); t.appendChild(th);
-    const tb = el('tbody');
-    list.forEach(x => {
-      const tr = el('tr'), name = el('td'), a = el('a', null, x.payee); a.href = href('channel', x.source, x.channel); name.appendChild(a);
-      const pace = el('td'), bar = el('span', 'vd-pace'), fill = el('i'), mark = el('b');
-      fill.style.width = Math.min(100, x.posted / Math.max(1, x.promised) * 100) + '%';
-      if (x.expected != null) { mark.style.left = Math.min(100, x.expected / Math.max(1, x.promised) * 100) + '%'; bar.title = 'Expected by today: ' + x.expected; }
-      fill.className = x.status === 'Behind' ? 'b' : ''; bar.append(fill, mark); pace.appendChild(bar);
-      const st = el('td'); st.appendChild(el('span', 'vd-pill ' + (x.status === 'Behind' ? 'b' : x.status === 'Done' ? 'ok' : 'w'),
-        x.status === 'Behind' ? 'Behind by ' + (x.expected - x.posted) : x.status));
-      tr.append(name, el('td', null, x.source), el('td', null, dmy(x.start) + ' · day ' + x.day), el('td', null, x.posted + ' / ' + (x.promised || '—')), pace, st,
-        el('td', null, inr(x.earned)), el('td', null, inr(x.amount)), el('td', null, inr(x.rate)), el('td', null, x.projected + ' videos · ' + inr(x.projEarned)));
-      tb.appendChild(tr);
-    });
-    t.appendChild(tb); tw.appendChild(t); box.appendChild(tw);
-    const pv = rows.filter(v => v.cost != null && v.committed == null && (v.published || '').slice(0, 7) === S.dlMonth);
-    if (pv.length) box.appendChild(el('p', 'vd-note', 'Paid per video: ' + pv.length + ' videos × ' + inr(pv[0].cost) + ' = ' + inr(sum(pv, v => v.cost)) + ' (' + [...new Set(pv.map(v => v.source))].join(', ') + ').'));
-    box.appendChild(el('p', 'vd-note', 'Pace: the promised videos spread over 30 days from the channel\'s first post. The marker on each bar is where it should be by today. Earned = videos posted × the contract rate (monthly amount ÷ videos promised).'));
-  }
-
-  function channelAlerts() {
-    const out = [], bySrc = groupBy(rows, v => v.source);
-    const ym = todayIso().slice(0, 7), behind = new Map(contracts(ym).filter(x => x.status === 'Behind').map(x => [x.source + '|' + x.channel, x]));
-    bySrc.forEach((list, src) => {
-      const chans = [...groupBy(list, chanOf)].map(([name, vs]) => ({ name, vs, st: stats(vs) }));
-      const typical = median(chans.filter(c => c.st.cpk != null && c.st.got >= 5).map(c => c.st.cpk));
-      chans.forEach(c => {
-        const why = [];
-        if (typical && c.st.cpk != null && c.st.got >= 5 && c.st.cpk > typical * 2) why.push(['b', 'Expensive: ' + inr1(c.st.cpk) + ' per 1,000 views (typical for ' + src + ': ' + inr1(typical) + ')']);
-        if (c.st.got >= 5 && c.st.med != null && c.st.med < 100) why.push(['w', 'Low reach: a typical video gets ' + Math.round(c.st.med) + ' views']);
-        const hidden = c.vs.filter(v => v.views == null).length;
-        if (c.vs.length >= 4 && hidden / c.vs.length >= 0.3) why.push(['w', 'No view count on ' + hidden + ' of ' + c.vs.length + ' videos']);
-        const b = behind.get(src + '|' + c.name);
-        if (b) why.push(['b', 'Behind: ' + b.posted + ' posted, ' + b.expected + ' expected by today (' + b.promised + ' promised)']);
-        if (why.length) out.push({ src, name: c.name, st: c.st, why, best: c.st.best || c.vs[0] });
-      });
-    });
-    return out.sort((a, b) => b.why.filter(w => w[0] === 'b').length - a.why.filter(w => w[0] === 'b').length || b.why.length - a.why.length);
-  }
-  function drawAlerts() {
-    const box = $('al-body'); box.textContent = '';
-    const list = channelAlerts();
-    $('al-note').textContent = list.length ? list.length + ' channels need a look' : 'No channel needs a look right now';
-    if (!list.length) { box.appendChild(el('p', 'vd-empty', 'Every channel is within normal cost, reach and delivery.')); return; }
-    const g = el('div', 'vd-alg');
-    list.slice(0, S.alAll ? list.length : 8).forEach(x => {
-      const a = el('a', 'vd-al'); a.href = href('channel', x.src, x.name);
-      const hh = el('div', 'vd-chh'), t = el('div', 'tx'); t.append(el('b', null, x.name), el('span', 'vd-small', x.src + ' · ' + x.st.n + ' videos · ' + big(x.st.views) + ' views'));
-      hh.append(avatar(x.best), t); a.appendChild(hh);
-      const ul = el('div', 'vd-why'); x.why.forEach(([k, txt]) => ul.appendChild(el('span', 'vd-pill ' + k, txt))); a.appendChild(ul);
-      g.appendChild(a);
-    });
-    box.appendChild(g);
-    if (list.length > 8) { const m = el('button', 'vd-more', S.alAll ? 'Show fewer' : 'Show all ' + list.length); m.type = 'button'; m.addEventListener('click', () => { S.alAll = !S.alAll; drawAlerts(); }); const w = el('div'); w.style.textAlign = 'center'; w.appendChild(m); box.appendChild(w); }
-  }
-
-  // the same video given to several channels: views compared on identical content
-  function drawSame() {
-    const box = $('sc-body'); box.textContent = '';
-    const groups = [...groupBy(rows.filter(v => v.content), v => v.content)].map(([id, vs]) => ({ id, vs: vs.filter(v => v.views != null) }))
-      .filter(g => new Set(g.vs.map(chanOf)).size >= 2);
-    if (!groups.length) { box.appendChild(el('p', 'vd-empty', 'No video has been posted by two channels yet.')); return; }
-    // each channel against the typical (median) views of the same video on the other channels
-    const score = new Map();
-    groups.forEach(g => {
-      const med = median(g.vs.map(v => v.views)) || 1, topV = Math.max(...g.vs.map(v => v.views));
-      g.vs.forEach(v => { const k = v.source + '|' + chanOf(v); const s = score.get(k) || { src: v.source, name: chanOf(v), r: [], wins: 0 }; s.r.push(v.views / med); if (v.views === topV) s.wins++; score.set(k, s); });
-    });
-    const ranks = [...score.values()].filter(s => s.r.length >= 2).map(s => ({ ...s, x: median(s.r) })).sort((a, b) => b.x - a.x);
-    $('sc-note').textContent = groups.length + ' videos posted by 2 or more channels · ' + sum(groups, g => g.vs.length) + ' posts compared';
-    const tw = el('div', 'vd-ctw'), t = el('table', 'vd-ct vd-sct'), hr = el('tr');
-    ['Channel', 'Source', 'Same videos', 'Views vs the same video elsewhere', 'Top channel on'].forEach(x => hr.appendChild(el('th', null, x)));
-    const th = el('thead'); th.appendChild(hr); t.appendChild(th);
-    const tb = el('tbody'), mx = Math.max(2, ...ranks.map(r => r.x));
-    ranks.forEach(r => {
-      const tr = el('tr'), name = el('td'), a = el('a', null, r.name); a.href = href('channel', r.src, r.name); name.appendChild(a);
-      const sc = el('td'), cpk = el('span', 'cpk'), bar = el('span'), fill = el('i'); fill.style.width = Math.min(100, r.x / mx * 100) + '%'; fill.style.background = r.x >= 1 ? 'var(--ok)' : 'var(--acc)';
-      bar.appendChild(fill); cpk.append(bar, el('b', null, r.x.toFixed(1) + '×')); sc.appendChild(cpk);
-      tr.append(name, el('td', null, r.src), el('td', null, String(r.r.length)), sc, el('td', null, r.wins + ' of ' + r.r.length));
-      tb.appendChild(tr);
-    });
-    t.appendChild(tb); tw.appendChild(t); box.append(el('h3', 'vd-h3', 'Which channel does more with the same video'), tw,
-      el('p', 'vd-note', '1.0× = the typical views the same video got on the other channels. Above 1.0× the channel gets more out of identical content. Channels with 2+ shared videos.'));
-    // the videos themselves
-    box.appendChild(el('h3', 'vd-h3', 'The shared videos'));
-    const g = el('div', 'vd-scg');
-    groups.sort((a, b) => new Set(b.vs.map(chanOf)).size - new Set(a.vs.map(chanOf)).size || sum(b.vs, v => v.views) - sum(a.vs, v => v.views));
-    groups.slice(0, S.scAll ? groups.length : 6).forEach(gr => {
-      const vs = gr.vs.slice().sort((a, b) => b.views - a.views), c = el('div', 'vd-scc');
-      const hh = el('div', 'vd-chh'), th2 = el('button', 'vd-av sq'); th2.type = 'button'; th2.setAttribute('aria-label', 'Play ' + vs[0].video); paintThumb(th2, vs[0]); th2.addEventListener('click', () => watch(vs[0].video, true));
-      const t2 = el('div', 'tx'); t2.append(el('b', null, (vs.find(v => v.title) || {}).title || 'Video ' + gr.id), el('span', 'vd-small', (vs[0].topic || 'Topic not detected') + ' · ' + new Set(vs.map(chanOf)).size + ' channels · ' + big(sum(vs, v => v.views)) + ' views'));
-      hh.append(th2, t2); c.appendChild(hh);
-      const mx2 = vs[0].views || 1;
-      vs.slice(0, 8).forEach(v => {
-        const r = el('button', 'vd-scr'); r.type = 'button'; r.addEventListener('click', () => watch(v.video, true));
-        const b = el('span', 'bar'), f = el('i'); f.style.width = Math.max(2, v.views / mx2 * 100) + '%'; b.appendChild(f);
-        r.append(el('span', 'n', chanOf(v)), b, el('b', null, big(v.views)));
-        c.appendChild(r);
-      });
-      g.appendChild(c);
-    });
-    box.appendChild(g);
-    if (groups.length > 6) { const m = el('button', 'vd-more', S.scAll ? 'Show fewer' : 'Show all ' + groups.length + ' shared videos'); m.type = 'button'; m.addEventListener('click', () => { S.scAll = !S.scAll; drawSame(); }); const w = el('div'); w.style.textAlign = 'center'; w.appendChild(m); box.appendChild(w); }
-  }
-
-  function drawTopics() {
-    const box = $('tp-body'); box.textContent = '';
-    const pool = rows.filter(v => !S.tpSrc || v.source === S.tpSrc), known = pool.filter(v => v.topic), list = [...groupBy(known, v => v.topic)].map(([name, vs]) => ({ name, st: stats(vs) }))
-      .sort((a, b) => (b.st.avg ?? -1) - (a.st.avg ?? -1));
-    $('tp-note').textContent = 'Topic found for ' + known.length + ' of ' + pool.length + ' videos (from captions and the text on thumbnails)';
-    const nav = el('div', 'vd-tabrow'); nav.style.marginBottom = '10px';
-    [['', 'All sources'], ...sourcesList().map(x => [x, x])].forEach(([k, t]) => { const b = el('button', 'vd-tab', t); b.type = 'button'; b.setAttribute('aria-pressed', String((S.tpSrc || '') === k)); b.addEventListener('click', () => { S.tpSrc = k; drawTopics(); }); nav.appendChild(b); });
-    box.appendChild(nav);
-    const tw = el('div', 'vd-ctw'), t = el('table', 'vd-ct'), hr = el('tr');
-    ['Topic', 'Videos', 'Avg views / video', '', 'Median', 'Engagement', 'Total views', '₹ per 1,000 views'].forEach(x => hr.appendChild(el('th', null, x)));
-    const th = el('thead'); th.appendChild(hr); t.appendChild(th);
-    const tb = el('tbody'), mx = Math.max(1, ...list.map(x => x.st.avg || 0));
-    list.forEach((x, i) => {
-      const tr = el('tr', i === 0 ? 'top1' : null), bar = el('td'), cpk = el('span', 'cpk'), b = el('span'), f = el('i');
-      f.style.width = ((x.st.avg || 0) / mx * 100) + '%'; b.appendChild(f); cpk.appendChild(b); bar.appendChild(cpk);
-      tr.append(el('td', null, x.name), el('td', null, String(x.st.n)), el('td', null, big(x.st.avg)), bar, el('td', null, big(x.st.med)),
-        el('td', null, pct(x.st.eng)), el('td', null, big(x.st.views)), el('td', null, x.st.cpk != null ? inr1(x.st.cpk) : '—'));
-      tb.appendChild(tr);
-    });
-    t.appendChild(tb); tw.appendChild(t); box.appendChild(tw);
-  }
-
-  // Internal PR: who posted on which day
-  function drawCalendar() {
-    const box = $('cal-body'); box.textContent = '';
-    const list = rows.filter(v => v.source === 'Internal PR' && v.published);
-    if (!list.length) { box.appendChild(el('p', 'vd-empty', 'No Internal PR posts yet.')); return; }
-    const end = todayIso(), first = list.map(v => v.published).sort()[0];
-    const start = dmyIso(end, -29) > first ? dmyIso(end, -29) : first, days = [];
-    for (let d = start; d <= end; d = dmyIso(d, 1)) days.push(d);
-    const people = [...groupBy(list, chanOf)].sort((a, b) => a[0].localeCompare(b[0]));
-    const tw = el('div', 'vd-calw'), t = el('table', 'vd-cal'), hr = el('tr');
-    hr.appendChild(el('th', 'nm', 'Influencer'));
-    days.forEach(d => { const h = el('th', null, String(+d.slice(8))); h.title = dmy(d); if (new Date(d + 'T00:00:00').getDay() === 0) h.className = 'sun'; hr.appendChild(h); });
-    hr.appendChild(el('th', 'nm', 'Posted'));
-    const th = el('thead'); th.appendChild(hr); t.appendChild(th);
-    const tb = el('tbody');
-    people.forEach(([name, vs]) => {
-      const tr = el('tr'), nm = el('td', 'nm'), a = el('a', null, name); a.href = href('channel', 'Internal PR', name); nm.appendChild(a); tr.appendChild(nm);
-      const by = groupBy(vs, v => v.published), since = vs.map(v => v.published).sort()[0];
-      let active = 0, missed = 0;
-      days.forEach(d => {
-        const n = (by.get(d) || []).length, c = el('td', n ? 'on' : d < since ? 'pre' : 'off');
-        if (n) { active++; c.textContent = n > 1 ? String(n) : '●'; c.title = name + ', ' + dmy(d) + ': ' + n + ' post' + (n > 1 ? 's' : ''); c.addEventListener('click', () => watch(by.get(d)[0].video, true)); }
-        else if (d >= since) { missed++; c.title = name + ', ' + dmy(d) + ': no post'; }
-        tr.appendChild(c);
-      });
-      tr.appendChild(el('td', 'nm', active + ' of ' + (active + missed) + ' days'));
-      tb.appendChild(tr);
-    });
-    t.appendChild(tb); tw.appendChild(t); box.appendChild(tw);
-    box.appendChild(el('p', 'vd-note', '● = posted that day (a number = more than one post) · empty = no post · grey = before the influencer started. Click a dot to play that video. Days follow the post date in the sheet.'));
-  }
-
-  function drawAll() { drawSeg(); drawTabs(); drawInsights(); drawKpis(); drawSrcBoxes(); drawCost(); drawWall(); drawDeep(); drawSources(); drawCompare(); drawDelivery(); drawAlerts(); drawSame(); drawTopics(); drawCalendar(); drawTable(); drawFix(); }
+  function drawAll() { drawSeg(); drawTabs(); drawInsights(); drawKpis(); drawCost(); drawWall(); drawDeep(); drawSources(); drawCompare(); drawGrowth(); drawPlats(); drawAccounts(); drawDist(); drawScatter(); drawTimeline(); drawHeat(); drawTop(); drawTable(); drawFix(); }
 
   dash.onData(() => {
     const d = dash.data('videos');
@@ -1575,7 +1212,6 @@ dash.calc('status', {
       S.snap = 'all';
     }
     drawAll();
-    route();
   });
 })();
 </script>
