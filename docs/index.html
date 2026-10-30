@@ -34,6 +34,10 @@ window.dash = (function () {
   fetch('data.json', { cache: 'no-cache' }).then(r => r.json())
     .then(rows => { sets.videos = { status: 'ok', data: rows }; run(); })
     .catch(() => { sets.videos = { status: 'error', data: [] }; run(); });
+  sets.checks = { status: 'loading', data: [] };
+  fetch('checks.json', { cache: 'no-cache' }).then(r => r.json())
+    .then(c => { sets.checks = { status: 'ok', data: [c] }; run(); })
+    .catch(() => { sets.checks = { status: 'error', data: [] }; run(); });
   let t; window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(run, 150); });
   return api;
 })();
@@ -55,6 +59,7 @@ window.dash = (function () {
 .vd-links a{padding:11px 16px;border-radius:11px;color:var(--ink2);font-size:14px;font-weight:600;text-decoration:none}
 .vd-links a:hover{background:#F7F8FC;color:var(--ink)}
 .vd-links a[aria-current]{background:#EEF0FF;color:var(--b3)}
+.vd-month{margin-left:auto;flex:0 0 auto;font-weight:700;color:var(--ink)}
 .vd-head{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-end;justify-content:space-between}
 .vd-eye{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--accd)}
 .vd-eye::before{content:"";flex:0 0 8px;height:8px;border-radius:999px;background:var(--acc)}
@@ -310,6 +315,18 @@ window.dash = (function () {
 .vd-help summary::before{content:"+";display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:999px;background:#EEF0FF;font-weight:700}
 .vd-help[open] summary::before{content:"–"}
 .vd-help p{margin-top:6px}
+/* comments and sheet check */
+.vd-qs{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+.vd-q{display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-radius:14px;background:#F7F8FC;border:1px solid var(--line2);text-decoration:none;color:inherit;min-width:0}
+.vd-q:hover{border-color:#C9CCFF}
+.vd-q p{font-size:14px;line-height:1.45;color:var(--ink);overflow-wrap:anywhere}
+.vd-q .m{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;font-size:12px;color:var(--mut2)}
+.vd-q .m b{color:var(--lnk);font-weight:600}
+.vd-ct td.wrap{white-space:normal;min-width:260px;max-width:440px;line-height:1.4}
+#ck-body .vd-ct{min-width:900px}
+#ck-body .vd-ct td,#ck-body .vd-ct th{text-align:left}
+#ck-body .vd-ct a{color:var(--lnk);font-weight:600;text-decoration:none}
+.vd-cbox .vd-q{background:#fff}
 /* phones */
 @media (max-width:640px){
   .vd-in{gap:18px;padding:10px 12px 40px}
@@ -319,6 +336,7 @@ window.dash = (function () {
   .vd-links{flex-wrap:nowrap;overflow-x:auto;min-width:0;flex:1 1 auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
   .vd-links::-webkit-scrollbar,.vd-tabrow::-webkit-scrollbar,.vd-ins::-webkit-scrollbar,.vd-src::-webkit-scrollbar{display:none}
   .vd-links a{padding:10px 11px;font-size:13px;white-space:nowrap}
+  .vd-month{min-height:40px;padding:0 8px;font-size:13px;max-width:110px}
   .vd-hero{gap:16px}
   .vd-head{gap:14px}
   .vd-title{font-size:34px}
@@ -486,7 +504,8 @@ window.dash = (function () {
 
 <div class="vd-topbar">
   <div class="vd-brand"><span class="vd-logo"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="#FFFFFF"></path></svg></span>PR Video Analytics</div>
-  <nav class="vd-links" aria-label="Sections"><a href="#overview" aria-current="page">Overview</a><a href="#/sources">Sources</a><a href="#wall-card">Videos</a><a href="#compare">Compare</a><a href="#all-videos">All videos</a></nav>
+  <nav class="vd-links" aria-label="Sections"><a href="#overview" aria-current="page">Overview</a><a href="#/sources">Sources</a><a href="#wall-card">Videos</a><a href="#compare">Compare</a><a href="#comments">Comments</a><a href="#sheet-check">Sheet check</a><a href="#all-videos">All videos</a></nav>
+  <select class="vd-sel vd-month" id="f-month" aria-label="Month"><option value="">All months</option></select>
 </div>
 <div class="vd-browse" id="browse" hidden></div>
 
@@ -602,8 +621,13 @@ window.dash = (function () {
   <div id="tp-body"></div>
 </section>
 
+<section class="vd-card" aria-label="What people ask in the comments" id="comments">
+  <div class="vd-ch"><div><h2 class="vd-h2">What people ask in the comments</h2><p class="vd-note" style="margin-top:4px">Comments under our videos, sorted by what people ask for: price, a contact number, where to get it, how to order, help for an illness. Shows which videos and channels bring real interest, not just views.</p></div><span class="vd-note" id="cm-note">—</span></div>
+  <div id="cm-body" style="display:flex;flex-direction:column;gap:14px"></div>
+</section>
+
 <section class="vd-card" aria-label="Internal PR posting calendar" id="calendar">
-  <div class="vd-ch"><div><h2 class="vd-h2">Internal PR posting calendar</h2><p class="vd-note" style="margin-top:4px">Which influencer posted on which day, last 30 days.</p></div></div>
+  <div class="vd-ch"><div><h2 class="vd-h2">Internal PR posting calendar</h2><p class="vd-note" style="margin-top:4px">Which influencer posted on which day: the last 30 days, or the month chosen at the top.</p></div></div>
   <div id="cal-body" style="display:flex;flex-direction:column;gap:10px"></div>
 </section>
 
@@ -641,6 +665,11 @@ window.dash = (function () {
   </div>
 </section>
 
+<section class="vd-card" aria-label="Sheet mistakes" id="sheet-check">
+  <div class="vd-ch"><div><h2 class="vd-h2">Sheet mistakes</h2><p class="vd-note" style="margin-top:4px">Checked on every refresh in the 3 video sheets and the PR Video Costs sheet. Fix these in the sheet; the next refresh picks the fix up.</p></div><span class="vd-note" id="ck-note">—</span></div>
+  <div id="ck-body" style="display:flex;flex-direction:column;gap:14px"></div>
+</section>
+
 <section class="vd-card" aria-label="To fix" id="to-fix">
   <div class="vd-ch"><h2 class="vd-h2">To fix</h2><span class="vd-note">Videos without numbers, and what to do</span></div>
   <div class="vd-fix" id="fix" data-source="status"></div>
@@ -651,10 +680,7 @@ window.dash = (function () {
 </div></div>
 
 <script>
-dash.calc('kpis', {
-  inputs: ['videos'], title: 'Headline figures by snapshot, platform and source',
-  description: 'For each snapshot (Day 2, 7, 30, all time) and filter: sums over videos captured at that snapshot, engagement rate, median views, share of videos past 1,000 views, and growth vs the previous snapshot over videos captured at both.',
-  fn: (videos) => {
+function pvKpis(videos) {
     const L = ['d2', 'd7', 'd30', 'all'], P = { d7: 'd2', d30: 'd7', all: 'd7' }, plats = ['All', ...new Set(videos.map(v => v.platform))], srcs = ['All', ...new Set(videos.map(v => v.source))];
     const f = (l, k) => l === 'all' ? k : l + '_' + k;
     const sum = (rs, k) => rs.reduce((a, v) => a + (Number(v[k]) || 0), 0);
@@ -680,13 +706,14 @@ dash.calc('kpis', {
       });
     }
     return out;
-  }
+}
+dash.calc('kpis', {
+  inputs: ['videos'], title: 'Headline figures by snapshot, platform and source',
+  description: 'For each snapshot (Day 2, 7, 30, all time) and filter: sums over videos captured at that snapshot, engagement rate, median views, share of videos past 1,000 views, and growth vs the previous snapshot over videos captured at both.',
+  fn: pvKpis
 });
 
-dash.calc('src_score', {
-  inputs: ['videos'], title: 'Source scorecard',
-  description: 'Per source sheet, using latest views: videos, videos with a view count, total and average views, median, share of videos past 1,000 views, engagement rate, and share of all views.',
-  fn: (videos) => {
+function pvSrcScore(videos) {
     const total = videos.reduce((a, v) => a + (Number(v.views) || 0), 0);
     return [...new Set(videos.map(v => v.source))].map(source => {
       const rs = videos.filter(v => v.source === source), w = rs.filter(v => v.views != null), vs = w.map(v => v.views).sort((a, b) => a - b);
@@ -695,7 +722,11 @@ dash.calc('src_score', {
         median: vs.length ? vs[Math.floor((vs.length - 1) / 2)] : null, hit1k: vs.length ? vs.filter(x => x >= 1000).length / vs.length : null,
         eng: views ? inter / views : null, share: total ? views / total : 0 };
     });
-  }
+}
+dash.calc('src_score', {
+  inputs: ['videos'], title: 'Source scorecard',
+  description: 'Per source sheet, using latest views: videos, videos with a view count, total and average views, median, share of videos past 1,000 views, engagement rate, and share of all views.',
+  fn: pvSrcScore
 });
 
 dash.calc('status', {
@@ -774,7 +805,23 @@ dash.calc('status', {
   }
 
   const S = { snap: 'd7', plat: 'All', src: 'All', sel: null, playing: false, wallN: 12, sortKey: null, sortDir: -1, auto: true, accAll: false, cmpA: null, cmpB: null };
-  let rows = [], byId = new Map();
+  let rows = [], byId = new Map(), ALL = [], KC = {};
+  // ---- month: every section counts the videos posted in the chosen month (by post date); '' = all months
+  const monthOf = (v) => (v.published || '').slice(0, 7);
+  function applyMonth() { rows = S.month ? ALL.filter(v => monthOf(v) === S.month) : ALL; }
+  function drawMonth() {
+    const sel = $('f-month'), months = [...new Set(ALL.map(monthOf).filter(Boolean))].sort().reverse();
+    if (S.month && !months.includes(S.month)) { S.month = ''; applyMonth(); }
+    sel.textContent = '';
+    [['', 'All months'], ...months.map(m => [m, monLabel(m)])].forEach(([k, t]) => { const o = el('option', null, t); o.value = k; o.selected = k === S.month; sel.appendChild(o); });
+  }
+  $('f-month').addEventListener('change', (e) => {
+    S.month = e.target.value; try { localStorage.setItem('pv-month', S.month); } catch (x) {}
+    applyMonth(); S.wallN = 12; drawAll(); route();
+  });
+  // headline figures and the source scorecard for the chosen month (all months: the dashboard's own calcs)
+  const kpiData = () => S.month ? { status: 'ok', data: KC['k' + S.month] || (KC['k' + S.month] = pvKpis(rows)) } : dash.data('kpis');
+  const srcData = () => S.month ? { status: 'ok', data: KC['s' + S.month] || (KC['s' + S.month] = pvSrcScore(rows)) } : dash.data('src_score');
 
   function filtered() { return rows.filter(v => (S.plat === 'All' || v.platform === S.plat) && (S.src === 'All' || v.source === S.src)); }
   function prev(l) { return { d7: 'd2', d30: 'd7', all: 'd7' }[l]; }
@@ -841,7 +888,7 @@ dash.calc('status', {
 
   // ---- KPIs
   function drawKpis() {
-    const k = dash.data('kpis'), key = S.snap + '|' + S.plat + '|' + S.src;
+    const k = kpiData(), key = S.snap + '|' + S.plat + '|' + S.src;
     const r = k.status === 'ok' ? k.data.find(x => x.key === key) : null;
     $('k-l-views').textContent = S.snap === 'all' ? 'All-time views' : 'Views at ' + LBL[S.snap];
     document.querySelectorAll('.vd-kpi [data-source="kpis"]').forEach(e => {
@@ -972,7 +1019,7 @@ dash.calc('status', {
       body.appendChild(tr);
     });
 
-    const d = dash.data('src_score'), box = $('src-cards'); box.textContent = '';
+    const d = srcData(), box = $('src-cards'); box.textContent = '';
     if (d.status !== 'ok') return;
     const data = d.data.slice().sort((a, b) => (b.avg ?? -1) - (a.avg ?? -1));
     const bestOf = (k) => Math.max(...data.map(r => r[k] ?? -1));
@@ -1325,7 +1372,9 @@ dash.calc('status', {
     else if (st.committed != null) kv(cb, [[inr(st.committed), 'Monthly amount'], [st.promised ? String(st.promised) : '—', 'Videos promised'], [st.n + (st.promised ? ' / ' + st.promised : ''), 'Posted so far'],
       [inr(st.rate), 'Rate per video'], [inr(st.spent), 'Spent so far'], [st.cpk != null ? inr1(st.cpk) : '—', '₹ per 1,000 views']], true);
     else cb.appendChild(el('p', 'vd-note', 'No amount in the PR Video Costs sheet yet. Add it there and the costing shows here after the next refresh.'));
-    head.appendChild(cb); box.appendChild(head);
+    head.appendChild(cb);
+    const cq = cmBox(list); if (cq) head.appendChild(cq);
+    box.appendChild(head);
     const row = el('div', 'vd-row'), card = el('section', 'vd-card vd-w3'), top = el('div', 'vd-ch');
     top.append(el('h2', 'vd-h2', 'Videos'), el('span', 'vd-note', st.n + ' videos · sorted by all-time views · click one to ' + (EMBED ? 'play it' : 'open its breakdown')));
     card.appendChild(top);
@@ -1388,10 +1437,10 @@ dash.calc('status', {
   }
   function drawDelivery() {
     const months = [...new Set(rows.filter(v => v.committed != null).map(v => (v.published || '').slice(0, 7)).filter(Boolean))].sort();
-    const box = $('dl-body'); box.textContent = '';
+    const box = $('dl-body'); box.textContent = ''; $('dl-month').hidden = !!S.month;
     if (!months.length) { box.appendChild(el('p', 'vd-empty', 'Add amounts in the PR Video Costs sheet to track delivery.')); return; }
     if (!months.includes(S.dlMonth)) S.dlMonth = months.includes(todayIso().slice(0, 7)) ? todayIso().slice(0, 7) : months[months.length - 1];
-    const sel = $('dl-month'); sel.textContent = '';
+    const sel = $('dl-month'); sel.textContent = ''; sel.hidden = !!S.month;
     months.forEach(m => { const o = el('option', null, monLabel(m)); o.value = m; o.selected = m === S.dlMonth; sel.appendChild(o); });
     const list = contracts(S.dlMonth), ord = { Behind: 0, 'On track': 1, 'No target': 2, Done: 3 };
     list.sort((a, b) => ord[a.status] - ord[b.status] || (a.posted / (a.expected || 1)) - (b.posted / (b.expected || 1)));
@@ -1425,7 +1474,7 @@ dash.calc('status', {
 
   function channelAlerts() {
     const out = [], bySrc = groupBy(rows, v => v.source);
-    const ym = todayIso().slice(0, 7), behind = new Map(contracts(ym).filter(x => x.status === 'Behind').map(x => [x.source + '|' + x.channel, x]));
+    const ym = S.month || todayIso().slice(0, 7), behind = new Map(contracts(ym).filter(x => x.status === 'Behind').map(x => [x.source + '|' + x.channel, x]));
     bySrc.forEach((list, src) => {
       const chans = [...groupBy(list, chanOf)].map(([name, vs]) => ({ name, vs, st: stats(vs) }));
       const typical = median(chans.filter(c => c.st.cpk != null && c.st.got >= 5).map(c => c.st.cpk));
@@ -1535,8 +1584,9 @@ dash.calc('status', {
     const box = $('cal-body'); box.textContent = '';
     const list = rows.filter(v => v.source === 'Internal PR' && v.published);
     if (!list.length) { box.appendChild(el('p', 'vd-empty', 'No Internal PR posts yet.')); return; }
-    const end = todayIso(), first = list.map(v => v.published).sort()[0];
-    const start = dmyIso(end, -29) > first ? dmyIso(end, -29) : first, days = [];
+    const now = todayIso(), past = S.month && S.month < now.slice(0, 7);  // a past month: its own days
+    const end = past ? S.month + '-' + String(daysIn(S.month)).padStart(2, '0') : now, first = list.map(v => v.published).sort()[0];
+    const from = S.month ? S.month + '-01' : dmyIso(end, -29), start = from > first ? from : first, days = [];
     for (let d = start; d <= end; d = dmyIso(d, 1)) days.push(d);
     const people = [...groupBy(list, chanOf)].sort((a, b) => a[0].localeCompare(b[0]));
     const tw = el('div', 'vd-calw'), t = el('table', 'vd-cal'), hr = el('tr');
@@ -1562,13 +1612,130 @@ dash.calc('status', {
     box.appendChild(el('p', 'vd-note', '● = posted that day (a number = more than one post) · empty = no post · grey = before the influencer started. Click a dot to play that video. Days follow the post date in the sheet.'));
   }
 
-  function drawAll() { drawSeg(); drawTabs(); drawInsights(); drawKpis(); drawSrcBoxes(); drawCost(); drawWall(); drawDeep(); drawSources(); drawCompare(); drawDelivery(); drawAlerts(); drawSame(); drawTopics(); drawCalendar(); drawTable(); drawFix(); }
+  // ---- comments: what people ask for (comments.py sorts each comment; examples carry no names)
+  const ASK = ['Price', 'Contact number', 'Where to get it', 'How to order', 'Help for an illness'];
+  const CMK = [...ASK, 'Other question', 'Doubt or complaint', 'Thanks or praise'];
+  const quote = (v, ex) => {
+    const a = el('a', 'vd-q'); a.href = href('channel', v.source, chanOf(v));
+    a.appendChild(el('p', null, '“' + ex[1] + '”'));
+    const m = el('span', 'm'); m.append(el('span', 'vd-pill ' + (ex[0] === 'Doubt or complaint' ? 'b' : ASK.includes(ex[0]) ? 'ok' : ''), ex[0]), el('b', null, chanOf(v)),
+      el('span', null, v.video + (ex[3] ? ' · ' + dmy(ex[3]) : '') + (ex[2] ? ' · ' + ex[2] + ' likes' : '')));
+    a.appendChild(m); return a;
+  };
+  function drawComments() {
+    const box = $('cm-body'); box.textContent = '';
+    const read = rows.filter(v => v.cm && v.cm.n), n = sum(read, v => v.cm.n), asks = sum(read, v => v.cm.ask);
+    const kc = {}; read.forEach(v => Object.entries(v.cm.k || {}).forEach(([k, c]) => { kc[k] = (kc[k] || 0) + c; }));
+    const last = read.map(v => v.cm.at).sort().pop();
+    $('cm-note').textContent = read.length ? n + ' comments read on ' + read.length + ' videos · last read ' + dmy(last) : '—';
+    if (!read.length) { box.appendChild(el('p', 'vd-empty', 'No comments read yet for these videos. Comments are read every morning for videos whose comment count grew.')); return; }
+    const topAsk = ASK.filter(k => kc[k]).sort((a, b) => kc[b] - kc[a])[0];
+    const top = el('div', 'vd-cost-top');
+    [['Comments read', full(n), read.length + ' videos with comments'], ['People asking for something', full(asks), pct0(asks / n) + ' of comments'],
+     ['Asked most', topAsk || '—', topAsk ? kc[topAsk] + ' comments' : ''], ['Doubts or complaints', full(kc['Doubt or complaint'] || 0), 'fake, fraud, not working…']]
+      .forEach(([l, v, x], i) => { const d = el('div', 'vd-cst' + (i === 1 ? ' hi' : '')); d.append(el('span', 'l', l), el('span', 'v', v), el('span', 's', x)); top.appendChild(d); });
+    box.appendChild(top);
+    // examples, by kind
+    const nav = el('div', 'vd-tabrow'), kind = S.cmKind || 'asks';
+    [['asks', 'All asks', asks], ...CMK.filter(k => kc[k] && k !== 'Thanks or praise').map(k => [k, k, kc[k]])].forEach(([k, t, c]) => {
+      const b = el('button', 'vd-tab'); b.type = 'button'; b.setAttribute('aria-pressed', String(kind === k)); b.append(t, el('span', null, String(c)));
+      b.addEventListener('click', () => { S.cmKind = k; S.cmAll = false; drawComments(); }); nav.appendChild(b);
+    });
+    box.appendChild(nav);
+    const ex = [];
+    read.forEach(v => (v.cm.ex || []).forEach(e => { if (kind === 'asks' ? ASK.includes(e[0]) : e[0] === kind) ex.push([v, e]); }));
+    ex.sort((a, b) => (b[1][2] || 0) - (a[1][2] || 0) || String(b[1][3]).localeCompare(String(a[1][3])));
+    const qs = el('div', 'vd-qs'); ex.slice(0, S.cmAll ? ex.length : 9).forEach(([v, e]) => qs.appendChild(quote(v, e))); box.appendChild(qs);
+    if (!ex.length) box.appendChild(el('p', 'vd-empty', 'No examples of this kind.'));
+    if (ex.length > 9) { const m = el('button', 'vd-more', S.cmAll ? 'Show fewer' : 'Show all ' + ex.length + ' examples'); m.type = 'button'; m.addEventListener('click', () => { S.cmAll = !S.cmAll; drawComments(); }); const w = el('div'); w.style.textAlign = 'center'; w.appendChild(m); box.appendChild(w); }
+    // channels by how many people ask
+    const ch = [...groupBy(read, v => v.source + '|' + chanOf(v))].map(([k, vs]) => {
+      const c = {}; vs.forEach(v => Object.entries(v.cm.k || {}).forEach(([x, y]) => { c[x] = (c[x] || 0) + y; }));
+      return { src: vs[0].source, name: chanOf(vs[0]), vids: vs.length, n: sum(vs, v => v.cm.n), ask: sum(vs, v => v.cm.ask), c, views: sum(vs, v => v.views) };
+    }).sort((a, b) => b.ask - a.ask || b.n - a.n);
+    box.appendChild(el('h3', 'vd-h3', 'Channels whose viewers ask the most'));
+    const tw = el('div', 'vd-ctw'), t = el('table', 'vd-ct'), hr = el('tr');
+    ['Channel', 'Source', 'Videos', 'Comments read', 'Asking', 'Per 10K views', ...ASK, 'Doubts'].forEach(x => hr.appendChild(el('th', null, x)));
+    const th = el('thead'); th.appendChild(hr); t.appendChild(th);
+    const tb = el('tbody');
+    ch.slice(0, S.cmChAll ? ch.length : 10).forEach(x => {
+      const tr = el('tr'), nm = el('td'), a = el('a', null, x.name); a.href = href('channel', x.src, x.name); nm.appendChild(a);
+      tr.append(nm, el('td', null, x.src), el('td', null, String(x.vids)), el('td', null, String(x.n)), el('td', x.ask ? 'win' : null, String(x.ask)),
+        el('td', null, x.views ? (x.ask / x.views * 1e4).toFixed(1) : '—'), ...ASK.map(k => el('td', null, x.c[k] ? String(x.c[k]) : '')), el('td', null, x.c['Doubt or complaint'] ? String(x.c['Doubt or complaint']) : ''));
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb); tw.appendChild(t); box.appendChild(tw);
+    if (ch.length > 10) { const m = el('button', 'vd-more', S.cmChAll ? 'Show first 10' : 'Show all ' + ch.length + ' channels'); m.type = 'button'; m.addEventListener('click', () => { S.cmChAll = !S.cmChAll; drawComments(); }); const w = el('div'); w.style.textAlign = 'center'; w.appendChild(m); box.appendChild(w); }
+    box.appendChild(el('p', 'vd-note', 'Up to 100 comments per video, the ones the platform shows first. A comment can count under more than one kind. Writers’ names are not kept and phone numbers are hidden.'));
+  }
+  function cmBox(list) {
+    const read = list.filter(v => v.cm && v.cm.n); if (!read.length) return null;
+    const b = el('div', 'vd-cbox'), n = sum(read, v => v.cm.n), ask = sum(read, v => v.cm.ask), kc = {};
+    read.forEach(v => Object.entries(v.cm.k || {}).forEach(([k, c]) => { kc[k] = (kc[k] || 0) + c; }));
+    b.appendChild(el('h3', 'vd-h3', 'What viewers ask'));
+    kv(b, [[String(n), 'Comments read'], [String(ask), 'Asking for something'], ...ASK.filter(k => kc[k]).map(k => [String(kc[k]), k])], true);
+    const ex = []; read.forEach(v => (v.cm.ex || []).forEach(e => ex.push([v, e])));
+    ex.sort((a, b) => (ASK.includes(b[1][0]) - ASK.includes(a[1][0])) || (b[1][2] || 0) - (a[1][2] || 0));
+    if (ex.length) { const qs = el('div', 'vd-qs'); ex.slice(0, 3).forEach(([v, e]) => qs.appendChild(quote(v, e))); b.appendChild(qs); }
+    return b;
+  }
+
+  // ---- sheet mistakes (sheet_check.py writes checks.json on every refresh)
+  function drawChecks() {
+    const box = $('ck-body'); box.textContent = '';
+    const d = dash.data('checks'), c = d.status === 'ok' && d.data.length ? (d.data[0].items ? d.data[0] : { items: d.data, summary: {} }) : null;
+    if (!c) { $('ck-note').textContent = d.status === 'loading' ? 'Loading…' : '—'; box.appendChild(el('p', 'vd-empty', d.status === 'loading' ? 'Loading the sheet check…' : 'The sheet check arrives with the next refresh.')); return; }
+    const items = c.items || [], fix = items.filter(x => x.level === 'fix').length, sm = c.summary || {};
+    $('ck-note').textContent = items.length ? fix + ' to fix · ' + (items.length - fix) + ' to check' + (c.checked_at ? ' · checked ' + dmy(c.checked_at) : '') : 'No mistakes found';
+    const top = el('div', 'vd-cost-top');
+    [['To fix', String(fix), 'wrong or missing in the sheet'], ['To check', String(items.length - fix), 'may be intended'],
+     ['Links that do not open', String(sm.links_not_opening || 0), 'listed under To fix below'], ['Drive file only', String(sm.drive_only || 0), 'Internal PR rows without the post link']]
+      .forEach(([l, v, x], i) => { const e = el('div', 'vd-cst' + (i === 0 ? ' hi' : '')); e.append(el('span', 'l', l), el('span', 'v', v), el('span', 's', x)); top.appendChild(e); });
+    box.appendChild(top);
+    if (!items.length) { box.appendChild(el('p', 'vd-empty', 'Every row looks right.')); return; }
+    const kinds = [...groupBy(items, x => x.kind)].sort((a, b) => (a[1][0].level === 'fix' ? 0 : 1) - (b[1][0].level === 'fix' ? 0 : 1) || b[1].length - a[1].length);
+    const nav = el('div', 'vd-tabrow'), k = S.ckKind || '';
+    [['', 'All', items.length], ...kinds.map(([x, l]) => [x, x, l.length])].forEach(([key, t, n]) => {
+      const b = el('button', 'vd-tab'); b.type = 'button'; b.setAttribute('aria-pressed', String(k === key)); b.append(t, el('span', null, String(n)));
+      b.addEventListener('click', () => { S.ckKind = key; S.ckAll = false; drawChecks(); }); nav.appendChild(b);
+    });
+    box.appendChild(nav);
+    const list = items.filter(x => !k || x.kind === k), cap = S.ckAll ? list.length : 12;
+    if (window.innerWidth < 700) {  // phones: one card per problem
+      const qs = el('div', 'vd-qs');
+      list.slice(0, cap).forEach(x => {
+        const c = el(x.url ? 'a' : 'div', 'vd-q'); if (x.url) { c.href = x.url; c.target = '_blank'; c.rel = 'noopener'; }
+        const m = el('span', 'm'); m.append(el('span', 'vd-pill ' + (x.level === 'fix' ? 'b' : 'w'), x.kind), el('b', null, x.who || x.source));
+        c.append(m, el('p', null, x.detail), el('span', 'm', x.source + ' · ' + x.where + (x.url ? ' · open ↗' : '')));
+        qs.appendChild(c);
+      });
+      box.appendChild(qs);
+    } else {
+    const tw = el('div', 'vd-ctw'), t = el('table', 'vd-ct'), hr = el('tr');
+    ['Problem', 'Source', 'Where in the sheet', 'Name', 'What to do', 'Link'].forEach(x => hr.appendChild(el('th', null, x)));
+    const th = el('thead'); th.appendChild(hr); t.appendChild(th);
+    const tb = el('tbody');
+    list.slice(0, cap).forEach(x => {
+      const tr = el('tr'), p = el('td'); p.appendChild(el('span', 'vd-pill ' + (x.level === 'fix' ? 'b' : 'w'), x.kind));
+      const lk = el('td');
+      if (x.url) { const a = el('a', null, x.video || 'Open ↗'); a.href = x.url; a.target = '_blank'; a.rel = 'noopener'; a.title = x.url; lk.appendChild(a); }
+      tr.append(p, el('td', null, x.source), el('td', null, x.where), el('td', null, x.who || ''), el('td', 'wrap', x.detail), lk);
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb); tw.appendChild(t); box.appendChild(tw);
+    }
+    if (list.length > 12) { const m = el('button', 'vd-more', S.ckAll ? 'Show first 12' : 'Show all ' + list.length); m.type = 'button'; m.addEventListener('click', () => { S.ckAll = !S.ckAll; drawChecks(); }); const w = el('div'); w.style.textAlign = 'center'; w.appendChild(m); box.appendChild(w); }
+  }
+
+  function drawAll() { drawSeg(); drawTabs(); drawInsights(); drawKpis(); drawSrcBoxes(); drawCost(); drawWall(); drawDeep(); drawSources(); drawCompare(); drawDelivery(); drawAlerts(); drawSame(); drawTopics(); drawComments(); drawCalendar(); drawChecks(); drawTable(); drawFix(); }
 
   dash.onData(() => {
     const d = dash.data('videos');
     if (d.status !== 'ok') { document.querySelectorAll('.vd-kpi .v').forEach(e => { e.textContent = '—'; }); return; }
-    rows = d.data.map(v => Object.assign({}, v, { all_views: v.views, all_likes: v.likes, all_comments: v.comments, all_shares: v.shares, all_age: v.alltime_age }));
-    byId = new Map(rows.map(v => [v.video, v]));
+    ALL = d.data.map(v => Object.assign({}, v, { all_views: v.views, all_likes: v.likes, all_comments: v.comments, all_shares: v.shares, all_age: v.alltime_age }));
+    byId = new Map(ALL.map(v => [v.video, v])); KC = {};
+    if (S.month == null) { try { S.month = localStorage.getItem('pv-month') || ''; } catch (x) { S.month = ''; } }
+    applyMonth(); drawMonth();
     if (!EMBED) { const t = dash.data('thumbs'); if (t.status === 'ok') THUMBS = new Map(t.data.map(r => [r.video, r.img])); }
     if (S.auto) {
       const n = (l) => rows.filter(v => v[l + '_views'] != null).length;
