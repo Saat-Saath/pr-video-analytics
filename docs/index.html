@@ -34,10 +34,6 @@ window.dash = (function () {
   fetch('data.json', { cache: 'no-cache' }).then(r => r.json())
     .then(rows => { sets.videos = { status: 'ok', data: rows }; run(); })
     .catch(() => { sets.videos = { status: 'error', data: [] }; run(); });
-  sets.followers = { status: 'loading', data: [] };
-  fetch('followers.json', { cache: 'no-cache' }).then(r => r.json())
-    .then(o => { sets.followers = { status: 'ok', data: Array.isArray(o) ? o : Object.entries(o).map(([key, a]) => Object.assign({ key }, a)) }; run(); })
-    .catch(() => { sets.followers = { status: 'error', data: [] }; run(); });
   let t; window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(run, 150); });
   return api;
 })();
@@ -484,7 +480,6 @@ window.dash = (function () {
   .vd-pace{width:90px}
   .vd-scr{grid-template-columns:minmax(0,7rem) minmax(0,1fr) auto}
 }
-.vd-cline.fo{background:#EAF7F0;color:var(--ok)}
 </style>
 
 <div class="vd"><div class="vd-in">
@@ -586,11 +581,6 @@ window.dash = (function () {
 </section>
 
 <h2 class="vd-sec">Channel performance</h2>
-
-<section class="vd-card" aria-label="Follower growth" id="followers">
-  <div class="vd-ch"><div><h2 class="vd-h2">Follower growth</h2><p class="vd-note" style="margin-top:4px">How many followers each channel gained while our videos ran, and how many per 1,000 views our videos brought.</p></div><span class="vd-note" id="fo-note">—</span></div>
-  <div id="fo-body" style="display:flex;flex-direction:column;gap:14px"></div>
-</section>
 
 <section class="vd-card" aria-label="Delivery and payments" id="delivery">
   <div class="vd-ch"><div><h2 class="vd-h2">Delivery &amp; payments</h2><p class="vd-note" style="margin-top:4px">Each monthly contract: videos promised vs posted, whether the channel is on pace, and what it has earned so far.</p></div><select class="vd-sel" id="dl-month" aria-label="Month"></select></div>
@@ -1313,7 +1303,6 @@ dash.calc('status', {
       kv(a, [[big(c.views), 'Total views'], [big(c.avg), 'Avg / video'], [pct(c.eng), 'Engagement'],
         [c.got + ' / ' + c.n, 'With views'], [c.rate != null ? inr(c.rate) : '—', 'Rate / video'], [c.cpk != null ? inr1(c.cpk) : '—', '₹ / 1K views']]);
       a.appendChild(el('span', 'vd-cline', costLine(c)));
-      const fo = folOf(vs); if (fo) a.appendChild(el('span', 'vd-cline fo', big(fo.now) + ' followers' + (fo.gained != null ? ' · ' + signed(fo.gained) + ' since ' + dmy(fo.from) + (fo.perK != null ? ' · ' + (Math.round(fo.perK * 10) / 10) + ' per 1K views' : '') : ' · tracking since ' + dmy(fo.from))));
       art.appendChild(a);
       const foot = el('div', 'vd-chf'), go = el('a', 'go', 'Videos →'); go.href = a.href;
       foot.append(c.pages.length ? pageLinks(c.pages) : el('span', 'vd-small', 'No profile link yet'), go);
@@ -1336,7 +1325,7 @@ dash.calc('status', {
     else if (st.committed != null) kv(cb, [[inr(st.committed), 'Monthly amount'], [st.promised ? String(st.promised) : '—', 'Videos promised'], [st.n + (st.promised ? ' / ' + st.promised : ''), 'Posted so far'],
       [inr(st.rate), 'Rate per video'], [inr(st.spent), 'Spent so far'], [st.cpk != null ? inr1(st.cpk) : '—', '₹ per 1,000 views']], true);
     else cb.appendChild(el('p', 'vd-note', 'No amount in the PR Video Costs sheet yet. Add it there and the costing shows here after the next refresh.'));
-    head.appendChild(cb); head.appendChild(folBox(list, src)); box.appendChild(head);
+    head.appendChild(cb); box.appendChild(head);
     const row = el('div', 'vd-row'), card = el('section', 'vd-card vd-w3'), top = el('div', 'vd-ch');
     top.append(el('h2', 'vd-h2', 'Videos'), el('span', 'vd-note', st.n + ' videos · sorted by all-time views · click one to ' + (EMBED ? 'play it' : 'open its breakdown')));
     card.appendChild(top);
@@ -1573,68 +1562,7 @@ dash.calc('status', {
     box.appendChild(el('p', 'vd-note', '● = posted that day (a number = more than one post) · empty = no post · grey = before the influencer started. Click a dot to play that video. Days follow the post date in the sheet.'));
   }
 
-  // ---- followers: one reading a day of every account (followers.json); growth next to the views our videos brought
-  let FOL = new Map();
-  function folOf(list) {
-    const keys = [...new Set(list.map(v => v.acc).filter(Boolean))];
-    const accs = keys.map(k => FOL.get(k)).filter(a => a && a.history && a.history.length);
-    if (!accs.length) return null;
-    const firsts = accs.map(a => a.history[0][0]).sort(), from = firsts[0];
-    let now = 0, gained = 0, grown = 0, to = from;
-    accs.forEach(a => { const h = a.history, last = h[h.length - 1]; now += last[1]; if (last[0] > to) to = last[0]; if (h.length >= 2) { gained += last[1] - h[0][1]; grown++; } });
-    const ours = list.filter(v => (v.published || '') >= from), oursViews = sum(ours, v => v.views);
-    const days = daysBetween(from, to);
-    return { accs, now, gained: grown ? gained : null, from, to, days, ours: ours.length, oursViews,
-      perK: grown && days >= 7 && oursViews >= 1000 ? gained / oursViews * 1000 : null, perDay: grown && days ? gained / days : null };
-  }
-  const signed = (n) => n == null ? '—' : (n >= 0 ? '+' : '−') + big(Math.abs(n));
-  function folBox(list, src) {
-    const f = folOf(list), box = el('div', 'vd-cbox');
-    box.appendChild(el('h3', 'vd-h3', 'Followers'));
-    if (!f) { box.appendChild(el('p', 'vd-note', 'No follower count yet for this channel. It is read every morning; Facebook does not show it for some personal profiles.')); return box; }
-    kv(box, [[big(f.now), 'Followers now'], [signed(f.gained), f.gained == null ? 'Gained (from tomorrow)' : 'Gained since ' + dmy(f.from)],
-      [f.perDay == null ? '—' : signed(Math.round(f.perDay)), 'Per day'], [String(f.ours), 'Our videos since ' + dmy(f.from)],
-      [big(f.oursViews), 'Their views'], [f.perK == null ? '—' : (Math.round(f.perK * 10) / 10).toLocaleString('en-IN'), 'Followers per 1,000 views']], true);
-    const acc = el('div', 'vd-pf');
-    f.accs.forEach(a => { const h = a.history, x = el('a', null, a.platform + ': ' + full(h[h.length - 1][1]) + (h.length >= 2 ? ' (' + signed(h[h.length - 1][1] - h[0][1]) + ')' : '')); x.href = a.url; x.target = '_blank'; x.rel = 'noopener'; acc.appendChild(x); });
-    box.appendChild(acc);
-    const why = src === 'Inhouse ai videos' ? 'These are our own pages, so their growth comes from our videos.'
-      : 'Growth of the whole account while our videos ran: the account\'s own posts count too. Followers per 1,000 views compares channels fairly.';
-    box.appendChild(el('p', 'vd-note', why + (f.gained == null ? ' Tracking started ' + dmy(f.from) + '; growth shows from the next reading.' : '')));
-    return box;
-  }
-  function drawFollowers() {
-    const box = $('fo-body'); box.textContent = '';
-    const fd = dash.data('followers');
-    if (fd.status === 'ok') FOL = new Map(fd.data.map(a => [a.key, a]));
-    const items = [];
-    groupBy(rows, v => v.source + '|' + chanOf(v)).forEach((vs, k) => { const f = folOf(vs); if (f) items.push({ src: vs[0].source, name: chanOf(vs[0]), f }); });
-    if (!items.length) { box.appendChild(el('p', 'vd-empty', 'Follower counts start with the next morning refresh.')); $('fo-note').textContent = ''; return; }
-    const from = items.map(x => x.f.from).sort()[0], started = items.every(x => x.f.gained == null);
-    $('fo-note').textContent = items.length + ' channels tracked since ' + dmy(from) + (started ? ' · growth shows from the next reading' : '');
-    items.sort((a, b) => (b.f.gained ?? -1e9) - (a.f.gained ?? -1e9) || b.f.now - a.f.now);
-    const own = items.filter(x => x.src === 'Inhouse ai videos' && x.f.gained != null), fromUs = sum(own, x => x.f.gained);
-    const top = el('div', 'vd-cost-top');
-    [['Followers now', big(sum(items, x => x.f.now)), items.length + ' channels'], ['Gained, our own pages', own.length ? signed(fromUs) : '—', 'Inhouse pages: all from our videos'],
-     ['Gained, partner channels', signed(sum(items.filter(x => x.src !== 'Inhouse ai videos' && x.f.gained != null), x => x.f.gained)), 'while our videos ran']]
-      .forEach(([l, v, n], i) => { const d = el('div', 'vd-cst' + (i === 0 ? ' hi' : '')); d.append(el('span', 'l', l), el('span', 'v', v), el('span', 's', n)); top.appendChild(d); });
-    box.appendChild(top);
-    const tw = el('div', 'vd-ctw'), t = el('table', 'vd-ct vd-dl'), hr = el('tr');
-    ['Channel', 'Source', 'Followers now', 'Gained', 'Since', 'Per day', 'Our videos', 'Their views', 'Followers / 1K views'].forEach(x => hr.appendChild(el('th', null, x)));
-    const th = el('thead'); th.appendChild(hr); t.appendChild(th);
-    const tb = el('tbody');
-    items.forEach(x => {
-      const tr = el('tr'), name = el('td'), a = el('a', null, x.name); a.href = href('channel', x.src, x.name); name.appendChild(a);
-      const g = el('td', x.f.gained > 0 ? 'win' : null, signed(x.f.gained));
-      tr.append(name, el('td', null, x.src), el('td', null, full(x.f.now)), g, el('td', null, dmy(x.f.from)), el('td', null, x.f.perDay == null ? '—' : signed(Math.round(x.f.perDay))),
-        el('td', null, String(x.f.ours)), el('td', null, big(x.f.oursViews)), el('td', null, x.f.perK == null ? '—' : (Math.round(x.f.perK * 10) / 10).toLocaleString('en-IN')));
-      tb.appendChild(tr);
-    });
-    t.appendChild(tb); tw.appendChild(t); box.appendChild(tw);
-    box.appendChild(el('p', 'vd-note', 'Followers are read every morning (Facebook followers, Instagram followers, YouTube subscribers). Facebook rounds big pages (e.g. 51K), so their growth moves in steps of about 1,000. Our own Inhouse pages only post our videos, so their growth comes from them; partner channels also post their own content.'));
-  }
-
-  function drawAll() { drawSeg(); drawTabs(); drawInsights(); drawKpis(); drawSrcBoxes(); drawCost(); drawWall(); drawDeep(); drawSources(); drawCompare(); drawFollowers(); drawDelivery(); drawAlerts(); drawSame(); drawTopics(); drawCalendar(); drawTable(); drawFix(); }
+  function drawAll() { drawSeg(); drawTabs(); drawInsights(); drawKpis(); drawSrcBoxes(); drawCost(); drawWall(); drawDeep(); drawSources(); drawCompare(); drawDelivery(); drawAlerts(); drawSame(); drawTopics(); drawCalendar(); drawTable(); drawFix(); }
 
   dash.onData(() => {
     const d = dash.data('videos');

@@ -260,8 +260,6 @@ def main(result_files):
         else:
             m["fetch_status"] = "OK"
 
-    if SEEN_FIELDS:  # which follower fields the scrapers returned in this run (to see what is available)
-        (ROOT / "follower_fields_seen.json").write_text(json.dumps(SEEN_FIELDS, indent=1))
     OUT.write_text(json.dumps({"generated_at": today.isoformat(), "config": src["config"], "occurrences": src["occurrences"],
                                "master": master, "snapshots": history}, indent=1, ensure_ascii=False), encoding="utf8")
     from collections import Counter

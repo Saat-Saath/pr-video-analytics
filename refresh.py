@@ -73,19 +73,6 @@ def start():
     py("merge_results.py")  # refresh milestone fields for any new videos
     due = due_today()
     print("due today:", {k: len(v) for k, v in due.items()})
-    # once a day: one recent video of every Facebook / YouTube account, so each account gets a follower reading
-    try:
-        sys.path.insert(0, str(BUILD))
-        import followers
-        data = json.loads((BUILD / "analytics_data.json").read_text(encoding="utf8"))
-        extra = followers.account_checks(data)
-        for plat, urls in extra.items():
-            due[plat] += [u for u in urls if u not in due[plat]]
-        print("follower checks:", {k: len(v) for k, v in extra.items()})
-        r = subprocess.run([sys.executable, str(BUILD / "followers.py"), "instagram"], capture_output=True, text=True, timeout=330)
-        print((r.stdout or r.stderr).strip()[-200:])
-    except Exception as e:  # never stop the refresh over follower counts
-        print("follower checks skipped:", e)
     run_dir = RUNS / datetime.now().strftime("%Y-%m-%d_%H%M")
     run_dir.mkdir(parents=True, exist_ok=True)
     state = {"started_at": datetime.now(timezone.utc).isoformat(), "runs": []}

@@ -75,8 +75,6 @@ def rows(with_costs=False):
                  or m.get("account") or sheet_name
         out[-1]["channel"] = (ch or "Unknown").strip()
         out[-1]["page"] = m.get("page_url") or None
-        acc = (m.get("account") or "").strip().lstrip("@")
-        out[-1]["acc"] = link_key(m.get("page_url")) or (("ig:" + acc.lower()) if m.get("platform") == "Instagram" and acc and " " not in acc else None)
         if with_costs:
             out[-1]["cost"] = cost.get(m["master_id"])
             out[-1]["payee"] = payee.get(m["master_id"])
@@ -185,10 +183,6 @@ window.dash = (function () {
   fetch('data.json', { cache: 'no-cache' }).then(r => r.json())
     .then(rows => { sets.videos = { status: 'ok', data: rows }; run(); })
     .catch(() => { sets.videos = { status: 'error', data: [] }; run(); });
-  sets.followers = { status: 'loading', data: [] };
-  fetch('followers.json', { cache: 'no-cache' }).then(r => r.json())
-    .then(o => { sets.followers = { status: 'ok', data: Array.isArray(o) ? o : Object.entries(o).map(([key, a]) => Object.assign({ key }, a)) }; run(); })
-    .catch(() => { sets.followers = { status: 'error', data: [] }; run(); });
   let t; window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(run, 150); });
   return api;
 })();
@@ -216,14 +210,6 @@ def main():
     (out / "dashboard_data_private.json").write_text(json.dumps(private, ensure_ascii=False), encoding="utf8")
     DOCS.mkdir(exist_ok=True)
     (DOCS / "data.json").write_text(json.dumps(data, ensure_ascii=False), encoding="utf8")
-    # follower counts of the accounts, one reading a day (followers.py); the same file feeds the Claude dashboard
-    try:
-        import followers
-        acc = followers.history(json.loads((ROOT / "analytics_data.json").read_text(encoding="utf8")))
-        rows_ = [dict(key=k, **v) for k, v in acc.items()]  # one row per account
-        (DOCS / "followers.json").write_text(json.dumps(rows_, ensure_ascii=False), encoding="utf8")
-    except Exception as e:
-        print("followers skipped:", e)
     page = (ROOT / "dashboard_page.html").read_text(encoding="utf8")
     updated = datetime.fromisoformat(generated).strftime("%d %b %Y")
     (DOCS / "index.html").write_text(SHELL.replace("__PAGE__", page).replace("__UPDATED__", updated), encoding="utf8")
