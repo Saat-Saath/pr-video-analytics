@@ -108,6 +108,12 @@ def history(data):
         m = master.get(s["master_id"], {})
         a = out.setdefault(k, {"platform": m.get("platform"), "name": s.get("account") or m.get("account"), "url": s.get("page_url"), "points": {}})
         a["points"][ist_date(s["captured_at"])] = f
+    # readings from past Bright Data runs (27 Oct onward), downloaded again once: followers_backfill.json
+    bf = ROOT / "followers_backfill.json"
+    for k, b in (json.loads(bf.read_text(encoding="utf8")).items() if bf.exists() else []):
+        a = out.setdefault(k, {"platform": "YouTube" if k.startswith("yt:") else "Facebook", "name": b.get("name"), "url": b.get("url"), "points": {}})
+        for d, f in b["points"].items():
+            a["points"].setdefault(d, f)
     store = json.loads(IG_FILE.read_text()) if IG_FILE.exists() else {}
     for u, pts in store.items():
         if u.startswith("_"):
