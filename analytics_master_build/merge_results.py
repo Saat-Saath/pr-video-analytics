@@ -16,6 +16,31 @@ HISTORY = ROOT / "snapshot_history.json"
 OUT = ROOT / "analytics_data.json"
 
 
+
+FOLLOWER_KEYS = ("followers", "followers_count", "page_followers", "num_followers", "user_followers", "profile_followers",
+                 "subscribers", "channel_subscribers", "subscriber_count", "ownerFollowersCount", "owner_followers", "page_likes")
+SEEN_FIELDS = {}
+
+
+def followers_of(raw):
+    """The account's follower / subscriber count when the scraper returned one with the post (else None)."""
+    if not isinstance(raw, dict):
+        return None
+    for k in FOLLOWER_KEYS:
+        v = raw.get(k)
+        if v not in (None, ""):
+            try:
+                n = int(float(str(v).replace(",", "")))
+            except ValueError:
+                continue
+            SEEN_FIELDS[k] = SEEN_FIELDS.get(k, 0) + 1
+            return n
+    for k, v in raw.items():  # note any other field that looks like a follower count, to learn the scrapers' names
+        lk = k.lower()
+        if ("follow" in lk or "subscri" in lk) and isinstance(v, (int, float, str)):
+            SEEN_FIELDS["other:" + k] = SEEN_FIELDS.get("other:" + k, 0) + 1
+    return None
+
 def platform_of(url):
     u = (url or "").lower()
     if "drive.google" in u: return "Google Drive Asset"
@@ -97,6 +122,7 @@ def load_records(path):
                          or ((raw.get("attachments") or [{}])[0].get("thumbnail") if isinstance(raw.get("attachments"), list) and raw.get("attachments") else None),
             "page_url": raw.get("page_url") or raw.get("user_url") or raw.get("user_profile_url") or raw.get("channel_url"),
             "account": r.get("account") or raw.get("page_name") or raw.get("user_username_raw") or raw.get("youtuber") or raw.get("user_posted"),
+            "followers": followers_of(raw),
             "source": source,
             "fetched_at": r.get("fetched_at"),
             "ok": not err and r.get("fetch_status", "OK") == "OK",
@@ -138,7 +164,7 @@ def main(result_files):
                 "snapshot_id": f"SNAP-{len(history) + 1:05d}",
                 "master_id": m["master_id"],
                 "captured_at": fetched.isoformat(),
-                **{k: rec[k] for k in ("views", "likes", "comments", "shares", "saves", "published_at", "account", "page_url", "caption", "thumb_url", "source", "error")},
+                **{k: rec[k] for k in ("views", "likes", "comments", "shares", "saves", "published_at", "account", "page_url", "caption", "thumb_url", "source", "error", "followers")},
                 "post_url": rec["resolved_url"],
                 "fetch_status": "OK" if rec["ok"] else "Failed",
             })
@@ -234,6 +260,8 @@ def main(result_files):
         else:
             m["fetch_status"] = "OK"
 
+    if SEEN_FIELDS:  # which follower fields the scrapers returned in this run (to see what is available)
+        (ROOT / "follower_fields_seen.json").write_text(json.dumps(SEEN_FIELDS, indent=1))
     OUT.write_text(json.dumps({"generated_at": today.isoformat(), "config": src["config"], "occurrences": src["occurrences"],
                                "master": master, "snapshots": history}, indent=1, ensure_ascii=False), encoding="utf8")
     from collections import Counter
