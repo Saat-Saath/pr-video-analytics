@@ -2,7 +2,7 @@
 
 Tracks views, likes, comments and shares for every PR video posted from three source sheets (Inhouse ai videos, Sanjay Agency, Internal PR) across Instagram, Facebook and YouTube, at **Day 2, Day 7 and Day 30 after upload**.
 
-**Live dashboard:** https://sagarchauhan7792-bot.github.io/pr-video-analytics/ (served from `docs/`)
+**Live dashboard:** https://saat-saath.github.io/pr-video-analytics/ (served from `docs/`)
 
 Every video, account and number in the dashboard links to the post on its platform.
 
@@ -39,3 +39,4 @@ git add docs && git commit -m "Daily refresh" && git push
 `sync_sheets.py` reads each sheet's CSV export, keeps existing `VID-####` ids, adds new rows, and keeps a video's id when its link is replaced in the same row (e.g. a Drive file swapped for the live post link). Internal PR tabs prefer the live post link over the Drive file.
 
 The private master list (`analytics_master_build/source_data.json`), the sheet IDs and the API keys stay out of this repo. It only contains public post links and public counts (`docs/data.json`).
+
